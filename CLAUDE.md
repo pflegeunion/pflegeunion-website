@@ -10,8 +10,10 @@ solange sie nicht ausdrücklich geändert werden.
 - **Kein JavaScript** im Browser. Keine Client-Komponenten, keine Frameworks.
   Einzige Ausnahmen, gemäss Webseitenkonzept V3.0: das Burger-Menü in
   `src/components/Header.astro` (kleines Inline-Skript ohne Abhängigkeiten,
-  ohne JavaScript bleibt die Navigation sichtbar) und später der Lohnrechner
-  (Baustein F). Strukturierte Daten als `<script type="application/ld+json">`
+  ohne JavaScript bleibt die Navigation sichtbar) und der Lohnrechner
+  (Baustein F, `src/scripts/lohnrechner.js`, eigenständig, unter 10 KB, ohne
+  Framework und Abhängigkeiten; ohne JavaScript zeigt die Seite die
+  Fallback-Tabelle). Strukturierte Daten als `<script type="application/ld+json">`
   sind Daten, kein Skript, und erlaubt.
 - **Kein Tracking**, keine Analytics, keine externen Skripte, keine externen
   Stylesheets, keine Einbettungen von Drittanbietern.
@@ -126,14 +128,16 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   Tokens.
 - Weitere Web-Textstile in `global.css`, ebenfalls aus dem Konzept:
   `.text-menu` (Mobilmenü 24 px, B2), `.text-faq` (FAQ-Frage 20 px, B4) und
-  `.text-trust` (Trust-Leiste 16 px, B4). Dazu `.button--sekundaer`,
+  `.text-trust` (Trust-Leiste 16 px, B4) und `.text-result-einheit` («rund»,
+  «CHF» und «.–» in der Rechner-Zahl, 24 px, B5). Dazu `.button--sekundaer`,
   `.etikette` (Übertitel in Ocker), `.textspalte` (680 px) und
   `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
   `global.css`: `--breite-inhalt` (1200 px), `--breite-kopfzeile` (1440 px),
   `--breite-text` (680 px), `--breite-hero-text` (560 px),
   `--hoehe-kopfzeile` (72 px),
-  `--hoehe-kopfzeile-mobil` (60 px), `--tippflaeche` (44 px).
+  `--hoehe-kopfzeile-mobil` (60 px), `--tippflaeche` (44 px),
+  `--tippflaeche-gross` (56 px, Auswahlfelder des Lohnrechners).
 - `--radius-full` auf der Webseite **nicht verwenden**; Porträts sind eckig.
 - Das Dunkel-Thema aus `design/tokens.json` wird auf der Webseite nicht
   verwendet; `tokens.css` enthält nur das Hell-Thema.
@@ -161,7 +165,7 @@ direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary und schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F, Vorstufe (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung, Fallback-Tabelle mit den Werten aus D1, Fussnote, Buttons. Stundensätze an einer Stelle in der Komponente, Kontrollwerte aus D1 werden beim Build geprüft | Startseite Abschnitt 2, Lohnrechner-Seite. **Das Rechner-Skript folgt in einem eigenen Pull Request**; es blendet `[data-rechner-fallback]` aus und rendert in `[data-rechner]`. Die Tabelle bleibt der Fallback ohne JavaScript |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit zwei Fragen als Radio-Gruppen (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden / «Nein, noch nicht»), Ergebnis als `aria-live`-Region mit Zahl in `.text-result`, Hinweiskasten bei «mehr als 3 Stunden», Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, versteckte Felder stunden/kurs/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schliessen-Button in `Anfrage.astro`). Ohne JavaScript bleibt die Fallback-Tabelle aus D1 (`[data-rechner-fallback]`) sichtbar, mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente importiert die Rechenlogik von dort, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1 sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
@@ -176,7 +180,12 @@ direkt eingetragen.
   Bildidee aus der Regieanweisung; sobald Fotos vorliegen, werden `src` und
   `alt` gesetzt (WebP, maximal 1600 px breit, Lizenz dokumentiert).
 - Das Anfrageformular hat noch kein Versandziel; Versand, Eingangsbestätigung
-  und Zeitprüfung folgen in einem eigenen Pull Request.
+  und Zeitprüfung folgen in einem eigenen Pull Request. Damit kommt auch die
+  Funktion des Buttons «Ergebnis per E-Mail erhalten» im Lohnrechner.
+- Die Postleitzahl-Liste `KONFIG.plzZug` in `src/scripts/lohnrechner.js` ist
+  eine **vorläufige Liste** der elf Zuger Gemeinden inklusive Ortsteile, ohne
+  6344 Meierskappel (LU); sie ist von der Geschäftsstelle zu prüfen (Konzept
+  Teil F, Punkt 5).
 - Die interne Musterseite `/bausteine/` (`src/pages/bausteine.astro`) zeigt
   jeden Baustein einmal mit Beispieltext. Sie ist `noindex`, steht nicht im
   Menü und **wird vor dem Go-live entfernt**.
@@ -205,6 +214,10 @@ src/components/      wiederkehrende Bausteine (Header, Footer, Hero, Abschnitt,
 src/layouts/         Layouts, z. B. Basis.astro (Kopf- und Fusszeile)
 src/pages/           Seiten, eine Datei pro Seite; bausteine.astro ist die
                      interne Musterseite
+src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
+                     (Sätze, Stufen, Postleitzahlen), unter 10 KB
+test/                lohnrechner.test.mjs prüft die Ergebniswerte aus D1
+                     (npm test, node:test ohne Zusatzpakete)
 src/styles/          tokens.css (erzeugt, nicht bearbeiten) und global.css
                      mit Schrifteinbindung, Web-Anpassungen und Grundlayout
 astro.config.mjs     Astro-Konfiguration
@@ -214,7 +227,7 @@ netlify.toml         Build- und Deploy-Einstellungen für Netlify
 ## Arbeitsweise
 
 - Änderungen auf einem eigenen Branch entwickeln und als Pull Request einreichen.
-- Vor dem Commit `npm run build` ausführen und sicherstellen, dass der Build
-  fehlerfrei durchläuft. Der Build erzeugt zuerst `src/styles/tokens.css`
+- Vor dem Commit `npm run build` und `npm test` ausführen und sicherstellen,
+  dass beides fehlerfrei durchläuft. Der Build erzeugt zuerst `src/styles/tokens.css`
   aus `design/tokens.json`.
 - Keine zusätzlichen Abhängigkeiten ohne Absprache.

@@ -177,6 +177,12 @@ body,
   color: var(--color-tiefblau);
 }
 
+/* In der Rechner-Zahl kleiner (24 px): «rund», «CHF» und «.–» (Konzept B5). */
+.text-result-einheit {
+  font-size: 24px;
+  line-height: 32px;
+}
+
 /* Schrittzahlen: Lato Bold 40 px, Ocker (Ocker nur ab 24 px, nie als Fliesstext). */
 .text-step {
   font-family: var(--font-sans);
@@ -252,6 +258,7 @@ input[type='checkbox'] {
   --hoehe-kopfzeile: 72px;
   --hoehe-kopfzeile-mobil: 60px;
   --tippflaeche: 44px;
+  --tippflaeche-gross: 56px;
 }
 
 *,

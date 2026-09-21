@@ -12,6 +12,7 @@ import Hinweiskasten from '../components/Hinweiskasten.astro';
 import Kernbotschaft from '../components/Kernbotschaft.astro';
 import FAQ from '../components/FAQ.astro';
 import Demnaechst from '../components/Demnaechst.astro';
+import Lohnrechner from '../components/Lohnrechner.astro';
 
 const fragen = [
   {
@@ -110,12 +111,8 @@ const fragen = [
     </p>
   </Abschnitt>
 
-  <Abschnitt anker="lohnrechner" etikette="BAUSTEIN F" titel="Lohnrechner">
-    <p class="textspalte">
-      Der Lohnrechner (Baustein F, Konzept D1) folgt in einem eigenen Pull Request. Dieser Anker
-      hält den Platz.
-    </p>
-  </Abschnitt>
+  <!-- Baustein F in der vollständigen Fassung (mit Postleitzahl und E-Mail-Button) -->
+  <Lohnrechner anker="lohnrechner" vollstaendig />
 
   <Anfrage />
 </Basis>
