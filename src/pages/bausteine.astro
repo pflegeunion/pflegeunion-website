@@ -1,0 +1,147 @@
+---
+/**
+ * Interne Musterseite: zeigt Kopfzeile, Utility-Zeile, jeden Baustein einmal
+ * mit Beispieltext und die Fusszeile. Nicht indexiert, nicht im Menü.
+ * Wird vor dem Go-live entfernt.
+ */
+import Basis from '../layouts/Basis.astro';
+import Abschnitt from '../components/Abschnitt.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
+import Anfrage from '../components/Anfrage.astro';
+import Hinweiskasten from '../components/Hinweiskasten.astro';
+import Kernbotschaft from '../components/Kernbotschaft.astro';
+import FAQ from '../components/FAQ.astro';
+import Demnaechst from '../components/Demnaechst.astro';
+
+const fragen = [
+  {
+    frage: 'Zahlt die Krankenversicherung wirklich, wenn meine Tochter oder mein Mann mich pflegt?',
+    antwort:
+      'Ja. Wenn wir Ihre Angehörigen anstellen, instruieren und fachlich begleiten, gilt ihre Grundpflege als reguläre Spitex-Leistung. Genau dafür sind wir als Spitex-Organisation vom Kanton Zug bewilligt.',
+  },
+  {
+    frage: 'Kostet das die gepflegte Person etwas?',
+    antwort:
+      'Den gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen Spitex-Organisation, unabhängig von der Zahl der Pflegestunden. Franchise und Selbstbehalt gelten wie bei jeder medizinischen Leistung. Die Hilflosenentschädigung bleibt bestehen.',
+  },
+  {
+    frage: 'Muss ich dafür meinen Beruf aufgeben?',
+    antwort:
+      'Nein. Die Anstellung richtet sich nach den anerkannten Pflegestunden – meist ein bis drei Stunden pro Tag – und lässt sich mit Beruf und Familie kombinieren.',
+  },
+  {
+    frage: 'Ich habe keine Pflegeausbildung. Geht das trotzdem?',
+    antwort:
+      'Ja, genau dafür ist unser Modell gebaut. Sie leisten Grundpflege nach sorgfältiger Instruktion durch Ihre Pflegefachperson und holen den Pflegehelferkurs im ersten Jahr berufsbegleitend nach. Wir bezahlen ihn.',
+  },
+  {
+    frage: 'Wo ist die Pflegeunion tätig, und wann?',
+    antwort:
+      'Im ganzen Kanton Zug, in allen elf Gemeinden. Unsere Geschäftsstelle in Rotkreuz ist Mo bis Fr von 08.00 bis 17.00 Uhr erreichbar; Pflegeeinsätze finden täglich zwischen 06.00 und 22.00 Uhr statt. Einen 24-Stunden-Pikettdienst bieten wir nicht an.',
+  },
+];
+---
+
+<Basis
+  titel="Bausteine – Musterseite"
+  beschreibung="Interne Musterseite der wiederkehrenden Bausteine."
+  noindex
+>
+  <Abschnitt etikette="MUSTERSEITE" titel="Bausteine der Webseite">
+    <div class="textspalte">
+      <p class="text-lead">
+        Diese Seite zeigt Kopfzeile, Utility-Zeile, jeden wiederkehrenden Baustein einmal mit
+        Beispieltext aus dem Webseitenkonzept V3.0 und die Fusszeile. Sie ist nicht indexiert und wird
+        vor dem Go-live entfernt.
+      </p>
+      <p>
+        Die Kopfzeile oben ist Baustein «Header» (B2), die Fusszeile unten Baustein «Footer» (B3).
+        Darunter folgt die Trust-Leiste (Baustein A).
+      </p>
+      <p>
+        <a class="button" href="#kontakt">Primär-Button</a>
+        <a class="button button--sekundaer" href="#kontakt">Sekundär-Button</a>
+      </p>
+    </div>
+  </Abschnitt>
+
+  <TrustLeiste />
+
+  <Abschnitt flaeche="warmgrau" anker="kaesten" etikette="BAUSTEIN C UND D" titel="Hinweiskasten und Kernbotschaft">
+    <div class="kaesten">
+      <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht.">
+        <p>
+          Vergütet wird die Grundpflege: Hilfe bei Körperpflege, Anziehen, Essen und Trinken, Bewegen,
+          Toilettengang. Je nach Situation sind das etwa ein bis drei Stunden pro Tag. Wie viele es bei
+          Ihnen sind, zeigt die Abklärung.
+        </p>
+        <p>
+          Medizinische Pflege wie Medikamente richten, Wundversorgung oder Injektionen bieten wir
+          zurzeit noch nicht an. Braucht die gepflegte Person solche Leistungen, klären wir im
+          Erstgespräch mit Ihnen, wer sie übernimmt.
+        </p>
+      </Hinweiskasten>
+
+      <Kernbotschaft etikette="UNSER VERSPRECHEN" titel="Jeder Franken bleibt in der Pflege.">
+        <p>
+          Die Pflegeunion ist ein nicht gewinnorientierter Verein. Das heisst konkret: Es gibt keine
+          Aktionäre und keine Gewinnausschüttung. Erwirtschaften wir Überschüsse, bleiben sie im Verein
+          – für bessere Pflege, für die Aus- und Weiterbildung unserer Mitarbeitenden und für faire
+          Anstellungsbedingungen. Das steht so in unseren Statuten.
+        </p>
+      </Kernbotschaft>
+    </div>
+  </Abschnitt>
+
+  <Abschnitt anker="faq" etikette="HÄUFIGE FRAGEN" titel="Kurz beantwortet.">
+    <FAQ fragen={fragen} />
+  </Abschnitt>
+
+  <Abschnitt flaeche="warmgrau" anker="demnaechst" etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt.">
+    <p class="textspalte einleitung">
+      Wir starten mit dem, was wir heute verlässlich leisten können: der Anstellung und Begleitung
+      pflegender Angehöriger sowie Betreuung und Hauswirtschaft. Schritt für Schritt bauen wir unser
+      Angebot aus. Diese Leistungen sind in Vorbereitung:
+    </p>
+    <Demnaechst />
+    <p class="textspalte nachsatz">
+      Sie brauchen eine dieser Leistungen schon heute? Rufen Sie uns trotzdem an – wir sagen Ihnen, ab
+      wann wir sie anbieten, und nennen Ihnen bis dahin eine Anlaufstelle.
+    </p>
+  </Abschnitt>
+
+  <Abschnitt anker="lohnrechner" etikette="BAUSTEIN F" titel="Lohnrechner">
+    <p class="textspalte">
+      Der Lohnrechner (Baustein F, Konzept D1) folgt in einem eigenen Pull Request. Dieser Anker
+      hält den Platz.
+    </p>
+  </Abschnitt>
+
+  <Anfrage />
+</Basis>
+
+<style>
+  .kaesten {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .einleitung {
+    margin-bottom: var(--space-4);
+  }
+
+  .nachsatz {
+    margin-top: var(--space-4);
+  }
+
+  .button + .button {
+    margin-left: var(--space-2);
+  }
+
+  @media (min-width: 1024px) {
+    .kaesten {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+  }
+</style>

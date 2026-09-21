@@ -133,6 +133,32 @@ body,
   font-size: 13px;
 }
 
+/* Menüpunkte im geöffneten Mobilmenü (Konzept B2): Lato Bold 24 px. */
+.text-menu {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+}
+
+/* FAQ-Frage (Konzept B4, Baustein E): Lato Bold 20 px, Tiefblau. */
+.text-faq {
+  font-family: var(--font-sans);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--color-tiefblau);
+}
+
+/* Trust-Leiste (Konzept B4, Baustein A): Lato 16 px, Fast-Schwarz. */
+.text-trust {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: var(--color-schwarz);
+}
+
 /* Rechner-Zahl: Lato Bold 48 px, Tiefblau. */
 .text-result {
   font-family: var(--font-sans);
@@ -169,14 +195,53 @@ button,
   cursor: pointer;
 }
 
+/* Sekundär-Button: Tiefblau auf Weiss mit 1-px-Rahmen Tiefblau. */
+.button--sekundaer {
+  background-color: var(--color-weiss);
+  color: var(--color-tiefblau);
+}
+
+/* Formularfelder (Konzept B5): Fliesstextgrösse, weisse Fläche,
+   1-px-Rahmen linie, Radius --radius-sm, Fokus 2 px Tiefblau. */
+input:not([type='hidden']):not([type='radio']):not([type='checkbox']),
+select,
+textarea {
+  font: inherit;
+  color: var(--color-schwarz);
+  background-color: var(--color-weiss);
+  border: 1px solid var(--color-linie);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-2);
+  width: 100%;
+  min-height: var(--tippflaeche);
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  width: var(--space-3);
+  height: var(--space-3);
+  margin: 0;
+  accent-color: var(--color-tiefblau);
+}
+
 /* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
 
 /*
- * Grundlayout. Alle Werte aus tokens.css; die Inhaltsbreite ist eine
- * Layoutgrösse der Webseite und kein Design-Token.
+ * Grundlayout. Alle Farben, Abstände und Schriften aus tokens.css.
+ * Die folgenden Layoutgrössen der Webseite (Konzept V3 B2 und B5) sind
+ * keine Design-Tokens und werden nur hier definiert.
  */
 :root {
-  --breite-inhalt: 64rem;
+  --breite-inhalt: 1200px;
+  --breite-kopfzeile: 1440px;
+  --breite-text: 680px;
+  --hoehe-kopfzeile: 72px;
+  --hoehe-kopfzeile-mobil: 60px;
+  --tippflaeche: 44px;
 }
 
 *,
@@ -218,6 +283,46 @@ h3 {
   color: var(--color-tiefblau);
 }
 
+/* Untertitel und Kartentitel in Fast-Schwarz (Konzept B5). */
+h3 {
+  color: var(--color-schwarz);
+}
+
+/* Sichtbarer Fokus für alle interaktiven Elemente: 2 px Tiefblau. */
+:focus-visible {
+  outline: 2px solid var(--color-tiefblau);
+  outline-offset: 2px;
+}
+
+/* Linien-Icons (Lucide) behalten in jeder Grösse einen 2-px-Strich. */
+.icon * {
+  vector-effect: non-scaling-stroke;
+}
+
+/* Etikette / Übertitel (Konzept A7): .text-label in Ocker. */
+.etikette {
+  color: var(--color-ocker);
+  margin: 0 0 var(--space-1);
+}
+
+/* Textspalte: maximal 680 px (Konzept B5). */
+.textspalte {
+  max-width: var(--breite-text);
+}
+
+/* Nur für Screenreader sichtbar. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 p {
   margin: 0 0 var(--space-2);
 }
@@ -231,35 +336,6 @@ a {
   text-decoration: underline;
 }
 
-.inhalt {
-  width: 100%;
-  max-width: var(--breite-inhalt);
-  margin: 0 auto;
-  padding-inline: var(--space-3);
-}
-
-.kopfzeile {
-  background-color: var(--color-tiefblau);
-  color: var(--color-auf-tiefblau);
-  padding-block: var(--space-4);
-}
-
-.kopfzeile h1 {
-  margin: 0;
-  color: var(--color-auf-tiefblau);
-}
-
 main {
   flex: 1;
-  padding-block: var(--space-6);
-}
-
-.abschnitt + .abschnitt {
-  margin-top: var(--space-4);
-}
-
-.fusszeile {
-  border-top: 1px solid var(--color-linie);
-  padding-block: var(--space-3);
-  color: var(--color-text-gedaempft);
 }

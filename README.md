@@ -22,4 +22,6 @@ Netlify baut mit `npm run build` und liefert den Ordner `dist` aus, siehe
 
 Die verbindlichen Regeln zu Technik, Schrift, Gestaltung und Sprache stehen in
 [CLAUDE.md](CLAUDE.md). Das Design-System liegt unter `design/`
-(`tokens.json`, `brand-book.md`).
+(`tokens.json`, `brand-book.md`), die wiederkehrenden Bausteine unter
+`src/components/`. Die interne Musterseite `/bausteine/` zeigt alle
+Bausteine und wird vor dem Go-live entfernt.
