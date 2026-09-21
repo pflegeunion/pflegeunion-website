@@ -16,6 +16,8 @@ const { titel, beschreibung } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titel}</title>
     {beschreibung && <meta name="description" content={beschreibung} />}
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link
       rel="preload"
       href="/fonts/lato-latin-400-normal.woff2"
