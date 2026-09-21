@@ -1,0 +1,80 @@
+---
+/**
+ * Schritte (Konzept V3 C1 Abschnitt 5; Betreuung «drei Schritte»).
+ *
+ * Nummerierte Schritte: Zahl in .text-step (Lato Bold 40 px Ocker), darunter
+ * Titel und Text. Keine Kreise, keine Verbindungslinien. Auf dem Desktop
+ * nebeneinander (eine Spalte pro Schritt), auf Mobile untereinander.
+ * Dieselben Daten werden als schema.org HowTo (JSON-LD) ausgegeben.
+ *
+ * Parameter:
+ *   name      Name des Ablaufs für HowTo (in der Regel die H2 des Abschnitts)
+ *   schritte  Liste { titel, text }
+ */
+interface Schritt {
+  titel: string;
+  text: string;
+}
+
+interface Props {
+  name: string;
+  schritte: Schritt[];
+}
+
+const { name, schritte } = Astro.props;
+
+const howTo = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name,
+  step: schritte.map((s, i) => ({
+    '@type': 'HowToStep',
+    position: i + 1,
+    name: s.titel,
+    text: s.text,
+  })),
+};
+---
+
+<ol class="schritte liste-blank" style={`--spalten: ${schritte.length}`}>
+  {
+    schritte.map((s, i) => (
+      <li class="schritt">
+        <span class="text-step zahl" aria-hidden="true">{i + 1}</span>
+        <h3 class="text-h3">{s.titel}</h3>
+        <p>{s.text}</p>
+      </li>
+    ))
+  }
+</ol>
+<script type="application/ld+json" set:html={JSON.stringify(howTo)} />
+
+<style>
+  .schritte {
+    display: grid;
+    gap: var(--space-4);
+    counter-reset: schritt;
+  }
+
+  .zahl {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .schritt h3 {
+    margin-bottom: var(--space-1);
+  }
+
+  @media (min-width: 640px) {
+    .schritte {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .schritte {
+      grid-template-columns: repeat(var(--spalten), minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+  }
+</style>

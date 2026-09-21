@@ -8,18 +8,22 @@
  * Parameter:
  *   etikette  Übertitel (Standard «GUT ZU WISSEN»)
  *   titel     Titel des Kastens
+ *   ebene     Überschriftenebene des Titels: 3 (Standard, Kasten in einem
+ *             Abschnitt) oder 2 (der Kasten ist selbst der Abschnitt, z. B.
+ *             «Ehrlich gesagt» auf der Startseite)
  */
 interface Props {
   etikette?: string;
   titel: string;
+  ebene?: 2 | 3;
 }
 
-const { etikette = 'GUT ZU WISSEN', titel } = Astro.props;
+const { etikette = 'GUT ZU WISSEN', titel, ebene = 3 } = Astro.props;
 ---
 
 <div class="kasten">
   <p class="text-label etikette">{etikette}</p>
-  <h3 class="text-h3">{titel}</h3>
+  {ebene === 2 ? <h2 class="text-h2">{titel}</h2> : <h3 class="text-h3">{titel}</h3>}
   <div class="kasten-inhalt">
     <slot />
   </div>
@@ -33,6 +37,14 @@ const { etikette = 'GUT ZU WISSEN', titel } = Astro.props;
 
   .kasten h3 {
     color: var(--color-schwarz);
+  }
+
+  .kasten h2 {
+    color: var(--color-tiefblau);
+  }
+
+  .kasten-inhalt {
+    max-width: var(--breite-text);
   }
 
   @media (min-width: 768px) {

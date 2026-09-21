@@ -1,0 +1,75 @@
+---
+/**
+ * Karten (Konzept V3 C1 Abschnitt 4; B5 «Karten und Kacheln»).
+ *
+ * Warmgrau-Fläche mit Haarlinie, Linien-Icon Ocker oben links (32 px),
+ * Kartentitel .text-h3, Text. Keine Buttons. Vier Spalten Desktop, zwei mal
+ * zwei Tablet, untereinander Mobile.
+ *
+ * Parameter:
+ *   karten  Liste { icon, titel, text }
+ */
+import Icon, { type IconName } from './Icon.astro';
+
+interface Karte {
+  icon: IconName;
+  titel: string;
+  text: string;
+}
+
+interface Props {
+  karten: Karte[];
+}
+
+const { karten } = Astro.props;
+---
+
+<ul class="karten liste-blank">
+  {
+    karten.map((k) => (
+      <li class="karte">
+        <span class="karte-icon">
+          <Icon name={k.icon} groesse={32} />
+        </span>
+        <h3 class="text-h3">{k.titel}</h3>
+        <p>{k.text}</p>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .karten {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .karte {
+    background-color: var(--color-warmgrau);
+    border: 1px solid var(--color-linie);
+    padding: var(--space-3);
+  }
+
+  .karte-icon {
+    display: inline-flex;
+    color: var(--color-ocker);
+    margin-bottom: var(--space-2);
+  }
+
+  .karte h3 {
+    margin-bottom: var(--space-1);
+  }
+
+  @media (min-width: 640px) {
+    .karten {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .karten {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+  }
+</style>

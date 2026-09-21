@@ -93,8 +93,9 @@
  * =====================================================================
  */
 
-/* Seitentitel: 56 px auf der Startseite, 40 px auf Unterseiten.
-   Überschriften ohne Klasse erhalten denselben Stil (h1, h2, h3, body). */
+/* Seitentitel: 56 px auf der Startseite, 40 px auf Unterseiten und auf
+   Mobile (Konzept C1, Hero). Überschriften ohne Klasse erhalten denselben
+   Stil (h1, h2, h3, body). */
 h1,
 .text-h1 {
   font-size: 56px;
@@ -104,6 +105,14 @@ h1,
 .text-h1--sub {
   font-size: 40px;
   line-height: 48px;
+}
+
+@media (max-width: 767px) {
+  h1,
+  .text-h1 {
+    font-size: 40px;
+    line-height: 48px;
+  }
 }
 
 h2,
@@ -239,6 +248,7 @@ input[type='checkbox'] {
   --breite-inhalt: 1200px;
   --breite-kopfzeile: 1440px;
   --breite-text: 680px;
+  --breite-hero-text: 560px;
   --hoehe-kopfzeile: 72px;
   --hoehe-kopfzeile-mobil: 60px;
   --tippflaeche: 44px;
@@ -308,6 +318,33 @@ h3 {
 /* Textspalte: maximal 680 px (Konzept B5). */
 .textspalte {
   max-width: var(--breite-text);
+}
+
+/* Tabellen: Haarlinien, Tabellenkopf auf tiefblau-hell (Brand Book). */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-linie);
+  vertical-align: top;
+}
+
+th {
+  background-color: var(--color-tiefblau-hell);
+  color: var(--color-tiefblau);
+  font-weight: 700;
+}
+
+/* Liste ohne Aufzählungszeichen, z. B. mit Icons. */
+.liste-blank {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Nur für Screenreader sichtbar. */

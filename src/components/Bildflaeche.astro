@@ -1,0 +1,70 @@
+---
+/**
+ * Bildfläche: eckig, festes Seitenverhältnis, ohne Schatten.
+ *
+ * Solange keine Fotos vorliegen, zeigt die Fläche Warmgrau mit einem kurzen,
+ * gedämpften Text zur Bildidee (Regieanweisung aus dem Konzept). Sobald ein
+ * Bild vorhanden ist, werden `src` und `alt` gesetzt; die Fläche rendert dann
+ * ein <img> im selben Seitenverhältnis. Kein Stockbild, kein Icon als Ersatz.
+ *
+ * Parameter:
+ *   verhaeltnis  '3:2' (Standard) oder '4:3'
+ *   idee         Bildidee als Text für die Platzhalterfläche
+ *   src, alt     Bilddatei und Alternativtext, sobald vorhanden
+ *   prioritaet   true für das Hero-Bild: kein Lazy Loading, hohe Priorität
+ *   class        zusätzliche Klassen
+ */
+interface Props {
+  verhaeltnis?: '3:2' | '4:3';
+  idee: string;
+  src?: string;
+  alt?: string;
+  prioritaet?: boolean;
+  class?: string;
+}
+
+const { verhaeltnis = '3:2', idee, src, alt = '', prioritaet = false, class: klasse } = Astro.props;
+const [b, h] = verhaeltnis.split(':');
+---
+
+<figure class:list={['bild', klasse]} style={`--verhaeltnis: ${b} / ${h}`}>
+  {
+    src ? (
+      <img
+        src={src}
+        alt={alt}
+        loading={prioritaet ? 'eager' : 'lazy'}
+        fetchpriority={prioritaet ? 'high' : 'auto'}
+        decoding={prioritaet ? 'sync' : 'async'}
+      />
+    ) : (
+      <figcaption class="bild-idee text-small" data-loading={prioritaet ? 'eager' : 'lazy'}>
+        {idee}
+      </figcaption>
+    )
+  }
+</figure>
+
+<style>
+  .bild {
+    margin: 0;
+    aspect-ratio: var(--verhaeltnis);
+    background-color: var(--color-warmgrau);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .bild img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .bild-idee {
+    margin: 0;
+    padding: var(--space-2);
+    color: var(--color-text-gedaempft);
+  }
+</style>

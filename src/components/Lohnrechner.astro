@@ -1,0 +1,197 @@
+---
+/**
+ * Baustein F – Lohnrechner, Vorstufe (Konzept V3 C1 Abschnitt 2, D1).
+ *
+ * Warmgrau-Fläche mit Übertitel, H2 und Einleitung. Anstelle des Rechners
+ * steht vorerst die Fallback-Tabelle aus D1 (Stunden pro Tag · Monat mit
+ * Pflegehelferkurs · Monat Einstieg), darunter Fussnote und Buttons.
+ *
+ * Die Tabelle bleibt auch später der Fallback ohne JavaScript: Das
+ * Rechner-Skript (eigener Pull Request) blendet `[data-rechner-fallback]`
+ * aus und rendert seine Oberfläche in `[data-rechner]`. Die Stundensätze
+ * stehen an einer Stelle (unten) und werden per Rechenlogik aus D1 in die
+ * Tabelle gerechnet; die Kontrollwerte aus D1 werden beim Build geprüft.
+ *
+ * Parameter:
+ *   anker  id des Abschnitts (Standard 'lohnrechner')
+ */
+interface Props {
+  anker?: string;
+}
+
+const { anker = 'lohnrechner' } = Astro.props;
+
+// Stundensätze (GL-Entscheid, Konzept D1). Beide an dieser Stelle konfigurierbar.
+const SATZ_MIT_KURS = 37.95;
+const SATZ_EINSTIEG = 33.95;
+const TAGE_PRO_MONAT = 30.4;
+
+/** Monatslohn brutto: Stunden × 30,4 Tage × Satz, kaufmännisch auf CHF 10.– gerundet. */
+function monatslohn(stunden: number, satz: number): number {
+  return Math.round((stunden * TAGE_PRO_MONAT * satz) / 10) * 10;
+}
+
+/** Anzeige mit Apostroph als Tausendertrennzeichen und «.–», z. B. CHF 2'310.– */
+function chf(betrag: number): string {
+  const ziffern = String(betrag).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  return `CHF ${ziffern}.–`;
+}
+
+const zeilen = [
+  { text: '1 Stunde', stunden: 1, mehr: false },
+  { text: '1½ Stunden', stunden: 1.5, mehr: false },
+  { text: '2 Stunden', stunden: 2, mehr: false },
+  { text: '2½ Stunden', stunden: 2.5, mehr: false },
+  { text: '3 Stunden', stunden: 3, mehr: false },
+  { text: 'mehr als 3 Stunden', stunden: 3, mehr: true },
+].map((z) => ({
+  text: z.text,
+  mitKurs: `${z.mehr ? 'über' : 'rund'} ${chf(monatslohn(z.stunden, SATZ_MIT_KURS))}`,
+  einstieg: `${z.mehr ? 'über' : 'rund'} ${chf(monatslohn(z.stunden, SATZ_EINSTIEG))}`,
+}));
+
+// Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)».
+const kontrolle = [
+  ['rund CHF 1\'150.–', 'rund CHF 1\'030.–'],
+  ['rund CHF 1\'730.–', 'rund CHF 1\'550.–'],
+  ['rund CHF 2\'310.–', 'rund CHF 2\'060.–'],
+  ['rund CHF 2\'880.–', 'rund CHF 2\'580.–'],
+  ['rund CHF 3\'460.–', 'rund CHF 3\'100.–'],
+  ['über CHF 3\'460.–', 'über CHF 3\'100.–'],
+];
+zeilen.forEach((z, i) => {
+  if (z.mitKurs !== kontrolle[i][0] || z.einstieg !== kontrolle[i][1]) {
+    throw new Error(
+      `Lohnrechner: Zeile «${z.text}» ergibt ${z.mitKurs} / ${z.einstieg}, erwartet ${kontrolle[i].join(' / ')}.`,
+    );
+  }
+});
+---
+
+<section id={anker} class="rechner-abschnitt">
+  <div class="rechner-inhalt">
+    <div class="kopf textspalte">
+      <p class="text-label etikette">IHR LOHN · IN 60 SEKUNDEN</p>
+      <h2 class="text-h2">Was würde ich verdienen?</h2>
+      <p>
+        Zwei Angaben genügen. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
+        kostenlosen Abklärung bei Ihnen zu Hause.
+      </p>
+    </div>
+
+    <div class="rechner" data-rechner>
+      <div class="fallback" data-rechner-fallback>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Stunden pro Tag</th>
+              <th scope="col">Monat mit Pflegehelferkurs</th>
+              <th scope="col">Monat Einstieg</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              zeilen.map((z) => (
+                <tr>
+                  <th scope="row">{z.text}</th>
+                  <td>{z.mitKurs}</td>
+                  <td>{z.einstieg}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="fussnote text-small textspalte">
+      Bruttolohn bei CHF 37.95 (mit Pflegehelferkurs) bzw. CHF 33.95 (Einstieg) pro Stunde, gerechnet
+      auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson bei Ihnen
+      zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
+    </p>
+
+    <div class="knoepfe">
+      <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
+      <a class="button button--sekundaer" href="/lohnrechner/">Alle Details zum Lohn</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .rechner-abschnitt {
+    background-color: var(--color-warmgrau);
+  }
+
+  .rechner-inhalt {
+    max-width: var(--breite-inhalt);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-2);
+  }
+
+  .kopf {
+    margin-bottom: var(--space-4);
+  }
+
+  .kopf h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  .rechner {
+    background-color: var(--color-weiss);
+    padding: var(--space-3);
+  }
+
+  .fallback {
+    overflow-x: auto;
+  }
+
+  /* Auf schmalen Geräten dürfen Zellen umbrechen und Wörter trennen,
+     damit die drei Spalten ohne Querscrollen Platz finden. */
+  .fallback th,
+  .fallback td {
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
+
+  @media (max-width: 479px) {
+    .fallback table {
+      table-layout: fixed;
+    }
+
+    .fallback th,
+    .fallback td {
+      padding: var(--space-1);
+    }
+  }
+
+  .fussnote {
+    margin: var(--space-3) 0 var(--space-4);
+    color: var(--color-text-gedaempft);
+  }
+
+  .knoepfe {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .knoepfe .button {
+    text-align: center;
+  }
+
+  @media (min-width: 480px) {
+    .knoepfe {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .rechner-inhalt {
+      padding-inline: var(--space-3);
+    }
+
+    .rechner {
+      padding: var(--space-4);
+    }
+  }
+</style>

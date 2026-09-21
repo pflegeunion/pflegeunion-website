@@ -1,14 +1,402 @@
 ---
+/**
+ * Startseite gemäss Webseitenkonzept V3.0, Abschnitt C1 (zwölf Abschnitte).
+ * Alle Texte wörtlich aus dem Konzept.
+ */
 import Basis from '../layouts/Basis.astro';
+import Hero from '../components/Hero.astro';
+import Lohnrechner from '../components/Lohnrechner.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
 import Abschnitt from '../components/Abschnitt.astro';
+import Karten from '../components/Karten.astro';
+import Schritte from '../components/Schritte.astro';
+import Bildflaeche from '../components/Bildflaeche.astro';
+import Icon from '../components/Icon.astro';
+import Hinweiskasten from '../components/Hinweiskasten.astro';
+import Demnaechst from '../components/Demnaechst.astro';
+import FAQ from '../components/FAQ.astro';
+import Anfrage from '../components/Anfrage.astro';
+
+const karten = [
+  {
+    icon: 'banknote',
+    titel: 'Fairer Lohn',
+    text: 'CHF 37.95 brutto pro Stunde für die geleistete Grundpflege mit Pflegehelferkurs; im ersten Jahr, bis zum Kurs, CHF 33.95 – mit AHV, Pensionskasse, Unfallversicherung und Ferienanspruch. Ihre Pflegearbeit zählt, auch für Ihre Altersvorsorge.',
+  },
+  {
+    icon: 'graduation-cap',
+    titel: 'Bezahlte Ausbildung',
+    text: 'Sie absolvieren im ersten Jahr berufsbegleitend einen anerkannten Pflegehelferkurs. Wir organisieren ihn und übernehmen die Kosten.',
+  },
+  {
+    icon: 'heart-handshake',
+    titel: 'Eine Pflegefachperson an Ihrer Seite',
+    text: 'Eine diplomierte Pflegefachperson leitet Sie an, besucht Sie in den ersten vier Wochen jede Woche zu Hause, danach mindestens einmal im Monat – und ist erreichbar, wenn Sie unsicher sind.',
+  },
+  {
+    icon: 'shield-check',
+    titel: 'Vertretung und Sicherheit',
+    text: 'Ferien, Krankheit, eine Pause: Wir organisieren die Vertretung. Die pflegerische Verantwortung liegt bei uns. Verändert sich die Situation, passen wir den Pflegeplan an.',
+  },
+] as const;
+
+const schritte = [
+  {
+    titel: 'Erstgespräch',
+    text: 'Sie erzählen, wir hören zu – am Telefon oder bei Ihnen zu Hause. Kostenlos und unverbindlich. Wir melden uns innert 24 Stunden an Werktagen.',
+  },
+  {
+    titel: 'Abklärung zu Hause',
+    text: 'Unsere Pflegefachperson erfasst den Pflegebedarf mit interRAI, dem in der Schweiz anerkannten Instrument. Daraus ergibt sich, wie viele Stunden Grundpflege die Krankenversicherung vergütet.',
+  },
+  {
+    titel: 'Anstellung',
+    text: 'Sie erhalten einen Arbeitsvertrag mit Stundenlohn, Sozialversicherungen und klar geregelten Aufgaben – schriftlich und verständlich. Sie wissen vor der Unterschrift, was Sie verdienen.',
+  },
+  {
+    titel: 'Instruktion und Start',
+    text: 'Ihre Pflegefachperson leitet Sie Schritt für Schritt an: Pflegetechniken, Hygiene, Dokumentation in unserer App, Verhalten im Notfall. Dann starten Sie – mit Rückhalt.',
+  },
+  {
+    titel: 'Lohn und Begleitung',
+    text: 'Ihr Lohn kommt monatlich aufs Konto, spätestens am 7. des Folgemonats. Ihre Pflegefachperson bleibt an Ihrer Seite: anfangs wöchentlich, danach mindestens einmal im Monat bei Ihnen zu Hause.',
+  },
+];
+
+const voraussetzungen = [
+  'Sie pflegen eine nahestehende Person, die im Kanton Zug wohnt – als Ehepartner, Tochter, Sohn, Elternteil, Geschwister, Schwiegerkind oder enge Bezugsperson.',
+  'Sie sind mindestens 18 Jahre alt. Eine obere Altersgrenze gibt es nicht; auch eine Anstellung im AHV-Alter ist möglich.',
+  'Sie verstehen und sprechen Deutsch, damit Instruktion und Dokumentation funktionieren.',
+  'Sie sind bereit, im ersten Jahr einen Pflegehelferkurs zu absolvieren. Wir organisieren und bezahlen ihn.',
+  'Sie dokumentieren Ihre Einsätze täglich in unserer App. Wir zeigen Ihnen wie – es dauert wenige Minuten.',
+  'Die gepflegte Person ist mit dem Vorgehen einverstanden.',
+];
+
+const betreuungLeistungen = [
+  'Haushalt und Einkauf',
+  'Mahlzeiten',
+  'Begleitung zu Arzt, Therapie und Behörden',
+  'Gesellschaft und Aktivierung',
+  'Entlastung für pflegende Angehörige',
+];
+
+const personen = [
+  { name: 'Michel Gurnari', funktion: 'Geschäftsleitung' },
+  { name: 'Cristian Fernandez', funktion: 'Geschäftsleitung' },
+  { name: 'Christoph Willi', funktion: 'Pflegedienstleitung, dipl. Pflegefachmann HF' },
+];
+
+const fragen = [
+  {
+    frage: 'Zahlt die Krankenversicherung wirklich, wenn meine Tochter oder mein Mann mich pflegt?',
+    antwort:
+      'Ja. Wenn wir Ihre Angehörigen anstellen, instruieren und fachlich begleiten, gilt ihre Grundpflege als reguläre Spitex-Leistung. Genau dafür sind wir als Spitex-Organisation vom Kanton Zug bewilligt.',
+  },
+  {
+    frage: 'Kostet das die gepflegte Person etwas?',
+    antwort:
+      'Den gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen Spitex-Organisation, unabhängig von der Zahl der Pflegestunden. Franchise und Selbstbehalt gelten wie bei jeder medizinischen Leistung. Die Hilflosenentschädigung bleibt bestehen.',
+  },
+  {
+    frage: 'Muss ich dafür meinen Beruf aufgeben?',
+    antwort:
+      'Nein. Die Anstellung richtet sich nach den anerkannten Pflegestunden – meist ein bis drei Stunden pro Tag – und lässt sich mit Beruf und Familie kombinieren.',
+  },
+  {
+    frage: 'Ich habe keine Pflegeausbildung. Geht das trotzdem?',
+    antwort:
+      'Ja, genau dafür ist unser Modell gebaut. Sie leisten Grundpflege nach sorgfältiger Instruktion durch Ihre Pflegefachperson und holen den Pflegehelferkurs im ersten Jahr berufsbegleitend nach. Wir bezahlen ihn.',
+  },
+  {
+    frage: 'Ich bin pensioniert. Kann ich trotzdem angestellt werden?',
+    antwort:
+      'Ja, eine Anstellung im AHV-Alter ist möglich. Der Lohn ist normales Erwerbseinkommen; Sie erhalten einen Lohnausweis für die Steuererklärung.',
+  },
+  {
+    frage: 'Was, wenn die gepflegte Person auch medizinische Pflege braucht?',
+    antwort:
+      'Medizinische Pflege wie Wundversorgung oder Injektionen bieten wir zurzeit noch nicht selbst an. Im Erstgespräch klären wir mit Ihnen, wer diese Leistungen übernimmt, und stimmen uns ab, damit keine Lücke entsteht.',
+  },
+  {
+    frage: 'Wo ist die Pflegeunion tätig, und wann?',
+    antwort:
+      'Im ganzen Kanton Zug, in allen elf Gemeinden. Unsere Geschäftsstelle in Rotkreuz ist Mo bis Fr von 08.00 bis 17.00 Uhr erreichbar; Pflegeeinsätze finden täglich zwischen 06.00 und 22.00 Uhr statt. Einen 24-Stunden-Pikettdienst bieten wir nicht an.',
+  },
+];
 ---
 
 <Basis
-  titel="Pflegeunion Schweiz"
-  beschreibung="Testumgebung der Website des Vereins Pflegeunion Schweiz."
+  titel="Pflegende Angehörige anstellen – Lohn, Schulung, Begleitung | Pflegeunion Schweiz, Spitex im Kanton Zug"
+  beschreibung="Sie pflegen einen nahestehenden Menschen? Die Pflegeunion stellt Sie an: CHF 37.95 pro Stunde mit Pflegehelferkurs – den Kurs bezahlen wir –, dazu eine Pflegefachperson an Ihrer Seite. Nicht gewinnorientiert, kantonal bewilligt. Lohn in 60 Sekunden berechnen."
+  buttonZiel="#lohnrechner"
 >
-  <Abschnitt>
-    <h2 class="text-h2">Testumgebung</h2>
-    <p class="text-body">Diese Seite ist der Testlauf für den Webseiten-Prozess mit Claude.</p>
+  <!-- 1 Hero -->
+  <Hero
+    etikette="CHF 37.95 PRO STUNDE MIT PFLEGEHELFERKURS · SPITEX IM KANTON ZUG"
+    titel="Sie pflegen. Wir stellen Sie dafür an."
+    text="Sie helfen Ihrer Mutter beim Aufstehen, Ihrem Mann beim Waschen, Ihrem Vater beim Essen – Tag für Tag, meist unbezahlt. Bei der Pflegeunion werden Sie dafür angestellt: mit Stundenlohn und Sozialversicherungen, bezahltem Pflegehelferkurs und einer diplomierten Pflegefachperson, die Sie begleitet. Sie starten mit CHF 33.95 pro Stunde; den Pflegehelferkurs bezahlen wir, danach gelten CHF 37.95. Nicht gewinnorientiert, kantonal bewilligt, im ganzen Kanton Zug."
+    primaer={{ text: 'Lohn berechnen', ziel: '#lohnrechner' }}
+    sekundaer={{ text: 'Erstgespräch vereinbaren', ziel: '#kontakt' }}
+    bildIdee="Bild folgt: Tochter oder Sohn mit Mutter oder Vater am Küchentisch oder beim Aufstehen, Tageslicht, beide im Tun."
+  />
+
+  <!-- 2 Lohnrechner (Vorstufe mit Fallback-Tabelle) -->
+  <Lohnrechner anker="lohnrechner" />
+
+  <!-- 3 Trust-Leiste -->
+  <TrustLeiste />
+
+  <!-- 4 Was Sie erhalten -->
+  <Abschnitt flaeche="warmgrau" etikette="IHRE ANSTELLUNG BEI DER PFLEGEUNION" titel="Mehr als ein Lohn.">
+    <Karten karten={karten} />
   </Abschnitt>
+
+  <!-- 5 So funktioniert es -->
+  <Abschnitt anker="ablauf" etikette="IN FÜNF SCHRITTEN ZUR ANSTELLUNG" titel="Vom ersten Anruf bis zum ersten Lohn.">
+    <Schritte name="Vom ersten Anruf bis zum ersten Lohn." schritte={schritte} />
+    <p class="knopfzeile">
+      <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
+    </p>
+  </Abschnitt>
+
+  <!-- 6 Passt es? -->
+  <Abschnitt flaeche="warmgrau" etikette="PASST ES?" titel="Das sind die Voraussetzungen.">
+    <div class="zweispaltig zweispaltig--bild-links">
+      <Bildflaeche
+        verhaeltnis="4:3"
+        idee="Bild folgt: Angehörige und Pflegefachperson im Gespräch."
+      />
+      <div>
+        <ul class="haken liste-blank">
+          {
+            voraussetzungen.map((v) => (
+              <li>
+                <span class="haken-icon">
+                  <Icon name="check" />
+                </span>
+                <span>{v}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="abschluss">
+          Unsicher, ob es bei Ihnen passt? Rufen Sie an. Wir sagen es Ihnen ehrlich – auch wenn die
+          Antwort «nein» ist.
+        </p>
+        <p><a class="telefon" href="tel:+41417842655">041 784 26 55</a></p>
+      </div>
+    </div>
+  </Abschnitt>
+
+  <!-- 7 Ehrlich gesagt -->
+  <Abschnitt>
+    <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht." ebene={2}>
+      <p>
+        <strong>Vergütet wird die Grundpflege:</strong> Hilfe bei Körperpflege, Anziehen, Essen und
+        Trinken, Bewegen, Toilettengang. Je nach Situation sind das etwa ein bis drei Stunden pro Tag.
+        Wie viele es bei Ihnen sind, zeigt die Abklärung.
+      </p>
+      <p>
+        <strong>
+          Nicht über die Krankenversicherung vergütet werden Gesellschaft und Beaufsichtigung,
+          Nachtpräsenz, Haushalt und Administratives.
+        </strong>
+        Das ist gesetzlich geregelt und bei allen Anbietern in der Schweiz gleich. Wenn Sie diese
+        Unterstützung brauchen, bieten wir sie als Betreuung und Hauswirtschaft an – zu einem festen
+        Stundentarif, den Sie vorher kennen.
+      </p>
+      <p>
+        <strong>
+          Medizinische Pflege wie Medikamente richten, Wundversorgung oder Injektionen bieten wir
+          zurzeit noch nicht an.
+        </strong>
+        Braucht die gepflegte Person solche Leistungen, klären wir im Erstgespräch mit Ihnen, wer sie
+        übernimmt.
+      </p>
+      <p>
+        <strong>Für die gepflegte Person ändert sich finanziell wenig:</strong> Sie bezahlt den
+        gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen
+        Spitex-Organisation. Ansprüche wie die Hilflosenentschädigung bleiben bestehen.
+      </p>
+      <p class="abschluss">
+        Wir versprechen Ihnen nichts, was wir nicht halten können. Dafür halten wir, was wir
+        versprechen.
+      </p>
+    </Hinweiskasten>
+  </Abschnitt>
+
+  <!-- 8 Betreuung & Hauswirtschaft -->
+  <Abschnitt flaeche="warmgrau" etikette="BETREUUNG & HAUSWIRTSCHAFT" titel="Und wenn es mehr braucht als Pflege?">
+    <div class="zweispaltig">
+      <div class="textspalte">
+        <p>
+          Ein Einkauf, der zu schwer geworden ist. Ein Mittagessen, das allein nicht schmeckt. Ein
+          Arzttermin, zu dem niemand begleiten kann. Ein Nachmittag, an dem Sie selbst einmal
+          durchatmen möchten. Unsere Betreuungspersonen kommen ins Haus – als Ergänzung zu Ihrer Pflege
+          oder für Haushalte im Kanton Zug, die einfach jemanden brauchen, der regelmässig da ist.
+        </p>
+        <ul class="leistungen">
+          {betreuungLeistungen.map((l) => <li>{l}</li>)}
+        </ul>
+        <p>
+          Private Leistung zu einem festen Stundentarif von CHF [XX.–], ohne Zuschläge.
+          Ergänzungsleistungen und Zusatzversicherungen können sich beteiligen – wir prüfen das mit
+          Ihnen.
+        </p>
+        <p class="knopfzeile">
+          <a class="button" href="/betreuung-hauswirtschaft/">Betreuung & Hauswirtschaft ansehen</a>
+        </p>
+      </div>
+      <Bildflaeche
+        verhaeltnis="3:2"
+        idee="Bild folgt: Betreuungsperson und ältere Person beim Kochen oder Spaziergang."
+      />
+    </div>
+  </Abschnitt>
+
+  <!-- 9 Wer dahintersteht -->
+  <Abschnitt etikette="ÜBER DIE PFLEGEUNION" titel="Ein Verein, drei Gesichter, ein Versprechen.">
+    <p class="textspalte">
+      Die Pflegeunion Schweiz ist ein nicht gewinnorientierter Verein mit Sitz in Rotkreuz, gegründet
+      2026 von Menschen aus der Spitex, die zwei Dinge zu oft gesehen haben: Angehörige, die längst
+      pflegen, aber weder Anleitung noch Anerkennung erhalten – und Pflegefachpersonen, die Formulare
+      statt Menschen betreuen. Wir stellen die einen an und entlasten die anderen von der
+      Administration. Es gibt keine Aktionäre. Überschüsse bleiben in der Pflege.
+    </p>
+    <ul class="personen liste-blank">
+      {
+        personen.map((p) => (
+          <li class="person">
+            <span class="person-name">{p.name}</span>
+            <span class="person-funktion text-small">{p.funktion}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="knopfzeile">
+      <a class="button button--sekundaer" href="/ueber-uns/">Mehr über uns</a>
+    </p>
+  </Abschnitt>
+
+  <!-- 10 Demnächst -->
+  <Abschnitt etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt.">
+    <p class="textspalte einleitung">
+      Wir starten mit dem, was wir heute verlässlich leisten können: der Anstellung und Begleitung
+      pflegender Angehöriger sowie Betreuung und Hauswirtschaft. Schritt für Schritt bauen wir unser
+      Angebot aus. Diese Leistungen sind in Vorbereitung:
+    </p>
+    <Demnaechst />
+    <p class="textspalte nachsatz">
+      Sie brauchen eine dieser Leistungen schon heute? Rufen Sie uns trotzdem an – wir sagen Ihnen, ab
+      wann wir sie anbieten, und nennen Ihnen bis dahin eine Anlaufstelle.
+    </p>
+  </Abschnitt>
+
+  <!-- 11 Häufige Fragen -->
+  <Abschnitt flaeche="warmgrau" anker="fragen" etikette="HÄUFIGE FRAGEN" titel="Kurz beantwortet.">
+    <FAQ fragen={fragen} />
+  </Abschnitt>
+
+  <!-- 12 Anfrage -->
+  <Anfrage titel="Reden wir über Ihre Situation." />
 </Basis>
+
+<style>
+  .knopfzeile {
+    margin-top: var(--space-4);
+  }
+
+  .zweispaltig {
+    display: grid;
+    gap: var(--space-4);
+    align-items: start;
+  }
+
+  .haken li {
+    display: flex;
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+  }
+
+  .haken-icon {
+    flex: none;
+    display: inline-flex;
+    color: var(--color-ocker);
+    margin-top: var(--space-1);
+  }
+
+  .abschluss {
+    margin-top: var(--space-3);
+    font-weight: 700;
+  }
+
+  .telefon {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tippflaeche);
+    font-weight: 700;
+  }
+
+  .leistungen {
+    margin: 0 0 var(--space-2);
+    padding-left: var(--space-3);
+  }
+
+  .leistungen li {
+    margin-bottom: var(--space-1);
+  }
+
+  .personen {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .person {
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .person-name {
+    font-weight: 700;
+    color: var(--color-tiefblau);
+  }
+
+  .person-funktion {
+    color: var(--color-text-gedaempft);
+  }
+
+  .einleitung {
+    margin-bottom: var(--space-4);
+  }
+
+  .nachsatz {
+    margin-top: var(--space-4);
+  }
+
+  @media (min-width: 768px) {
+    .personen {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .zweispaltig {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+
+    /* Mobile: Text vor Bild; Desktop: Bild links */
+    .zweispaltig--bild-links > :first-child {
+      order: 0;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .zweispaltig--bild-links > :first-child {
+      order: 1;
+    }
+  }
+</style>
