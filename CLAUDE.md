@@ -25,6 +25,35 @@ solange sie nicht ausdrücklich geändert werden.
 - Lato steht unter der SIL Open Font License 1.1, siehe
   `public/fonts/LICENSE.txt`.
 
+## Logo
+
+Die Logo-Dateien liegen als SVG unter `public/logos/`:
+
+- `logo-horizontal-de.svg`, `logo-horizontal-fr.svg`, `logo-horizontal-it.svg`
+  horizontales Logo mit Schriftzug, farbig, je Sprache
+- `logo-horizontal-negativ.svg` horizontales Logo für dunkle Flächen
+- `bildzeichen-farbig.svg` Bildzeichen allein, farbig
+- `bildzeichen-negativ.svg` Bildzeichen allein für dunkle Flächen
+
+Logo-Farben: Tiefblau `#1E3F6E` und Ocker `#C8963C`, die Negativ-Varianten
+zusätzlich Weiss.
+
+### Einsatz
+
+- **Header**: horizontales Logo DE, farbig. Höhe 44 bis 52 px, Breite
+  mindestens 140 px. Ohne Kachel, ohne Rahmen, ohne Schatten.
+- **Mobil**: stehen weniger als 140 px Breite zur Verfügung, wird nur das
+  Bildzeichen gezeigt.
+- **Footer**: Negativ-Logo auf Tiefblau `#1E3F6E`.
+- **Favicon und Social-Vorschau**: Bildzeichen allein, nie das horizontale Logo.
+
+### Nicht erlaubt
+
+- **Umfärben.** Die Logo-Farben werden nie geändert, auch nicht über CSS.
+- **Verzerren.** Das Seitenverhältnis bleibt immer erhalten.
+- Das Logo auf eine **ockerfarbene Fläche** setzen.
+- Das Logo auf ein **Foto** oder eine andere unruhige Fläche setzen.
+
 ## Gestaltung
 
 - Textfarbe: `#1B1B19`
