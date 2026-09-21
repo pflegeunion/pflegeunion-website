@@ -32,11 +32,18 @@ const { titel, beschreibung } = Astro.props;
       type="font/woff2"
       crossorigin
     />
+    <link
+      rel="preload"
+      href="/fonts/playfair-display-latin-700-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
   </head>
   <body>
     <header class="kopfzeile">
       <div class="inhalt">
-        <h1>Pflegeunion Schweiz</h1>
+        <h1 class="text-h1 text-h1--sub">Pflegeunion Schweiz</h1>
       </div>
     </header>
 
@@ -48,7 +55,7 @@ const { titel, beschreibung } = Astro.props;
 
     <footer class="fusszeile">
       <div class="inhalt">
-        <p>&copy; 2026 Verein Pflegeunion Schweiz</p>
+        <p class="text-small">&copy; 2026 Verein Pflegeunion Schweiz</p>
       </div>
     </footer>
   </body>

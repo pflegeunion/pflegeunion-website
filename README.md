@@ -8,7 +8,8 @@ Netlify.
 ```bash
 npm install
 npm run dev      # lokaler Entwicklungsserver
-npm run build    # Build nach dist/
+npm run tokens   # src/styles/tokens.css aus design/tokens.json erzeugen
+npm run build    # Tokens erzeugen und Build nach dist/
 npm run preview  # gebaute Site lokal ansehen
 ```
 
@@ -20,4 +21,5 @@ Netlify baut mit `npm run build` und liefert den Ordner `dist` aus, siehe
 ## Regeln
 
 Die verbindlichen Regeln zu Technik, Schrift, Gestaltung und Sprache stehen in
-[CLAUDE.md](CLAUDE.md).
+[CLAUDE.md](CLAUDE.md). Das Design-System liegt unter `design/`
+(`tokens.json`, `brand-book.md`).
