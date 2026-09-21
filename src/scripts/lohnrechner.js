@@ -1,10 +1,7 @@
 /*
- * Lohnrechner (Baustein F, Webseitenkonzept V3.0 Teil D1).
- * Eigenständig, ohne Framework, ohne Abhängigkeiten, unter 10 KB.
- * Speichert nichts: keine Cookies, kein localStorage.
- *
- * Die Rechenfunktionen werden auch von Lohnrechner.astro (Fallback-Tabelle)
- * und vom Test (npm test) importiert; die Oberfläche startet nur im Browser.
+ * Lohnrechner (Baustein F, Konzept V3.0 D1). Eigenständig, ohne Framework,
+ * unter 10 KB, speichert nichts. Rechenfunktionen werden auch von
+ * Lohnrechner.astro und vom Test importiert; die Oberfläche startet im Browser.
  */
 
 /* ---------- Konfiguration: Sätze und Listen nur hier ändern ---------- */
@@ -22,9 +19,8 @@ export const KONFIG = {
     { wert: '3', text: '3 Stunden', stunden: 3 },
     { wert: 'mehr', text: 'mehr als 3 Stunden', stunden: 3, mehr: true },
   ],
-  // Postleitzahlen der elf Gemeinden des Kantons Zug inklusive Ortsteile.
-  // VORLÄUFIGE LISTE, von der Geschäftsstelle zu prüfen (Konzept Teil F,
-  // Punkt 5). 6344 Meierskappel (LU) ist bewusst nicht enthalten.
+  // Postleitzahlen der elf Zuger Gemeinden inkl. Ortsteile. VORLÄUFIGE LISTE,
+  // von der Geschäftsstelle zu prüfen (Teil F, Punkt 5); ohne 6344 Meierskappel (LU).
   plzZug: [
     6300, 6301, 6302, 6303, 6304, // Zug
     6312, // Steinhausen
@@ -50,12 +46,12 @@ function rundeAuf(betrag, schritt) {
   return Math.round(betrag / schritt) * schritt;
 }
 
-/** Monatslohn brutto: Stunden × 30,4 Tage × Satz, kaufmännisch auf CHF 10.– gerundet. */
+/** Monatslohn brutto: Stunden × 30,4 Tage × Satz, auf CHF 10.– gerundet. */
 export function monatslohn(stunden, satz) {
   return rundeAuf(stunden * KONFIG.tageProMonat * satz, 10);
 }
 
-/** Jahreslohn brutto: Stunden × 365 Tage × Satz, kaufmännisch auf CHF 100.– gerundet. */
+/** Jahreslohn brutto: Stunden × 365 Tage × Satz, auf CHF 100.– gerundet. */
 export function jahreslohn(stunden, satz) {
   return rundeAuf(stunden * KONFIG.tageProJahr * satz, 100);
 }
@@ -105,7 +101,8 @@ function starte(wurzel) {
 
   var zahl = q('[data-monat]');
   var vorlesen = q('[data-vorlesen]');
-  var reduziert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mq = function (abfrage) { return window.matchMedia ? window.matchMedia(abfrage) : { matches: false }; };
+  var reduziert = mq('(prefers-reduced-motion: reduce)').matches;
   var angezeigt = 0;
   var animation = 0;
 
@@ -150,7 +147,29 @@ function starte(wurzel) {
     q('[data-einstieg]').textContent = chf(werte.monatEinstieg, werte.mehr);
     q('[data-zeile3]').hidden = kurs;
     q('[data-mehr]').hidden = !werte.mehr;
+    if (leiste) {
+      q('[data-leiste-titel]').textContent = kurs ? 'Ihr Lohn' : 'Ihr Lohn nach dem Kurs';
+      q('[data-leiste-betrag]').textContent = chf(werte.monatMitKurs, werte.mehr);
+    }
   }
+
+  // Mobile Ergebnisleiste (B4): Antippen scrollt zum Ergebnisblock.
+  var leiste = q('[data-leiste]');
+  var abschnitt = wurzel.closest('section') || wurzel;
+  if (leiste) {
+    leiste.addEventListener('click', function () {
+      q('.ergebnis').scrollIntoView({ behavior: reduziert ? 'auto' : 'smooth', block: 'start' });
+    });
+  }
+
+  // Hilfetexte: auf Mobile zugeklappt, auf Desktop offen.
+  var hilfen = wurzel.querySelectorAll('[data-hilfe]');
+  var mobil = mq('(max-width: 767px)');
+  function klappe() {
+    hilfen.forEach(function (h) { h.open = !mobil.matches; });
+  }
+  if (mobil.addEventListener) mobil.addEventListener('change', klappe);
+  klappe();
 
   wurzel.addEventListener('change', function (ereignis) {
     var ziel = ereignis.target;
@@ -217,22 +236,29 @@ function starte(wurzel) {
     }
   }
 
-  // Sekundär-Button «Ergebnis per E-Mail erhalten»: vorerst nur Messung,
-  // der Versand folgt mit dem Formularversand.
+  // «Ergebnis per E-Mail erhalten»: vorerst nur Messung, Versand folgt.
   var email = q('[data-email]');
   if (email) {
     email.addEventListener('click', function () { melde('rechner_email'); });
   }
 
-  // Sichtbarkeit einmal melden.
+  // Sichtbarkeit (ohne Kopfzeile und Leiste): Leiste nur bei sichtbarem
+  // Abschnitt; «gesehen» einmal ab 50 % des Abschnitts oder des Bildschirms.
   if ('IntersectionObserver' in window) {
-    var beobachter = new IntersectionObserver(function (eintraege) {
-      if (eintraege.some(function (e) { return e.isIntersecting; })) {
+    var gemeldet = false;
+    var kopf = document.querySelector('header');
+    new IntersectionObserver(function (eintraege) {
+      var e = eintraege[eintraege.length - 1];
+      if (leiste) leiste.hidden = !e.isIntersecting;
+      if (!gemeldet && (e.intersectionRatio >= 0.5 ||
+        (e.rootBounds && e.intersectionRect.height >= e.rootBounds.height / 2))) {
+        gemeldet = true;
         melde('rechner_gesehen');
-        beobachter.disconnect();
       }
-    }, { threshold: 0.5 });
-    beobachter.observe(wurzel);
+    }, {
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+      rootMargin: '-' + (kopf ? kopf.offsetHeight : 0) + 'px 0px -56px 0px',
+    }).observe(abschnitt);
   }
 
   aktualisiere();

@@ -11,6 +11,13 @@
  * Buttons. Das Skript src/scripts/lohnrechner.js blendet
  * `[data-rechner-fallback]` aus und `[data-rechner-ui]` ein.
  *
+ * Mobile (unter 900 px): eine Ergebnisleiste am unteren Bildschirmrand
+ * (`[data-leiste]`, Tiefblau, ein Button) zeigt Titel und Zahl, solange der
+ * Abschnitt im sichtbaren Bereich ist; Antippen scrollt zum Ergebnisblock.
+ * Sie ist für Screenreader ausgeblendet, weil der Ergebnisblock bereits die
+ * Live-Region ist. Die Hilfetexte stehen auf Mobile (unter 768 px) als
+ * aufklappbare Zeile (details/summary) und sind auf Desktop offen.
+ *
  * Sätze, Tage, Stundenstufen und Postleitzahlen stehen ausschliesslich im
  * Konfigurationsblock des Skripts (KONFIG); die Fallback-Tabelle wird beim
  * Build aus derselben Rechenlogik erzeugt und gegen die Kontrollwerte aus D1
@@ -26,6 +33,7 @@
  *                 Lohn» entfällt dort.
  */
 import Hinweiskasten from './Hinweiskasten.astro';
+import Icon from './Icon.astro';
 import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
 
 interface Props {
@@ -156,10 +164,19 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
                 ))
               }
             </div>
-            <p class="hilfe text-small">
-              Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
-              Gesellschaft zählen hier nicht – dazu weiter unten mehr.
-            </p>
+            <details class="hilfe text-small" data-hilfe open>
+              <summary class="hilfe-zeile">
+                <span>Was zählt dazu?</span>
+                <span class="hilfe-icon">
+                  <Icon name="plus" groesse={20} class="icon-plus" />
+                  <Icon name="minus" groesse={20} class="icon-minus" />
+                </span>
+              </summary>
+              <p>
+                Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
+                Gesellschaft zählen hier nicht – dazu weiter unten mehr.
+              </p>
+            </details>
           </fieldset>
 
           <fieldset class="frage">
@@ -179,10 +196,19 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
                 ))
               }
             </div>
-            <p class="hilfe text-small">
-              Mit Kurs verdienen Sie CHF {satzMitKurs} pro Stunde. Noch ohne Kurs starten Sie mit
-              CHF {satzEinstieg} und holen den Kurs im ersten Jahr nach – wir bezahlen ihn.
-            </p>
+            <details class="hilfe text-small" data-hilfe open>
+              <summary class="hilfe-zeile">
+                <span>Was bedeutet das?</span>
+                <span class="hilfe-icon">
+                  <Icon name="plus" groesse={20} class="icon-plus" />
+                  <Icon name="minus" groesse={20} class="icon-minus" />
+                </span>
+              </summary>
+              <p>
+                Mit Kurs verdienen Sie CHF {satzMitKurs} pro Stunde. Noch ohne Kurs starten Sie mit
+                CHF {satzEinstieg} und holen den Kurs im ersten Jahr nach – wir bezahlen ihn.
+              </p>
+            </details>
           </fieldset>
 
           {
@@ -272,6 +298,16 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
             }
           </div>
         </div>
+
+        <!-- Mobile Ergebnisleiste (B4): fixiert unten, nur solange der Abschnitt sichtbar ist.
+             Für Screenreader ausgeblendet; das Ergebnis oben ist die Live-Region. -->
+        <button type="button" class="leiste" data-leiste aria-hidden="true" tabindex="-1" hidden>
+          <span class="text-small leiste-titel" data-leiste-titel>Ihr Lohn nach dem Kurs</span>
+          <span class="leiste-zahl">
+            <span class="text-h3 leiste-betrag" data-leiste-betrag>{chf(start.monatMitKurs, start.mehr)}</span>
+            <span class="text-label leiste-einheit">brutto pro Monat</span>
+          </span>
+        </button>
       </div>
     </div>
   </div>
@@ -410,9 +446,55 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
     outline-offset: 2px;
   }
 
+  /* Hilfetexte: auf Desktop offen (Zeile versteckt), auf Mobile aufklappbar. */
   .hilfe {
     margin: var(--space-2) 0 0;
     color: var(--color-text-gedaempft);
+  }
+
+  .hilfe p {
+    margin: 0;
+  }
+
+  .hilfe-zeile {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: var(--tippflaeche);
+    list-style: none;
+    font-weight: 700;
+    color: var(--color-tiefblau);
+    cursor: pointer;
+  }
+
+  .hilfe-zeile::-webkit-details-marker {
+    display: none;
+  }
+
+  .hilfe-icon {
+    flex: none;
+    display: inline-flex;
+  }
+
+  /* Die Icons stammen aus Icon.astro und liegen ausserhalb des Scopes. */
+  .hilfe[open] :global(.icon-plus),
+  .hilfe:not([open]) :global(.icon-minus) {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .hilfe {
+      margin-top: var(--space-1);
+    }
+
+    .hilfe-zeile {
+      display: flex;
+    }
+
+    .hilfe[open] p {
+      padding-bottom: var(--space-1);
+    }
   }
 
   .frage--plz input {
@@ -423,6 +505,7 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
   .ergebnis {
     padding-top: var(--space-4);
     border-top: 1px solid var(--color-linie);
+    scroll-margin-top: calc(var(--hoehe-kopfzeile-mobil) + var(--space-2));
   }
 
   .ergebnis-titel {
@@ -460,6 +543,68 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
 
   .knoepfe .button {
     text-align: center;
+  }
+
+  /* Mobile Ergebnisleiste: Tiefblau, weisse Schrift, 56 px plus Gestenleiste,
+     eckig, ohne Schatten, oben eine 1-px-Linie tiefblau-hell. */
+  .leiste {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: calc(var(--tippflaeche-gross) + env(safe-area-inset-bottom, 0px));
+    padding: 0 var(--space-2) env(safe-area-inset-bottom, 0px);
+    border: 0;
+    border-top: 1px solid var(--color-tiefblau-hell);
+    border-radius: var(--radius-none);
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+    text-align: left;
+    font-weight: 400;
+  }
+
+  .leiste[hidden] {
+    display: none;
+  }
+
+  .leiste-titel {
+    min-width: 0;
+  }
+
+  .leiste-zahl {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .leiste-betrag {
+    color: var(--color-auf-tiefblau);
+  }
+
+  /* 13 px wie .text-label, aber als normaler Text (keine Versalien). */
+  .leiste-einheit {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+  }
+
+  /* Unten Platz, damit die Leiste die Buttons nicht verdeckt. */
+  @media (max-width: 899px) {
+    .ui {
+      padding-bottom: calc(var(--tippflaeche-gross) + var(--space-2) + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .leiste {
+      display: none;
+    }
   }
 
   @media (min-width: 480px) {
