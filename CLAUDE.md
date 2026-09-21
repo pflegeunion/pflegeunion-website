@@ -131,7 +131,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
   `global.css`: `--breite-inhalt` (1200 px), `--breite-kopfzeile` (1440 px),
-  `--breite-text` (680 px), `--hoehe-kopfzeile` (72 px),
+  `--breite-text` (680 px), `--breite-hero-text` (560 px),
+  `--hoehe-kopfzeile` (72 px),
   `--hoehe-kopfzeile-mobil` (60 px), `--tippflaeche` (44 px).
 - `--radius-full` auf der Webseite **nicht verwenden**; Porträts sind eckig.
 - Das Dunkel-Thema aus `design/tokens.json` wird auf der Webseite nicht
@@ -148,6 +149,10 @@ direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
+| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
+| `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Hero: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht; keine Stockbilder, keine Icons als Ersatz |
+| `Karten.astro` | Karten (C1 Abschnitt 4, B5): Warmgrau mit Haarlinie, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
+| `Schritte.astro` | Nummerierte Schritte mit Zahl in `.text-step` (Ocker), Titel, Text; schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
 | `Header.astro` | Kopfzeile (B2): sticky, Logo, fünf Menüpunkte, Telefon, Primär-Button, Burger-Menü, Utility-Zeile | Jede Seite über `Basis.astro`; Button per Parameter (`buttonText`, `buttonZiel`), auf Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt` |
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
@@ -156,11 +161,20 @@ direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary und schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| Baustein F | Lohnrechner-Modul (D1) | Startseite Abschnitt 2, Lohnrechner-Seite. **Noch nicht gebaut**, folgt in einem eigenen Pull Request als `Lohnrechner.astro` |
+| `Lohnrechner.astro` | Baustein F, Vorstufe (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung, Fallback-Tabelle mit den Werten aus D1, Fussnote, Buttons. Stundensätze an einer Stelle in der Komponente, Kontrollwerte aus D1 werden beim Build geprüft | Startseite Abschnitt 2, Lohnrechner-Seite. **Das Rechner-Skript folgt in einem eigenen Pull Request**; es blendet `[data-rechner-fallback]` aus und rendert in `[data-rechner]`. Die Tabelle bleibt der Fallback ohne JavaScript |
 | `Demnaechst.astro` | Baustein G: sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
 - Die Parameter jeder Komponente sind im Kommentarkopf der Datei beschrieben.
+- Die Startseite `src/pages/index.astro` setzt die zwölf Abschnitte aus
+  Konzept C1 in dieser Reihenfolge um: Hero · Lohnrechner · Trust-Leiste ·
+  Was Sie erhalten · So funktioniert es (`#ablauf`) · Passt es? · Ehrlich
+  gesagt · Betreuung & Hauswirtschaft · Wer dahintersteht · Demnächst ·
+  Häufige Fragen · Anfrage (`#kontakt`). Texte wörtlich aus dem Konzept;
+  Änderungen an Texten nur mit dem Konzept zusammen.
+- Bilder liegen noch nicht vor. `Bildflaeche.astro` zeigt bis dahin die
+  Bildidee aus der Regieanweisung; sobald Fotos vorliegen, werden `src` und
+  `alt` gesetzt (WebP, maximal 1600 px breit, Lizenz dokumentiert).
 - Das Anfrageformular hat noch kein Versandziel; Versand, Eingangsbestätigung
   und Zeitprüfung folgen in einem eigenen Pull Request.
 - Die interne Musterseite `/bausteine/` (`src/pages/bausteine.astro`) zeigt
@@ -184,9 +198,10 @@ public/fonts/        lokale Lato- und Playfair-Display-Dateien (WOFF2) und
                      Lizenzen
 public/logos/        Logo-Dateien (SVG)
 public/              favicon-32.png und apple-touch-icon.png
-src/components/      wiederkehrende Bausteine (Header, Footer, Abschnitt,
-                     TrustLeiste, Anfrage, Hinweiskasten, Kernbotschaft, FAQ,
-                     Demnaechst, Icon) und die Lucide-Lizenz
+src/components/      wiederkehrende Bausteine (Header, Footer, Hero, Abschnitt,
+                     Lohnrechner, TrustLeiste, Karten, Schritte, Bildflaeche,
+                     Anfrage, Hinweiskasten, Kernbotschaft, FAQ, Demnaechst,
+                     Icon) und die Lucide-Lizenz
 src/layouts/         Layouts, z. B. Basis.astro (Kopf- und Fusszeile)
 src/pages/           Seiten, eine Datei pro Seite; bausteine.astro ist die
                      interne Musterseite

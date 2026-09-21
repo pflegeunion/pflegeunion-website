@@ -1,0 +1,175 @@
+---
+/**
+ * Hero (Konzept V3 C1, Abschnitt 1; Unterseiten analog).
+ *
+ * Weisse Fläche. Links Übertitel, H1 in Playfair (.text-h1: 56 px, auf
+ * Mobile 40 px), Text (max. 560 px), Primär- und Sekundär-Button, darunter
+ * die Telefonzeile. Rechts eine eckige Bildfläche 3:2; dahinter einmal der
+ * Ring aus dem Logo, gross, angeschnitten, einfarbig tiefblau-hell als
+ * Inline-SVG-Kreisring. Mobile: Text vor Bild, Buttons volle Breite.
+ *
+ * Parameter:
+ *   etikette   Übertitel
+ *   titel      H1
+ *   text       Fliesstext
+ *   primaer    { text, ziel } Primär-Button
+ *   sekundaer  { text, ziel } Sekundär-Button (optional)
+ *   telefon    Telefonzeile anzeigen (Standard true)
+ *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt
+ *   bildSrc, bildAlt  Bilddatei, sobald vorhanden
+ *   ring       Ring hinter dem Bild (Standard true; nur einmal pro Seite)
+ */
+import Bildflaeche from './Bildflaeche.astro';
+
+interface Knopf {
+  text: string;
+  ziel: string;
+}
+
+interface Props {
+  etikette: string;
+  titel: string;
+  text: string;
+  primaer: Knopf;
+  sekundaer?: Knopf;
+  telefon?: boolean;
+  bildIdee: string;
+  bildSrc?: string;
+  bildAlt?: string;
+  ring?: boolean;
+}
+
+const {
+  etikette,
+  titel,
+  text,
+  primaer,
+  sekundaer,
+  telefon = true,
+  bildIdee,
+  bildSrc,
+  bildAlt,
+  ring = true,
+} = Astro.props;
+---
+
+<section class="hero">
+  <div class="hero-inhalt">
+    <div class="hero-text">
+      <p class="text-label etikette">{etikette}</p>
+      <h1 class="text-h1">{titel}</h1>
+      <p class="hero-absatz">{text}</p>
+      <div class="knoepfe">
+        <a class="button" href={primaer.ziel}>{primaer.text}</a>
+        {sekundaer && <a class="button button--sekundaer" href={sekundaer.ziel}>{sekundaer.text}</a>}
+      </div>
+      {
+        telefon && (
+          <p class="telefon">
+            Oder rufen Sie an: <a href="tel:+41417842655">041 784 26 55</a> – Mo bis Fr, 08.00–17.00 Uhr
+          </p>
+        )
+      }
+    </div>
+
+    <div class="hero-bild">
+      {
+        ring && (
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--color-tiefblau-hell)" stroke-width="12" />
+          </svg>
+        )
+      }
+      <Bildflaeche verhaeltnis="3:2" idee={bildIdee} src={bildSrc} alt={bildAlt} prioritaet class="bildflaeche" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    background-color: var(--color-weiss);
+    overflow: hidden;
+  }
+
+  .hero-inhalt {
+    max-width: var(--breite-inhalt);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-2);
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .hero-text {
+    max-width: var(--breite-hero-text);
+  }
+
+  .hero-text h1 {
+    margin-bottom: var(--space-3);
+  }
+
+  .hero-absatz {
+    margin-bottom: var(--space-4);
+  }
+
+  .knoepfe {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .knoepfe .button {
+    text-align: center;
+  }
+
+  .telefon {
+    margin-top: var(--space-3);
+  }
+
+  .telefon a {
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tippflaeche);
+  }
+
+  /* Bild mit Ring dahinter: der Ring liegt hinter dem Bild und wird vom
+     Abschnitt angeschnitten. */
+  .hero-bild {
+    position: relative;
+  }
+
+  .ring {
+    position: absolute;
+    z-index: 0;
+    width: 120%;
+    height: auto;
+    right: -35%;
+    top: -30%;
+    pointer-events: none;
+  }
+
+  .hero-bild :global(.bildflaeche) {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (min-width: 480px) {
+    .knoepfe {
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .hero-inhalt {
+      padding-inline: var(--space-3);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-inhalt {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-8);
+    }
+  }
+</style>
