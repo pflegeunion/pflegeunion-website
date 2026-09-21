@@ -1,0 +1,118 @@
+---
+/**
+ * Baustein E – FAQ (Konzept V3 B4).
+ *
+ * Akkordeon mit details/summary: Frage Lato Bold 20 px Tiefblau, Antwort
+ * 18 px, Haarlinie zwischen den Einträgen, Plus/Minus-Icon rechts. Alle
+ * Antworten stehen im HTML. Öffnet weich, respektiert
+ * prefers-reduced-motion. Dieselben Daten werden als schema.org FAQPage
+ * (JSON-LD) ausgegeben.
+ *
+ * Parameter:
+ *   fragen  Liste { frage, antwort }; die Antwort ist Text ohne HTML
+ */
+import Icon from './Icon.astro';
+
+interface Frage {
+  frage: string;
+  antwort: string;
+}
+
+interface Props {
+  fragen: Frage[];
+}
+
+const { fragen } = Astro.props;
+
+const faqPage = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: fragen.map((f) => ({
+    '@type': 'Question',
+    name: f.frage,
+    acceptedAnswer: { '@type': 'Answer', text: f.antwort },
+  })),
+};
+---
+
+<div class="faq">
+  {
+    fragen.map((f) => (
+      <details class="eintrag">
+        <summary class="frage text-faq">
+          <span class="frage-text">{f.frage}</span>
+          <span class="frage-icon">
+            <Icon name="plus" class="icon-plus" />
+            <Icon name="minus" class="icon-minus" />
+          </span>
+        </summary>
+        <div class="antwort">
+          <p>{f.antwort}</p>
+        </div>
+      </details>
+    ))
+  }
+  <script type="application/ld+json" set:html={JSON.stringify(faqPage)} />
+</div>
+
+<style>
+  .faq {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .eintrag {
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .frage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    min-height: var(--tippflaeche);
+    padding-block: var(--space-2);
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .frage::-webkit-details-marker {
+    display: none;
+  }
+
+  .frage-icon {
+    flex: none;
+    display: inline-flex;
+    color: var(--color-tiefblau);
+  }
+
+  /* Die Icons stammen aus Icon.astro und liegen ausserhalb des Scopes. */
+  .eintrag[open] :global(.icon-plus),
+  .eintrag:not([open]) :global(.icon-minus) {
+    display: none;
+  }
+
+  .antwort {
+    max-width: var(--breite-text);
+    padding-bottom: var(--space-3);
+  }
+
+  .eintrag[open] .antwort {
+    animation: faq-oeffnen 200ms ease-out;
+  }
+
+  @keyframes faq-oeffnen {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .eintrag[open] .antwort {
+      animation: none;
+    }
+  }
+</style>

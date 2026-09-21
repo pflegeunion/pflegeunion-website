@@ -1,12 +1,19 @@
 ---
 import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   titel: string;
   beschreibung?: string;
+  /** Seite nicht indexieren (interne Seiten wie /bausteine/). */
+  noindex?: boolean;
+  /** Beschriftung und Ziel des Primär-Buttons in der Kopfzeile. */
+  buttonText?: string;
+  buttonZiel?: string;
 }
 
-const { titel, beschreibung } = Astro.props;
+const { titel, beschreibung, noindex = false, buttonText, buttonZiel } = Astro.props;
 ---
 
 <!doctype html>
@@ -16,6 +23,7 @@ const { titel, beschreibung } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titel}</title>
     {beschreibung && <meta name="description" content={beschreibung} />}
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link
@@ -41,22 +49,12 @@ const { titel, beschreibung } = Astro.props;
     />
   </head>
   <body>
-    <header class="kopfzeile">
-      <div class="inhalt">
-        <h1 class="text-h1 text-h1--sub">Pflegeunion Schweiz</h1>
-      </div>
-    </header>
+    <Header buttonText={buttonText} buttonZiel={buttonZiel} />
 
-    <main>
-      <div class="inhalt">
-        <slot />
-      </div>
+    <main id="inhalt">
+      <slot />
     </main>
 
-    <footer class="fusszeile">
-      <div class="inhalt">
-        <p class="text-small">&copy; 2026 Verein Pflegeunion Schweiz</p>
-      </div>
-    </footer>
+    <Footer />
   </body>
 </html>

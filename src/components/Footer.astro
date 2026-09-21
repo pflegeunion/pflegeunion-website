@@ -1,0 +1,199 @@
+---
+/**
+ * Fusszeile (Konzept V3 B3).
+ *
+ * Tiefblau-Fläche, weisse Schrift 15 px, Negativ-Logo oben links, drei
+ * Spalten (Kontakt, Angebot, Pflegeunion), darunter Vertrauenszeile und
+ * Copyright. Adresse zusätzlich als schema.org Organization (JSON-LD).
+ * Auf Mobile stehen die Spalten untereinander.
+ *
+ * Keine Parameter.
+ */
+const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
+const email = 'info@pflegeunion.ch';
+
+const angebot = [
+  { text: 'Angehörige anstellen', ziel: '/#ablauf' },
+  { text: 'Lohnrechner', ziel: '/lohnrechner/' },
+  { text: 'Betreuung & Hauswirtschaft', ziel: '/betreuung-hauswirtschaft/' },
+  { text: 'Erstgespräch vereinbaren', ziel: '#kontakt' },
+];
+
+const pflegeunion = [
+  { text: 'Über uns', ziel: '/ueber-uns/' },
+  { text: 'Stellen', ziel: '/ueber-uns/#stellen' },
+  { text: 'Für Fachpersonen', ziel: '#kontakt' },
+  { text: 'Impressum', ziel: '/impressum/' },
+  { text: 'Datenschutz', ziel: '/datenschutz/' },
+];
+
+const basis = Astro.site ?? new URL('https://pflegeunion.ch/');
+
+const organisation = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Verein Pflegeunion Schweiz',
+  alternateName: 'Pflegeunion Schweiz',
+  url: basis.href,
+  logo: new URL('/logos/bildzeichen-farbig.svg', basis).href,
+  telephone: '+41 41 784 26 55',
+  email,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Grundstrasse 4b',
+    postalCode: '6343',
+    addressLocality: 'Rotkreuz',
+    addressRegion: 'ZG',
+    addressCountry: 'CH',
+  },
+  areaServed: 'Kanton Zug',
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      name: 'Geschäftsstelle',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '08:00',
+      closes: '17:00',
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      name: 'Pflegeeinsätze',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '06:00',
+      closes: '22:00',
+    },
+  ],
+};
+---
+
+<footer class="fusszeile text-small">
+  <div class="fusszeile-inhalt">
+    <a class="logo" href="/">
+      <img
+        src="/logos/logo-horizontal-negativ.svg"
+        alt="Pflegeunion Schweiz, zur Startseite"
+        width="242"
+        height="48"
+      />
+    </a>
+
+    <div class="spalten">
+      <div class="spalte">
+        <h2 class="spalte-titel text-small">Kontakt</h2>
+        <address class="adresse">
+          Pflegeunion Schweiz<br />
+          Grundstrasse 4b<br />
+          6343 Rotkreuz<br />
+          <a href={telefon.href}>{telefon.text}</a><br />
+          <a href={`mailto:${email}`}>{email}</a><br />
+          Geschäftsstelle Mo–Fr, 08.00–17.00 Uhr<br />
+          Pflegeeinsätze täglich 06.00–22.00 Uhr
+        </address>
+      </div>
+
+      <div class="spalte">
+        <h2 class="spalte-titel text-small">Angebot</h2>
+        <ul class="liste">
+          {angebot.map((p) => <li><a href={p.ziel}>{p.text}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="spalte">
+        <h2 class="spalte-titel text-small">Pflegeunion</h2>
+        <ul class="liste">
+          {pflegeunion.map((p) => <li><a href={p.ziel}>{p.text}</a></li>)}
+        </ul>
+      </div>
+    </div>
+
+    <p class="vertrauen">
+      Kantonal bewilligte Spitex-Organisation · Nicht gewinnorientierter Verein · Tätig im ganzen
+      Kanton Zug
+    </p>
+    <p class="copyright">© 2026 Verein Pflegeunion Schweiz</p>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(organisation)} />
+</footer>
+
+<style>
+  .fusszeile {
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .fusszeile-inhalt {
+    max-width: var(--breite-inhalt);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-2);
+  }
+
+  .fusszeile a {
+    color: var(--color-auf-tiefblau);
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tippflaeche);
+    margin-bottom: var(--space-4);
+  }
+
+  .logo img {
+    display: block;
+    height: var(--space-6);
+    width: auto;
+  }
+
+  .spalten {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .spalte-titel {
+    margin: 0 0 var(--space-1);
+    font-weight: 700;
+    color: var(--color-auf-tiefblau);
+  }
+
+  .adresse {
+    font-style: normal;
+  }
+
+  .liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .liste li {
+    display: flex;
+  }
+
+  .liste a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tippflaeche);
+  }
+
+  .vertrauen {
+    margin: var(--space-6) 0 var(--space-1);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-auf-tiefblau);
+  }
+
+  .copyright {
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .fusszeile-inhalt {
+      padding-inline: var(--space-3);
+    }
+
+    .spalten {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
+    }
+  }
+</style>

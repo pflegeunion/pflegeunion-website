@@ -1,0 +1,43 @@
+---
+/**
+ * Baustein D – Kernbotschaft-Kasten (Konzept V3 B4).
+ *
+ * Fläche ocker-hell, Etikette in Ocker, Titel Lato Bold Tiefblau, Inhalt als
+ * Slot. Höchstens einer pro Seite. Auf der Startseite: der Lohn-Abschnitt.
+ *
+ * Parameter:
+ *   etikette  Übertitel
+ *   titel     Titel des Kastens
+ */
+interface Props {
+  etikette: string;
+  titel: string;
+}
+
+const { etikette, titel } = Astro.props;
+---
+
+<div class="kasten">
+  <p class="text-label etikette">{etikette}</p>
+  <h3 class="text-h3">{titel}</h3>
+  <div class="kasten-inhalt">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .kasten {
+    background-color: var(--color-ocker-hell);
+    padding: var(--space-3);
+  }
+
+  .kasten h3 {
+    color: var(--color-tiefblau);
+  }
+
+  @media (min-width: 768px) {
+    .kasten {
+      padding: var(--space-4);
+    }
+  }
+</style>

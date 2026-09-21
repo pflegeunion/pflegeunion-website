@@ -1,0 +1,331 @@
+---
+/**
+ * Baustein B – Anfrage-Abschnitt mit Formular (Konzept V3 B4 und D2).
+ *
+ * Tiefblau-Fläche, weisse Schrift. Links Übertitel, H2, Text, Telefon und
+ * E-Mail; rechts das Formular auf weisser Fläche mit sieben Feldern in der
+ * Reihenfolge der Tabelle D2 (Pflicht: Anliegen, Name, Telefon, Wohnort).
+ * Steht am Ende jeder Seite unter dem Anker #kontakt.
+ *
+ * Versand: Das Formular hat noch kein Versandziel; der Versand (Adresse,
+ * Eingangsbestätigung, Zeitprüfung des Honeypots) folgt in einem eigenen
+ * Pull Request. Der Bestätigungstext aus D2 liegt als versteckter Block bereit.
+ *
+ * Fehlerhinweise: Die Pflichtfelder nutzen die HTML-Validierung. Die eigenen
+ * deutschen Texte erscheinen ohne JavaScript über :user-invalid, sobald ein
+ * Feld verlassen oder das Formular abgeschickt wurde. Fehler als Tiefblau-
+ * Fläche mit weisser Schrift, kein Rot.
+ *
+ * Parameter:
+ *   titel       H2 (Standard «Reden wir über Ihre Situation.»)
+ *   anker       id des Abschnitts (Standard 'kontakt')
+ *   quellseite  Wert des versteckten Felds «quellseite» (Standard: aktueller Pfad)
+ */
+interface Props {
+  titel?: string;
+  anker?: string;
+  quellseite?: string;
+}
+
+const {
+  titel = 'Reden wir über Ihre Situation.',
+  anker = 'kontakt',
+  quellseite = Astro.url.pathname,
+} = Astro.props;
+
+const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
+const email = 'info@pflegeunion.ch';
+
+const anliegen = [
+  'Anstellung als pflegender Angehöriger',
+  'Betreuung und Hauswirtschaft',
+  'Ich bin Fachperson (Arzt, Spital, Beratungsstelle)',
+  'Etwas anderes',
+];
+
+const erreichbar = ['Vormittag', 'Nachmittag', 'Abend'];
+
+// Zeitstempel des Builds. Die Zeitprüfung (Mindestdauer zwischen Aufruf und
+// Absenden) wird beim Versand serverseitig festgelegt.
+const zeitstempel = new Date().toISOString();
+---
+
+<section id={anker} class="anfrage">
+  <div class="anfrage-inhalt">
+    <div class="anfrage-text">
+      <p class="text-label etikette etikette--weiss">
+        ERSTGESPRÄCH KOSTENLOS · ANTWORT INNERT 24 STUNDEN
+      </p>
+      <h2 class="text-h2">{titel}</h2>
+      <p>
+        Rufen Sie uns an oder schreiben Sie uns. Wir melden uns innert 24 Stunden an Werktagen. Ein
+        Erstgespräch kostet nichts und verpflichtet Sie zu nichts.
+      </p>
+      <p class="kontakt">
+        <a class="kontakt-telefon" href={telefon.href}>{telefon.text}</a> – Mo bis Fr, 08.00–17.00 Uhr<br />
+        <a href={`mailto:${email}`}>{email}</a>
+      </p>
+    </div>
+
+    <form class="formular" method="post" novalidate={false} data-versand="offen">
+      <div class="feld">
+        <label for="anfrage-anliegen">Ich interessiere mich für:</label>
+        <select id="anfrage-anliegen" name="anliegen" required aria-describedby="anfrage-anliegen-fehler">
+          <option value="">Bitte wählen</option>
+          {anliegen.map((a) => <option value={a}>{a}</option>)}
+        </select>
+        <p class="fehler" id="anfrage-anliegen-fehler">
+          Bitte wählen Sie aus, wofür Sie sich interessieren.
+        </p>
+      </div>
+
+      <div class="feld">
+        <label for="anfrage-name">Vorname und Name</label>
+        <input
+          type="text"
+          id="anfrage-name"
+          name="name"
+          autocomplete="name"
+          required
+          aria-describedby="anfrage-name-fehler"
+        />
+        <p class="fehler" id="anfrage-name-fehler">Bitte geben Sie Ihren Vornamen und Namen an.</p>
+      </div>
+
+      <div class="feld">
+        <label for="anfrage-telefon">Telefon</label>
+        <input
+          type="tel"
+          id="anfrage-telefon"
+          name="telefon"
+          autocomplete="tel"
+          required
+          aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler"
+        />
+        <p class="hinweis text-small" id="anfrage-telefon-hinweis">
+          Für eine schnelle, persönliche Rückmeldung
+        </p>
+        <p class="fehler" id="anfrage-telefon-fehler">
+          Damit wir Sie erreichen können, brauchen wir noch Ihre Telefonnummer.
+        </p>
+      </div>
+
+      <div class="feld">
+        <label for="anfrage-email">E-Mail (freiwillig)</label>
+        <input
+          type="email"
+          id="anfrage-email"
+          name="email"
+          autocomplete="email"
+          aria-describedby="anfrage-email-fehler"
+        />
+        <p class="fehler" id="anfrage-email-fehler">Bitte prüfen Sie die E-Mail-Adresse.</p>
+      </div>
+
+      <div class="feld">
+        <label for="anfrage-ort">Postleitzahl und Ort der gepflegten Person</label>
+        <input type="text" id="anfrage-ort" name="ort" required aria-describedby="anfrage-ort-fehler" />
+        <p class="fehler" id="anfrage-ort-fehler">Bitte geben Sie Postleitzahl und Ort an.</p>
+      </div>
+
+      <fieldset class="feld feld--gruppe">
+        <legend>Wann erreichen wir Sie am besten? (freiwillig)</legend>
+        <div class="optionen">
+          {
+            erreichbar.map((zeit) => (
+              <label class="option">
+                <input type="radio" name="erreichbar" value={zeit} />
+                <span>{zeit}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="feld">
+        <label for="anfrage-nachricht">Ihre Nachricht (freiwillig)</label>
+        <textarea id="anfrage-nachricht" name="nachricht" rows="4"></textarea>
+      </div>
+
+      <!-- Versteckte Felder: Übergabe aus dem Lohnrechner und Quellseite. -->
+      <input type="hidden" name="stunden" value="" />
+      <input type="hidden" name="kurs" value="" />
+      <input type="hidden" name="ergebnis" value="" />
+      <input type="hidden" name="quellseite" value={quellseite} />
+      <input type="hidden" name="zeitstempel" value={zeitstempel} />
+
+      <!-- Honeypot: für Menschen unsichtbar (ausserhalb des sichtbaren Bereichs), für Programme ein normales Feld. -->
+      <div class="honeypot" aria-hidden="true">
+        <label for="anfrage-webseite">Bitte dieses Feld leer lassen</label>
+        <input type="text" id="anfrage-webseite" name="webseite" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <p class="datenschutz text-small">
+        Bitte keine Gesundheitsangaben in die Nachricht schreiben – diese besprechen wir im Gespräch.
+        Ihre Angaben nutzen wir ausschliesslich für die Beantwortung Ihrer Anfrage. Details:
+        <a href="/datenschutz/">Datenschutzerklärung</a>.
+      </p>
+
+      <button type="submit" class="button">Anfrage senden</button>
+
+      <div class="bestaetigung" hidden>
+        <p>
+          Vielen Dank. Ihre Anfrage ist bei uns eingegangen. Eine Fachperson meldet sich innert 24
+          Stunden an Werktagen bei Ihnen. Wenn es dringend ist:
+          <a href={telefon.href}>{telefon.text}</a>.
+        </p>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  .anfrage {
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .anfrage-inhalt {
+    max-width: var(--breite-inhalt);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-2);
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .anfrage-text {
+    max-width: var(--breite-text);
+    min-width: 0;
+  }
+
+  .anfrage-text h2 {
+    color: var(--color-auf-tiefblau);
+  }
+
+  .anfrage-text a {
+    color: var(--color-auf-tiefblau);
+  }
+
+  .etikette--weiss {
+    color: var(--color-auf-tiefblau);
+  }
+
+  .kontakt {
+    margin-top: var(--space-3);
+  }
+
+  .kontakt-telefon {
+    font-weight: 700;
+  }
+
+  .kontakt a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tippflaeche);
+  }
+
+  /* Formular auf weisser Fläche */
+  .formular {
+    min-width: 0;
+    background-color: var(--color-weiss);
+    color: var(--color-schwarz);
+    padding: var(--space-3);
+  }
+
+  .feld {
+    margin: 0 0 var(--space-3);
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .feld label,
+  .feld legend {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-weight: 700;
+    padding: 0;
+  }
+
+  .hinweis {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-gedaempft);
+  }
+
+  /* Fehlerhinweis: Tiefblau-Fläche mit weisser Schrift, kein Rot. */
+  .fehler {
+    display: none;
+    margin: var(--space-1) 0 0;
+    padding: var(--space-1) var(--space-2);
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .feld:has(:user-invalid) .fehler {
+    display: block;
+  }
+
+  .feld:has(:user-invalid) :is(input, select) {
+    border-color: var(--color-tiefblau);
+    outline: 2px solid var(--color-tiefblau);
+    outline-offset: 0;
+  }
+
+  .optionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--tippflaeche);
+    margin: 0;
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .datenschutz {
+    margin: 0 0 var(--space-3);
+    color: var(--color-text-gedaempft);
+  }
+
+  .datenschutz a {
+    color: var(--color-link);
+  }
+
+  .bestaetigung {
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--color-tiefblau-hell);
+  }
+
+  @media (min-width: 768px) {
+    .anfrage-inhalt {
+      padding-inline: var(--space-3);
+    }
+
+    .formular {
+      padding: var(--space-4);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .anfrage-inhalt {
+      grid-template-columns: 5fr 7fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+/**
+ * Baustein A – Trust-Leiste (Konzept V3 B4).
+ *
+ * Eine Zeile mit fünf Belegen, je ein Linien-Icon (2 px, Ocker) links vom
+ * Text (Lato 16 px, Fast-Schwarz). Auf Mobile zwei Spalten.
+ * Einsatz: unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt
+ * jeder Unterseite.
+ *
+ * Parameter:
+ *   belege  Liste { icon, text }; Standard sind die fünf Belege aus B4
+ */
+import Icon, { type IconName } from './Icon.astro';
+
+interface Beleg {
+  icon: IconName;
+  text: string;
+}
+
+interface Props {
+  belege?: Beleg[];
+}
+
+const standard: Beleg[] = [
+  { icon: 'shield-check', text: 'Kantonal bewilligte Spitex-Organisation' },
+  { icon: 'hand-heart', text: 'Nicht gewinnorientierter Verein' },
+  { icon: 'file-check', text: 'Abrechnung über die Krankenversicherung' },
+  { icon: 'map-pin', text: 'Tätig im ganzen Kanton Zug' },
+  { icon: 'clock', text: 'Antwort innert 24 Stunden an Werktagen' },
+];
+
+const { belege = standard } = Astro.props;
+---
+
+<div class="trust">
+  <ul class="trust-liste text-trust">
+    {
+      belege.map((b) => (
+        <li class="beleg">
+          <span class="beleg-icon">
+            <Icon name={b.icon} />
+          </span>
+          <span>{b.text}</span>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .trust {
+    background-color: var(--color-weiss);
+    border-top: 1px solid var(--color-linie);
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .trust-liste {
+    max-width: var(--breite-inhalt);
+    margin: 0 auto;
+    padding: var(--space-4) var(--space-2);
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .beleg {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    min-width: 0;
+    hyphens: auto;
+    overflow-wrap: break-word;
+  }
+
+  .beleg-icon {
+    flex: none;
+    display: inline-flex;
+    color: var(--color-ocker);
+  }
+
+  @media (min-width: 768px) {
+    .trust-liste {
+      padding-inline: var(--space-3);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .trust-liste {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+</style>
