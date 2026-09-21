@@ -1,0 +1,59 @@
+# Projektregeln: Website Pflegeunion Schweiz
+
+Diese Regeln gelten für alle Arbeiten in diesem Repository. Sie sind verbindlich,
+solange sie nicht ausdrücklich geändert werden.
+
+## Technik
+
+- Statische Website mit **Astro** (aktuell Version 7), Ausgabe nach `dist`.
+- Deploy über **Netlify**: Build-Befehl `npm run build`, Publish-Verzeichnis `dist`.
+- **Kein JavaScript** im Browser. Keine Client-Komponenten, keine Inline-Skripte,
+  keine `<script>`-Tags.
+- **Kein Tracking**, keine Analytics, keine externen Skripte, keine externen
+  Stylesheets, keine Einbettungen von Drittanbietern.
+- **Keine Cookies** und keine vergleichbare Speicherung im Browser.
+- Alle Ressourcen liegen im Repository und werden von der eigenen Domain
+  ausgeliefert.
+
+## Schrift
+
+- Schriftfamilie **Lato** in den Schnitten **Regular (400)** und **Bold (700)**.
+- Die Schriftdateien liegen als lokale Webfonts unter `public/fonts/`
+  (WOFF2) und werden über `@font-face` in `src/styles/global.css` eingebunden.
+- Die Schrift wird **nie** von Google-Servern oder einem anderen externen CDN
+  geladen.
+- Lato steht unter der SIL Open Font License 1.1, siehe
+  `public/fonts/LICENSE.txt`.
+
+## Gestaltung
+
+- Textfarbe: `#1B1B19`
+- Hintergrund: Weiss (`#FFFFFF`)
+- Tiefblau für Kopfzeile und Akzente: `#1E3F6E`
+- **Keine Schatten** (kein `box-shadow`, kein `text-shadow`).
+- **Keine abgerundeten Ecken.** Einzige Ausnahme: **4 px** bei Buttons.
+- Ruhige, sachliche Gestaltung ohne Effekte und ohne Animationen.
+
+## Sprache
+
+- Deutsch in **Schweizer Rechtschreibung**: immer `ss` statt `ß`.
+- **Keine Ausrufezeichen.**
+- Sachlicher, ruhiger Ton.
+
+## Struktur
+
+```
+public/fonts/        lokale Lato-Dateien (WOFF2) und Lizenz
+src/layouts/         Layouts, z. B. Basis.astro
+src/pages/           Seiten, eine Datei pro Seite
+src/styles/          global.css mit Farben, Schrift und Grundlayout
+astro.config.mjs     Astro-Konfiguration
+netlify.toml         Build- und Deploy-Einstellungen für Netlify
+```
+
+## Arbeitsweise
+
+- Änderungen auf einem eigenen Branch entwickeln und als Pull Request einreichen.
+- Vor dem Commit `npm run build` ausführen und sicherstellen, dass der Build
+  fehlerfrei durchläuft.
+- Keine zusätzlichen Abhängigkeiten ohne Absprache.

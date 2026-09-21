@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  titel: string;
+  beschreibung?: string;
+}
+
+const { titel, beschreibung } = Astro.props;
+---
+
+<!doctype html>
+<html lang="de-CH">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titel}</title>
+    {beschreibung && <meta name="description" content={beschreibung} />}
+    <link
+      rel="preload"
+      href="/fonts/lato-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/lato-latin-700-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body>
+    <header class="kopfzeile">
+      <div class="inhalt">
+        <h1>Pflegeunion Schweiz</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="inhalt">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="fusszeile">
+      <div class="inhalt">
+        <p>&copy; 2026 Verein Pflegeunion Schweiz</p>
+      </div>
+    </footer>
+  </body>
+</html>
