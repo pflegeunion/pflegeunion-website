@@ -31,12 +31,23 @@ Die Logo-Dateien liegen als SVG unter `public/logos/`:
 
 - `logo-horizontal-de.svg`, `logo-horizontal-fr.svg`, `logo-horizontal-it.svg`
   horizontales Logo mit Schriftzug, farbig, je Sprache
-- `logo-horizontal-negativ.svg` horizontales Logo für dunkle Flächen
+- `logo-horizontal-negativ.svg` horizontales Logo für dunkle Flächen, mit
+  deutschem Schriftzug. Für Französisch und Italienisch gibt es bisher keine
+  Negativ-Variante.
 - `bildzeichen-farbig.svg` Bildzeichen allein, farbig
 - `bildzeichen-negativ.svg` Bildzeichen allein für dunkle Flächen
 
 Logo-Farben: Tiefblau `#1E3F6E` und Ocker `#C8963C`, die Negativ-Varianten
 zusätzlich Weiss.
+
+Aus `bildzeichen-farbig.svg` erzeugt und in `src/layouts/Basis.astro` im
+Seitenkopf eingebunden:
+
+- `public/favicon-32.png` Favicon, 32 px, transparenter Hintergrund
+- `public/apple-touch-icon.png` Apple-Touch-Icon, 180 px, weisse Fläche, weil
+  iOS transparente Icons sonst auf Schwarz setzt
+
+Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 
 ### Einsatz
 
@@ -73,6 +84,8 @@ zusätzlich Weiss.
 
 ```
 public/fonts/        lokale Lato-Dateien (WOFF2) und Lizenz
+public/logos/        Logo-Dateien (SVG)
+public/              favicon-32.png und apple-touch-icon.png
 src/layouts/         Layouts, z. B. Basis.astro
 src/pages/           Seiten, eine Datei pro Seite
 src/styles/          global.css mit Farben, Schrift und Grundlayout
