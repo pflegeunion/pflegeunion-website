@@ -1,3 +1,15 @@
+/*
+ * Grundlayout der Webseite.
+ *
+ * Farben, Schriftfamilien, Abstände, Radien und Textstile kommen aus
+ * src/styles/tokens.css, die aus design/tokens.json erzeugt wird.
+ * Hier stehen nur die Einbindung der Schriften, das Grundlayout und die
+ * dokumentierten Web-Anpassungen gemäss Webseitenkonzept V3.0, Teil B5.
+ * Keine Hex-Werte, keine freien Pixelabstände.
+ */
+
+@import './tokens.css';
+
 /* Lato als lokale Webfont-Dateien, keine Verbindung zu Google-Servern. */
 @font-face {
   font-family: 'Lato';
@@ -43,12 +55,128 @@
     U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/*
+ * Playfair Display Bold als lokale Webfont-Dateien, nur für .text-display
+ * und .text-h1 (oberste Titelebene). Lizenz: public/fonts/LICENSE-playfair-display.txt
+ */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/playfair-display-latin-700-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/playfair-display-latin-ext-700-normal.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/*
+ * =====================================================================
+ * Web-Anpassungen gegenüber design/tokens.json
+ * gemäss Webseitenkonzept V3.0, Teil B5 (Zielgruppe über 50).
+ *
+ * Diese Werte überschreiben bewusst und nur für die Webseite die
+ * Textstile aus tokens.css. Alle übrigen Werte kommen unverändert aus
+ * den Tokens. Zeilenabstände der vergrösserten Titel folgen dem
+ * 8-px-Raster.
+ * =====================================================================
+ */
+
+/* Seitentitel: 56 px auf der Startseite, 40 px auf Unterseiten.
+   Überschriften ohne Klasse erhalten denselben Stil (h1, h2, h3, body). */
+h1,
+.text-h1 {
+  font-size: 56px;
+  line-height: 64px;
+}
+
+.text-h1--sub {
+  font-size: 40px;
+  line-height: 48px;
+}
+
+h2,
+.text-h2 {
+  font-size: 32px;
+  line-height: 40px;
+}
+
+h3,
+.text-h3 {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+body,
+.text-body {
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.text-small {
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.text-label {
+  font-size: 13px;
+}
+
+/* Rechner-Zahl: Lato Bold 48 px, Tiefblau. */
+.text-result {
+  font-family: var(--font-sans);
+  font-size: 48px;
+  line-height: 56px;
+  font-weight: 700;
+  color: var(--color-tiefblau);
+}
+
+/* Schrittzahlen: Lato Bold 40 px, Ocker (Ocker nur ab 24 px, nie als Fliesstext). */
+.text-step {
+  font-family: var(--font-sans);
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 700;
+  color: var(--color-ocker);
+}
+
+/* Buttons: Lato Bold 17 px, Höhe 52 px, Innenabstand 14/28 px, Radius --radius-sm. */
+button,
+.button {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 24px;
+  font-weight: 700;
+  min-height: 52px;
+  padding: 14px 28px;
+  border: 1px solid var(--color-tiefblau);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-tiefblau);
+  color: var(--color-auf-tiefblau);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
+
+/*
+ * Grundlayout. Alle Werte aus tokens.css; die Inhaltsbreite ist eine
+ * Layoutgrösse der Webseite und kein Design-Token.
+ */
 :root {
-  --farbe-tiefblau: #1e3f6e;
-  --farbe-text: #1b1b19;
-  --farbe-hintergrund: #ffffff;
   --breite-inhalt: 64rem;
-  --abstand-seitlich: 1.5rem;
 }
 
 *,
@@ -58,11 +186,8 @@
 }
 
 html {
-  font-family: 'Lato', system-ui, sans-serif;
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--farbe-text);
-  background-color: var(--farbe-hintergrund);
+  color: var(--color-schwarz);
+  background-color: var(--color-weiss);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -71,18 +196,30 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
+  font-family: var(--font-sans);
+  font-weight: 400;
+}
+
+/* Überschriften ohne Klasse: Schriftfamilie und Gewicht wie .text-h1 bis .text-h3. */
+h1 {
+  font-family: var(--font-serif);
+}
+
+h2,
+h3 {
+  font-family: var(--font-sans);
 }
 
 h1,
 h2,
 h3 {
+  margin: 0 0 var(--space-2);
   font-weight: 700;
-  line-height: 1.25;
-  margin: 0 0 1rem;
+  color: var(--color-tiefblau);
 }
 
 p {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-2);
 }
 
 p:last-child {
@@ -90,51 +227,39 @@ p:last-child {
 }
 
 a {
-  color: var(--farbe-tiefblau);
+  color: var(--color-link);
+  text-decoration: underline;
 }
 
 .inhalt {
   width: 100%;
   max-width: var(--breite-inhalt);
   margin: 0 auto;
-  padding-inline: var(--abstand-seitlich);
+  padding-inline: var(--space-3);
 }
 
 .kopfzeile {
-  background-color: var(--farbe-tiefblau);
-  color: var(--farbe-hintergrund);
-  padding-block: 2rem;
+  background-color: var(--color-tiefblau);
+  color: var(--color-auf-tiefblau);
+  padding-block: var(--space-4);
 }
 
 .kopfzeile h1 {
   margin: 0;
-  font-size: 1.75rem;
-  letter-spacing: 0.01em;
+  color: var(--color-auf-tiefblau);
 }
 
 main {
   flex: 1;
-  padding-block: 3rem;
+  padding-block: var(--space-6);
 }
 
-.abschnitt h2 {
-  font-size: 1.375rem;
+.abschnitt + .abschnitt {
+  margin-top: var(--space-4);
 }
 
 .fusszeile {
-  border-top: 1px solid var(--farbe-tiefblau);
-  padding-block: 1.5rem;
-  font-size: 0.875rem;
-}
-
-/* Einzige Ausnahme von eckigen Kanten: 4 px bei Buttons. */
-button,
-.button {
-  font: inherit;
-  border: 1px solid var(--farbe-tiefblau);
-  border-radius: 4px;
-  background-color: var(--farbe-tiefblau);
-  color: var(--farbe-hintergrund);
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+  border-top: 1px solid var(--color-linie);
+  padding-block: var(--space-3);
+  color: var(--color-text-gedaempft);
 }

@@ -1,0 +1,108 @@
+/*
+ * AUTOMATISCH ERZEUGT aus design/tokens.json durch scripts/build-tokens.mjs.
+ * Nicht von Hand bearbeiten. Werte nur in design/tokens.json ändern.
+ * Design-System «Pflegeunion Schweiz», Version 1.
+ */
+
+:root {
+  /* Farben (Hell-Thema) */
+  --color-tiefblau: #1e3f6e;
+  --color-ocker: #c8963c;
+  --color-schwarz: #1b1b19;
+  --color-warmgrau: #f1f1ee;
+  --color-weiss: #ffffff;
+  --color-tiefblau-hell: #e6ecf4;
+  --color-ocker-hell: #f8efdd;
+  --color-text-gedaempft: #5c5c58;
+  --color-linie: #d8d8d3;
+  --color-auf-tiefblau: #ffffff;
+  --color-link: var(--color-tiefblau);
+
+  /* Schriftfamilien */
+  --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-sans: Lato, "Helvetica Neue", Arial, sans-serif;
+
+  /* Abstände: 8-px-Raster. Print: 1 Schritt = 2 mm. */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* Radien: Fast eckig. Die Rundung gehört dem Bildzeichen – Flächen bleiben ruhig. */
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-full: 9999px;
+}
+
+/* Titel – Playfair Display: Nur für die oberste Titelebene. Ab 14 pt abwärts wird die Serifenschrift dünn – dann Lato Bold. */
+
+/* Plakat, Flyer-Titelseite, Website-Hero. */
+.text-display {
+  font-family: var(--font-serif);
+  font-size: 56px;
+  line-height: 60px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Seitentitel, Factsheet-Titel, Kapitel. */
+.text-h1 {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 700;
+}
+
+/* Text – Lato: Alles unterhalb des Titels: Zwischentitel, Fliesstext, Tabellen, Legenden. */
+
+/* Abschnittstitel, in tiefblau. */
+.text-h2 {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 700;
+}
+
+/* Unterabschnitte, Kastenüberschriften. */
+.text-h3 {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
+/* Einleitungsabsatz, erster Absatz eines Flyers. */
+.text-lead {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 400;
+}
+
+/* Fliesstext. Print: 10–11 pt. */
+.text-body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+/* Kontaktzeilen, Tabellen, Fussnoten. Print: 8.5–9 pt. */
+.text-small {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+/* Kategorie-Etiketten, Kolumnentitel, in ocker oder tiefblau. */
+.text-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
