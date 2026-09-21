@@ -1,63 +1,62 @@
 ---
 /**
- * Baustein F – Lohnrechner, Vorstufe (Konzept V3 C1 Abschnitt 2, D1).
+ * Baustein F – Lohnrechner (Konzept V3 C1 Abschnitt 2, D1).
  *
- * Warmgrau-Fläche mit Übertitel, H2 und Einleitung. Anstelle des Rechners
- * steht vorerst die Fallback-Tabelle aus D1 (Stunden pro Tag · Monat mit
- * Pflegehelferkurs · Monat Einstieg), darunter Fussnote und Buttons.
+ * Warmgrau-Fläche mit Übertitel, H2 und Einleitung, darunter der Rechner auf
+ * weisser Fläche: links die Eingaben (Radio-Gruppen mit sichtbaren Labels),
+ * rechts das Ergebnis als Live-Region; auf Mobile untereinander.
  *
- * Die Tabelle bleibt auch später der Fallback ohne JavaScript: Das
- * Rechner-Skript (eigener Pull Request) blendet `[data-rechner-fallback]`
- * aus und rendert seine Oberfläche in `[data-rechner]`. Die Stundensätze
- * stehen an einer Stelle (unten) und werden per Rechenlogik aus D1 in die
- * Tabelle gerechnet; die Kontrollwerte aus D1 werden beim Build geprüft.
+ * Ohne JavaScript zeigt die Seite die Fallback-Tabelle aus D1 (Stunden pro
+ * Tag · Monat mit Pflegehelferkurs · Monat Einstieg) mit Fussnote und
+ * Buttons. Das Skript src/scripts/lohnrechner.js blendet
+ * `[data-rechner-fallback]` aus und `[data-rechner-ui]` ein.
+ *
+ * Sätze, Tage, Stundenstufen und Postleitzahlen stehen ausschliesslich im
+ * Konfigurationsblock des Skripts (KONFIG); die Fallback-Tabelle wird beim
+ * Build aus derselben Rechenlogik erzeugt und gegen die Kontrollwerte aus D1
+ * geprüft.
  *
  * Parameter:
- *   anker  id des Abschnitts (Standard 'lohnrechner')
+ *   anker         id des Abschnitts (Standard 'lohnrechner')
+ *   vollstaendig  Vollständige Fassung für die Lohnrechner-Seite (Standard
+ *                 false): zusätzlich Frage 3 (Postleitzahl, freiwillig) mit
+ *                 den Meldungen aus D1 und der Sekundär-Button «Ergebnis per
+ *                 E-Mail erhalten» (vorerst ohne Funktion, folgt mit dem
+ *                 Formularversand); der Sekundär-Button «Alle Details zum
+ *                 Lohn» entfällt dort.
  */
+import Hinweiskasten from './Hinweiskasten.astro';
+import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
+
 interface Props {
   anker?: string;
+  vollstaendig?: boolean;
 }
 
-const { anker = 'lohnrechner' } = Astro.props;
+const { anker = 'lohnrechner', vollstaendig = false } = Astro.props;
 
-// Stundensätze (GL-Entscheid, Konzept D1). Beide an dieser Stelle konfigurierbar.
-const SATZ_MIT_KURS = 37.95;
-const SATZ_EINSTIEG = 33.95;
-const TAGE_PRO_MONAT = 30.4;
+// Vorbelegung gemäss D1: 2 Stunden, «Nein, noch nicht».
+const vorbelegung = { stunden: '2', kurs: 'nein' };
+const start = ergebnis(stufeFuer(vorbelegung.stunden));
 
-/** Monatslohn brutto: Stunden × 30,4 Tage × Satz, kaufmännisch auf CHF 10.– gerundet. */
-function monatslohn(stunden: number, satz: number): number {
-  return Math.round((stunden * TAGE_PRO_MONAT * satz) / 10) * 10;
-}
-
-/** Anzeige mit Apostroph als Tausendertrennzeichen und «.–», z. B. CHF 2'310.– */
-function chf(betrag: number): string {
-  const ziffern = String(betrag).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
-  return `CHF ${ziffern}.–`;
-}
-
-const zeilen = [
-  { text: '1 Stunde', stunden: 1, mehr: false },
-  { text: '1½ Stunden', stunden: 1.5, mehr: false },
-  { text: '2 Stunden', stunden: 2, mehr: false },
-  { text: '2½ Stunden', stunden: 2.5, mehr: false },
-  { text: '3 Stunden', stunden: 3, mehr: false },
-  { text: 'mehr als 3 Stunden', stunden: 3, mehr: true },
-].map((z) => ({
-  text: z.text,
-  mitKurs: `${z.mehr ? 'über' : 'rund'} ${chf(monatslohn(z.stunden, SATZ_MIT_KURS))}`,
-  einstieg: `${z.mehr ? 'über' : 'rund'} ${chf(monatslohn(z.stunden, SATZ_EINSTIEG))}`,
-}));
+const zeilen = KONFIG.stufen.map((s) => {
+  const w = ergebnis(s);
+  return {
+    text: s.text,
+    wert: s.wert,
+    mitKurs: chf(w.monatMitKurs, w.mehr),
+    einstieg: chf(w.monatEinstieg, w.mehr),
+  };
+});
 
 // Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)».
 const kontrolle = [
-  ['rund CHF 1\'150.–', 'rund CHF 1\'030.–'],
-  ['rund CHF 1\'730.–', 'rund CHF 1\'550.–'],
-  ['rund CHF 2\'310.–', 'rund CHF 2\'060.–'],
-  ['rund CHF 2\'880.–', 'rund CHF 2\'580.–'],
-  ['rund CHF 3\'460.–', 'rund CHF 3\'100.–'],
-  ['über CHF 3\'460.–', 'über CHF 3\'100.–'],
+  ["rund CHF 1'150.–", "rund CHF 1'030.–"],
+  ["rund CHF 1'730.–", "rund CHF 1'550.–"],
+  ["rund CHF 2'310.–", "rund CHF 2'060.–"],
+  ["rund CHF 2'880.–", "rund CHF 2'580.–"],
+  ["rund CHF 3'460.–", "rund CHF 3'100.–"],
+  ["über CHF 3'460.–", "über CHF 3'100.–"],
 ];
 zeilen.forEach((z, i) => {
   if (z.mitKurs !== kontrolle[i][0] || z.einstieg !== kontrolle[i][1]) {
@@ -66,6 +65,19 @@ zeilen.forEach((z, i) => {
     );
   }
 });
+
+const kursAntworten = [
+  { wert: 'nein', text: 'Nein, noch nicht' },
+  { wert: 'ja', text: 'Ja' },
+];
+
+// Eindeutige Namen und ids je Einsatz der Komponente.
+const id = anker;
+const nameStunden = `${id}-stunden`;
+const nameKurs = `${id}-kurs`;
+
+const satzMitKurs = KONFIG.satzMitKurs.toFixed(2);
+const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
 ---
 
 <section id={anker} class="rechner-abschnitt">
@@ -79,7 +91,8 @@ zeilen.forEach((z, i) => {
       </p>
     </div>
 
-    <div class="rechner" data-rechner>
+    <div class="rechner" data-rechner data-stunden={nameStunden} data-kurs={nameKurs}>
+      <!-- Fallback ohne JavaScript: dieselben Werte als Tabelle (D1). -->
       <div class="fallback" data-rechner-fallback>
         <table>
           <thead>
@@ -101,21 +114,170 @@ zeilen.forEach((z, i) => {
             }
           </tbody>
         </table>
+
+        <p class="fussnote text-small textspalte">
+          Bruttolohn bei CHF {satzMitKurs} (mit Pflegehelferkurs) bzw. CHF {satzEinstieg} (Einstieg) pro Stunde,
+          gerechnet auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson
+          bei Ihnen zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
+        </p>
+
+        <div class="knoepfe">
+          <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
+          {
+            !vollstaendig && (
+              <a class="button button--sekundaer" href="/lohnrechner/">
+                Alle Details zum Lohn
+              </a>
+            )
+          }
+        </div>
       </div>
-    </div>
 
-    <p class="fussnote text-small textspalte">
-      Bruttolohn bei CHF 37.95 (mit Pflegehelferkurs) bzw. CHF 33.95 (Einstieg) pro Stunde, gerechnet
-      auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson bei Ihnen
-      zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
-    </p>
+      <!-- Rechner: wird vom Skript eingeblendet. -->
+      <div class="ui" data-rechner-ui hidden>
+        <div class="eingaben">
+          <fieldset class="frage">
+            <legend>
+              Wie viele Stunden pro Tag helfen Sie bei Körperpflege, Anziehen, Essen, Trinken und
+              Bewegen?
+            </legend>
+            <div class="felder felder--sechs">
+              {
+                zeilen.map((z) => (
+                  <label class="rechner-feld">
+                    <input
+                      type="radio"
+                      name={nameStunden}
+                      value={z.wert}
+                      checked={z.wert === vorbelegung.stunden}
+                    />
+                    <span>{z.text}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <p class="hilfe text-small">
+              Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
+              Gesellschaft zählen hier nicht – dazu weiter unten mehr.
+            </p>
+          </fieldset>
 
-    <div class="knoepfe">
-      <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
-      <a class="button button--sekundaer" href="/lohnrechner/">Alle Details zum Lohn</a>
+          <fieldset class="frage">
+            <legend>Haben Sie einen Pflegehelferkurs abgeschlossen?</legend>
+            <div class="felder felder--zwei">
+              {
+                kursAntworten.map((a) => (
+                  <label class="rechner-feld">
+                    <input
+                      type="radio"
+                      name={nameKurs}
+                      value={a.wert}
+                      checked={a.wert === vorbelegung.kurs}
+                    />
+                    <span>{a.text}</span>
+                  </label>
+                ))
+              }
+            </div>
+            <p class="hilfe text-small">
+              Mit Kurs verdienen Sie CHF {satzMitKurs} pro Stunde. Noch ohne Kurs starten Sie mit
+              CHF {satzEinstieg} und holen den Kurs im ersten Jahr nach – wir bezahlen ihn.
+            </p>
+          </fieldset>
+
+          {
+            vollstaendig && (
+              <div class="frage frage--plz">
+                <label for={`${id}-plz`}>
+                  Postleitzahl der gepflegten Person (freiwillig – wir prüfen, ob wir bei Ihnen im
+                  Einsatz sind)
+                </label>
+                <input
+                  type="text"
+                  id={`${id}-plz`}
+                  inputmode="numeric"
+                  autocomplete="postal-code"
+                  pattern="[0-9]{4}"
+                  maxlength="4"
+                  data-plz
+                />
+              </div>
+            )
+          }
+        </div>
+
+        <div class="ergebnis" aria-live="polite">
+          <p class="text-label etikette">IHRE SCHÄTZUNG</p>
+          <p class="ergebnis-titel" data-titel>Ihr Lohn nach dem Pflegehelferkurs, den wir bezahlen</p>
+          <p class="text-result zahl" aria-hidden="true">
+            <span class="text-result-einheit" data-praefix>rund</span>{' '}
+            <span class="text-result-einheit">CHF</span>{' '}
+            <span data-monat>{ziffern(start.monatMitKurs)}</span><span class="text-result-einheit">.–</span>
+          </p>
+          <p class="visually-hidden" data-vorlesen></p>
+          <p class="zeile-1">brutto pro Monat</p>
+          <p>
+            Das sind <span data-jahr>{chf(start.jahrMitKurs, start.mehr)}</span> pro Jahr – versichert mit AHV,
+            Pensionskasse und Unfallversicherung.
+          </p>
+          <p data-zeile3>
+            Bis zum Kursabschluss im ersten Jahr: <span data-einstieg>{chf(start.monatEinstieg, start.mehr)}</span> pro
+            Monat.
+          </p>
+
+          <div class="zusatz" data-mehr hidden>
+            <Hinweiskasten etikette="WICHTIG" titel="Die Krankenversicherung vergütet die Grundpflege">
+              <p>
+                Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um
+                die Uhr. Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im
+                Gespräch zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
+                Hilflosenentschädigung, Ergänzungsleistungen.
+              </p>
+            </Hinweiskasten>
+          </div>
+
+          {
+            vollstaendig && (
+              <>
+                <p class="plz-meldung" data-plz-innerhalb hidden>
+                  Wir sind bei Ihnen im Einsatz.
+                </p>
+                <p class="plz-meldung" data-plz-ausserhalb hidden>
+                  Ehrlich gesagt: An diesem Ort sind wir noch nicht im Einsatz. Lassen Sie uns Ihre
+                  Kontaktdaten da – wir melden uns, sobald wir Ihre Region erschliessen, und nennen
+                  Ihnen auf Wunsch eine Anlaufstelle in Ihrer Nähe.
+                </p>
+              </>
+            )
+          }
+
+          <p class="fussnote text-small">
+            Bruttolohn bei CHF {satzMitKurs} (mit Pflegehelferkurs) bzw. CHF {satzEinstieg} (Einstieg) pro Stunde,
+            gerechnet auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson
+            bei Ihnen zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
+          </p>
+
+          <div class="knoepfe">
+            <a class="button" href="#kontakt" data-erstgespraech>Erstgespräch vereinbaren</a>
+            {
+              vollstaendig ? (
+                <button type="button" class="button button--sekundaer" data-email>
+                  Ergebnis per E-Mail erhalten
+                </button>
+              ) : (
+                <a class="button button--sekundaer" href="/lohnrechner/">
+                  Alle Details zum Lohn
+                </a>
+              )
+            }
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
+
+<script src="../scripts/lohnrechner.js"></script>
 
 <style>
   .rechner-abschnitt {
@@ -141,12 +303,11 @@ zeilen.forEach((z, i) => {
     padding: var(--space-3);
   }
 
+  /* Fallback-Tabelle ohne JavaScript */
   .fallback {
     overflow-x: auto;
   }
 
-  /* Auf schmalen Geräten dürfen Zellen umbrechen und Wörter trennen,
-     damit die drei Spalten ohne Querscrollen Platz finden. */
   .fallback th,
   .fallback td {
     hyphens: auto;
@@ -162,6 +323,129 @@ zeilen.forEach((z, i) => {
     .fallback td {
       padding: var(--space-1);
     }
+  }
+
+  .fallback .fussnote {
+    margin: var(--space-3) 0 var(--space-4);
+  }
+
+  /* Rechner: Eingaben und Ergebnis, auf Mobile untereinander */
+  .ui {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  /* hidden gilt auch für die Grid-Fläche (ohne JavaScript bleibt der Rechner versteckt). */
+  .ui[hidden] {
+    display: none;
+  }
+
+  .frage {
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .frage:last-child {
+    margin-bottom: 0;
+  }
+
+  .frage legend,
+  .frage--plz label {
+    display: block;
+    padding: 0;
+    margin-bottom: var(--space-2);
+    font-weight: 700;
+  }
+
+  /* Auswahlfelder: eckig, 1-px-Rahmen linie, mindestens 56 px hoch;
+     Mobile drei mal zwei, Desktop sechs nebeneinander. */
+  .felder {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .felder--sechs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .felder--zwei {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rechner-feld {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--tippflaeche-gross);
+    padding: var(--space-1);
+    border: 1px solid var(--color-linie);
+    background-color: var(--color-weiss);
+    color: var(--color-schwarz);
+    text-align: center;
+    font-weight: 700;
+    cursor: pointer;
+    hyphens: auto;
+  }
+
+  /* Der Radio-Button bleibt fokussierbar, sichtbar ist das Feld selbst. */
+  .rechner-feld input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+  }
+
+  .rechner-feld:has(input:checked) {
+    background-color: var(--color-tiefblau);
+    border-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .rechner-feld:has(input:focus-visible) {
+    outline: 2px solid var(--color-tiefblau);
+    outline-offset: 2px;
+  }
+
+  .hilfe {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-gedaempft);
+  }
+
+  .frage--plz input {
+    max-width: calc(var(--space-8) * 2);
+  }
+
+  /* Ergebnis */
+  .ergebnis {
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .ergebnis-titel {
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+  }
+
+  .zahl {
+    margin: 0;
+  }
+
+  .zeile-1 {
+    margin-bottom: var(--space-2);
+  }
+
+  .zusatz,
+  .plz-meldung {
+    margin: var(--space-3) 0;
+  }
+
+  .plz-meldung {
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--color-tiefblau-hell);
   }
 
   .fussnote {
@@ -192,6 +476,25 @@ zeilen.forEach((z, i) => {
 
     .rechner {
       padding: var(--space-4);
+    }
+
+    .felder--sechs {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .ui {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .ergebnis {
+      padding-top: 0;
+      padding-left: var(--space-6);
+      border-top: 0;
+      border-left: 1px solid var(--color-linie);
     }
   }
 </style>
