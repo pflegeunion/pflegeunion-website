@@ -172,6 +172,11 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   Verläufe** (kein `gradient`).
 - **Keine Rundungen** ausser 4 px (`--radius-sm`) bei Buttons und
   Eingabefeldern.
+- Radio-Buttons sind kreisförmig (24 px, Rahmen text-gedaempft, ausgewählt
+  Rahmen und Punkt Tiefblau) – die einzige Rundung ausser 4 px bei Buttons
+  und Feldern und dem Ring; damit sie von Checkboxen unterscheidbar sind.
+  Kommt eine Checkbox dazu: eckig, 4 px Radius, Rahmen text-gedaempft,
+  ausgewählt Tiefblau.
 - **Kein Rot.** Fehlerhinweise in Formularen als Tiefblau-Fläche mit weisser
   Schrift.
 - Ruhige, sachliche Gestaltung ohne Effekte. Keine Karussells, keine
@@ -180,7 +185,10 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   beides mit `prefers-reduced-motion`.
 - Alle interaktiven Elemente mit sichtbarem Fokusring 2 px Tiefblau
   (`:focus-visible` in `global.css`) und Tippflächen von mindestens 44 px
-  (`--tippflaeche`).
+  (`--tippflaeche`). Auf Tiefblau-Flächen ist der Fokusring 2 px
+  `--color-auf-tiefblau` (Entscheid GL 22.09.2026): zentral über die Klasse
+  `.flaeche-tiefblau` in `global.css`, die jede Tiefblau-Fläche mit
+  fokussierbaren Elementen trägt (Anfrage-Abschnitt links, Fusszeile).
 
 ## Design-Tokens
 
@@ -245,7 +253,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
-| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
+| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter; der Ring überdeckt auf keiner Breite Text, Telefonzeile oder Buttons (unter 1024 px beginnt er unter dem Textblock) | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Hero: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): Warmgrau mit Haarlinie, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
 | `Schritte.astro` | Nummerierte Schritte mit Zahl in `.text-step` (Tiefblau), Titel, Text; schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
