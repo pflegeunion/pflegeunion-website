@@ -49,14 +49,15 @@ const zeilen = KONFIG.stufen.map((s) => {
   };
 });
 
-// Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)».
+// Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)»,
+// Fassung V3.1 mit 26 Tagen pro Monat (Entscheid GL 22.09.2026, Art. 20 ArG).
 const kontrolle = [
-  ["rund CHF 1'150.–", "rund CHF 1'030.–"],
-  ["rund CHF 1'730.–", "rund CHF 1'550.–"],
-  ["rund CHF 2'310.–", "rund CHF 2'060.–"],
-  ["rund CHF 2'880.–", "rund CHF 2'580.–"],
-  ["rund CHF 3'460.–", "rund CHF 3'100.–"],
-  ["über CHF 3'460.–", "über CHF 3'100.–"],
+  ["rund CHF 990.–", "rund CHF 880.–"],
+  ["rund CHF 1'480.–", "rund CHF 1'320.–"],
+  ["rund CHF 1'970.–", "rund CHF 1'770.–"],
+  ["rund CHF 2'470.–", "rund CHF 2'210.–"],
+  ["rund CHF 2'960.–", "rund CHF 2'650.–"],
+  ["über CHF 2'960.–", "über CHF 2'650.–"],
 ];
 zeilen.forEach((z, i) => {
   if (z.mitKurs !== kontrolle[i][0] || z.einstieg !== kontrolle[i][1]) {
@@ -78,6 +79,14 @@ const nameKurs = `${id}-kurs`;
 
 const satzMitKurs = KONFIG.satzMitKurs.toFixed(2);
 const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
+
+// Fussnote wörtlich aus D1 (Fassung V3.1): sechs Einsatztage pro Woche.
+const fussnote =
+  `Bruttolohn bei CHF ${satzMitKurs} (mit Pflegehelferkurs) bzw. CHF ${satzEinstieg} (Einstieg) pro Stunde, ` +
+  `gerechnet auf sechs Einsatztage pro Woche (${KONFIG.tageProMonat} Tage pro Monat). Ein freier Tag pro Woche ` +
+  'ist gesetzlich vorgeschrieben; die Pflege an diesem Tag stellen wir über die Vertretung sicher. ' +
+  'Massgebend ist der Pflegebedarf, den unsere Pflegefachperson bei Ihnen zu Hause erfasst. ' +
+  'Der definitive Lohn steht in Ihrem Arbeitsvertrag.';
 ---
 
 <section id={anker} class="rechner-abschnitt">
@@ -115,11 +124,7 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
           </tbody>
         </table>
 
-        <p class="fussnote text-small textspalte">
-          Bruttolohn bei CHF {satzMitKurs} (mit Pflegehelferkurs) bzw. CHF {satzEinstieg} (Einstieg) pro Stunde,
-          gerechnet auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson
-          bei Ihnen zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
-        </p>
+        <p class="fussnote text-small textspalte">{fussnote}</p>
 
         <div class="knoepfe">
           <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
@@ -251,11 +256,7 @@ const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
             )
           }
 
-          <p class="fussnote text-small">
-            Bruttolohn bei CHF {satzMitKurs} (mit Pflegehelferkurs) bzw. CHF {satzEinstieg} (Einstieg) pro Stunde,
-            gerechnet auf 30,4 Tage pro Monat. Massgebend ist der Pflegebedarf, den unsere Pflegefachperson
-            bei Ihnen zu Hause erfasst. Der definitive Lohn steht in Ihrem Arbeitsvertrag.
-          </p>
+          <p class="fussnote text-small">{fussnote}</p>
 
           <div class="knoepfe">
             <a class="button" href="#kontakt" data-erstgespraech>Erstgespräch vereinbaren</a>

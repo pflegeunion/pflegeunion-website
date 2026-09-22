@@ -11,8 +11,10 @@
 export const KONFIG = {
   satzMitKurs: 37.95,
   satzEinstieg: 33.95,
-  tageProMonat: 30.4,
-  tageProJahr: 365,
+  // Sechs Einsatztage pro Woche: ein freier Tag pro Woche ist gesetzlich
+  // vorgeschrieben (Entscheid GL 22.09.2026, Art. 20 ArG).
+  tageProMonat: 26,
+  tageProJahr: 312,
   // Stundenstufen; «mehr als 3» rechnet mit 3 und weist «über» aus.
   stufen: [
     { wert: '1', text: '1 Stunde', stunden: 1 },
@@ -50,22 +52,22 @@ function rundeAuf(betrag, schritt) {
   return Math.round(betrag / schritt) * schritt;
 }
 
-/** Monatslohn brutto: Stunden × 30,4 Tage × Satz, kaufmännisch auf CHF 10.– gerundet. */
+/** Monatslohn brutto: Stunden × 26 Tage × Satz, kaufmännisch auf CHF 10.– gerundet. */
 export function monatslohn(stunden, satz) {
   return rundeAuf(stunden * KONFIG.tageProMonat * satz, 10);
 }
 
-/** Jahreslohn brutto: Stunden × 365 Tage × Satz, kaufmännisch auf CHF 100.– gerundet. */
+/** Jahreslohn brutto: Stunden × 312 Tage × Satz, kaufmännisch auf CHF 100.– gerundet. */
 export function jahreslohn(stunden, satz) {
   return rundeAuf(stunden * KONFIG.tageProJahr * satz, 100);
 }
 
-/** Ziffern mit Apostroph als Tausendertrennzeichen: 2310 → 2'310 */
+/** Ziffern mit Apostroph als Tausendertrennzeichen: 1970 → 1'970 */
 export function ziffern(betrag) {
   return String(Math.round(betrag)).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 }
 
-/** Anzeige: rund CHF 2'310.– bzw. über CHF 3'460.– */
+/** Anzeige: rund CHF 1'970.– bzw. über CHF 2'960.– */
 export function chf(betrag, mehr) {
   return (mehr ? 'über' : 'rund') + ' CHF ' + ziffern(betrag) + '.–';
 }

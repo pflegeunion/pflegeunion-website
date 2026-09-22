@@ -182,6 +182,40 @@ direkt eingetragen.
 - Das Anfrageformular hat noch kein Versandziel; Versand, Eingangsbestätigung
   und Zeitprüfung folgen in einem eigenen Pull Request. Damit kommt auch die
   Funktion des Buttons «Ergebnis per E-Mail erhalten» im Lohnrechner.
+- **Der Lohnrechner rechnet mit 26 Tagen pro Monat und 312 Tagen pro Jahr**
+  (sechs Einsatztage pro Woche; Entscheid GL 22.09.2026, Art. 20 ArG). Die
+  Werte 30,4 und 365 sind verboten – im Rechner, in der Fallback-Tabelle, in
+  Lohnbeispielen und in allen Texten. Referenztabelle: Nachtrag vom
+  22.09.2026, eingearbeitet in Webseitenkonzept V3.1, Teil D1:
+
+  | Auswahl | Monat, mit Kurs | Jahr, mit Kurs | Monat, Einstieg | Jahr, Einstieg |
+  | --- | --- | --- | --- | --- |
+  | 1 Stunde | rund CHF 990.– | rund CHF 11'800.– | rund CHF 880.– | rund CHF 10'600.– |
+  | 1½ Stunden | rund CHF 1'480.– | rund CHF 17'800.– | rund CHF 1'320.– | rund CHF 15'900.– |
+  | 2 Stunden | rund CHF 1'970.– | rund CHF 23'700.– | rund CHF 1'770.– | rund CHF 21'200.– |
+  | 2½ Stunden | rund CHF 2'470.– | rund CHF 29'600.– | rund CHF 2'210.– | rund CHF 26'500.– |
+  | 3 Stunden | rund CHF 2'960.– | rund CHF 35'500.– | rund CHF 2'650.– | rund CHF 31'800.– |
+  | mehr als 3 Stunden | über CHF 2'960.– | über CHF 35'500.– | über CHF 2'650.– | über CHF 31'800.– |
+
+- Die Lohnrechner-Seite `/lohnrechner/` (Konzept C2) besteht noch nicht.
+  Beim Bau der Seite werden diese Inhalte aus dem Nachtrag vom 22.09.2026
+  übernommen:
+  - Tabelle «Drei Beispiele aus dem Alltag» mit den Werten rund CHF 990.– /
+    880.– (ca. 1 Stunde pro Tag), rund CHF 1'970.– / 1'770.– (ca. 2 Stunden)
+    und rund CHF 2'960.– / 2'650.– (ca. 3 Stunden), je mit Kurs / Einstieg.
+  - Fussnote unter der Tabelle: «* Richtwerte bei CHF 37.95 (mit Kurs) bzw.
+    CHF 33.95 (Einstieg) pro Stunde, gerechnet auf sechs Einsatztage pro
+    Woche (26 Tage pro Monat) und auf zehn Franken gerundet. Massgebend ist
+    die individuelle Abklärung; der definitive Lohn steht in Ihrem
+    Arbeitsvertrag.»
+  - In der Lohn-FAQ nach Frage 4 als neue Frage 5 (die bisherige Frage 5
+    «Wann steht mein Lohn definitiv fest?» wird Frage 6): «Ich pflege jeden
+    Tag. Warum rechnet der Lohnrechner mit sechs Tagen pro Woche?» – «Weil
+    das Arbeitsgesetz für jede Anstellung einen freien Tag pro Woche
+    vorschreibt – auch für Sie. An diesem Tag übernimmt unsere Vertretung
+    die Grundpflege, damit die gepflegte Person versorgt bleibt und Sie eine
+    echte Pause haben. Bezahlt werden die Tage, an denen Sie selbst
+    pflegen.»
 - Die Postleitzahl-Liste `KONFIG.plzZug` in `src/scripts/lohnrechner.js` ist
   eine **vorläufige Liste** der elf Zuger Gemeinden inklusive Ortsteile, ohne
   6344 Meierskappel (LU); sie ist von der Geschäftsstelle zu prüfen (Konzept
