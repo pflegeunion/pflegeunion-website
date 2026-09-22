@@ -5,7 +5,8 @@
  * Tiefblau-Fläche, weisse Schrift. Links Übertitel, H2, Text, Telefon und
  * E-Mail; rechts das Formular auf weisser Fläche mit sieben Feldern in der
  * Reihenfolge der Tabelle D2 (Pflicht: Anliegen, Name, Telefon, Wohnort).
- * Steht am Ende jeder Seite unter dem Anker #kontakt.
+ * Steht am Ende jeder Seite unter dem Anker #kontakt. Die linke Spalte trägt
+ * .flaeche-tiefblau (Fokusrahmen in --color-auf-tiefblau, global.css).
  *
  * Versand: Das Formular hat noch kein Versandziel; der Versand (Adresse,
  * Eingangsbestätigung, Zeitprüfung des Honeypots) folgt in einem eigenen
@@ -60,7 +61,7 @@ const zeitstempel = new Date().toISOString();
 
 <section id={anker} class="anfrage">
   <div class="anfrage-inhalt">
-    <div class="anfrage-text">
+    <div class="anfrage-text flaeche-tiefblau">
       <p class="text-label etikette etikette--weiss">
         ERSTGESPRÄCH KOSTENLOS · ANTWORT INNERT 24 STUNDEN
       </p>

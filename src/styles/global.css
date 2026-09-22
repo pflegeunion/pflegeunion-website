@@ -370,6 +370,14 @@ h3 {
   outline-offset: 2px;
 }
 
+/* Auf Tiefblau-Flächen 2 px in --color-auf-tiefblau (Entscheid GL
+   22.09.2026, Konzept V3.3 B5). Jede Tiefblau-Fläche mit fokussierbaren
+   Elementen trägt die Klasse .flaeche-tiefblau: Anfrage-Abschnitt links,
+   Fusszeile. */
+.flaeche-tiefblau :focus-visible {
+  outline-color: var(--color-auf-tiefblau);
+}
+
 /* Linien-Icons (Lucide) behalten in jeder Grösse einen 2-px-Strich. */
 .icon * {
   vector-effect: non-scaling-stroke;
