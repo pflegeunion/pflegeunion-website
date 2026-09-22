@@ -1,21 +1,31 @@
 ---
 /**
- * Kopfzeile mit Navigation (Konzept V3 B2) und Utility-Zeile.
+ * Kopfzeile mit Navigation (Konzept V3.1 B2) und Utility-Zeile.
  *
  * Sticky, 72 px Desktop / 60 px Mobile, weisse Fläche mit Haarlinie unten.
  * Logo links (horizontales Logo DE, unter 480 px Breite nur das Bildzeichen),
  * fünf Menüpunkte, Telefon, Primär-Button. Unterhalb von 1360 px ein
  * Burger-Menü; Telefon und Button bleiben ausserhalb des Menüs sichtbar.
  * Die Desktop-Navigation braucht rund 1310 px (Logo, fünf Punkte in 18 px,
- * Telefon, Button), deshalb ist die Kopfzeile bis --breite-kopfzeile breit
- * und die Utility-Zeile erscheint ab 1024 px.
+ * Telefon, Button), deshalb ist die Kopfzeile bis --breite-kopfzeile breit.
+ * Die Utility-Zeile erscheint nur zusammen mit der Desktop-Navigation ab
+ * 1360 px, nie gleichzeitig mit dem Burger-Menü.
  *
- * Das Burger-Menü ist das einzige JavaScript der Webseite. Ohne JavaScript
- * bleibt die Navigation sichtbar (unter der Kopfzeile umbrechend).
+ * Primär-Button je Seite (B2): auf der Lohnrechner-Seite «Lohn berechnen» →
+ * #rechner (dort erhält der Lohnrechner anker="rechner"), auf Betreuung &
+ * Hauswirtschaft «Beratung anfragen» → #kontakt, auf allen anderen Seiten
+ * «Lohn berechnen» → /#lohnrechner, auch auf der Startseite.
+ *
+ * Menü-Skript: neben dem Lohnrechner die einzige zweite Ausnahme vom
+ * Verzicht auf JavaScript, inline, unter 1 KB, ohne Framework. Ohne
+ * JavaScript bleibt die Navigation sichtbar (unter der Kopfzeile
+ * umbrechend). Das Skript blendet den Burger ein, hält aria-expanded
+ * aktuell und schliesst das Menü per Escape-Taste und beim Antippen eines
+ * Menüpunkts. `npm test` prüft die Grösse.
  *
  * Parameter:
- *   buttonText  Beschriftung des Primär-Buttons (Standard «Lohn berechnen»)
- *   buttonZiel  Ziel des Primär-Buttons (Standard /#lohnrechner)
+ *   buttonText  Beschriftung des Primär-Buttons (Standard je Seite, siehe oben)
+ *   buttonZiel  Ziel des Primär-Buttons (Standard je Seite, siehe oben)
  *   utility     Utility-Zeile über der Kopfzeile anzeigen (Standard true, nur Desktop)
  */
 import Icon from './Icon.astro';
@@ -26,9 +36,17 @@ interface Props {
   utility?: boolean;
 }
 
+// Primär-Button je Seite gemäss B2; der Pfad ohne abschliessenden Schrägstrich.
+const pfad = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const buttonJeSeite: Record<string, { text: string; ziel: string }> = {
+  '/lohnrechner': { text: 'Lohn berechnen', ziel: '#rechner' },
+  '/betreuung-hauswirtschaft': { text: 'Beratung anfragen', ziel: '#kontakt' },
+};
+const standardButton = buttonJeSeite[pfad] ?? { text: 'Lohn berechnen', ziel: '/#lohnrechner' };
+
 const {
-  buttonText = 'Lohn berechnen',
-  buttonZiel = '/#lohnrechner',
+  buttonText = standardButton.text,
+  buttonZiel = standardButton.ziel,
   utility = true,
 } = Astro.props;
 
@@ -107,50 +125,36 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 </header>
 
 <script is:inline>
-  // Burger-Menü: einziges JavaScript der Webseite. Ohne JavaScript bleibt
-  // die Navigation sichtbar; erst mit JavaScript wird sie auf Mobile
-  // hinter dem Burger verborgen.
   (function () {
     var kopfzeile = document.getElementById('kopfzeile');
-    var knopf = kopfzeile.querySelector('.burger');
+    var knopf = kopfzeile && kopfzeile.querySelector('.burger');
     var navigation = document.getElementById('navigation');
-    if (!kopfzeile || !knopf || !navigation) return;
-
+    if (!knopf || !navigation) return;
+    var offen = false;
+    function setzeOffen(wert) {
+      offen = wert;
+      knopf.setAttribute('aria-expanded', wert);
+      kopfzeile.classList.toggle('menue-offen', wert);
+    }
     kopfzeile.setAttribute('data-js', '');
     knopf.hidden = false;
-
-    function setzeOffen(offen) {
-      knopf.setAttribute('aria-expanded', offen ? 'true' : 'false');
-      kopfzeile.classList.toggle('menue-offen', offen);
-    }
-
-    function istOffen() {
-      return knopf.getAttribute('aria-expanded') === 'true';
-    }
-
     knopf.addEventListener('click', function () {
-      setzeOffen(!istOffen());
+      setzeOffen(!offen);
     });
-
     navigation.addEventListener('click', function (ereignis) {
       if (ereignis.target.closest('a')) setzeOffen(false);
     });
-
     document.addEventListener('keydown', function (ereignis) {
-      if (ereignis.key === 'Escape' && istOffen()) {
+      if (ereignis.key === 'Escape' && offen) {
         setzeOffen(false);
         knopf.focus();
       }
-    });
-
-    document.addEventListener('click', function (ereignis) {
-      if (istOffen() && !kopfzeile.contains(ereignis.target)) setzeOffen(false);
     });
   })();
 </script>
 
 <style>
-  /* Utility-Zeile: nur Desktop, Warmgrau, über der Kopfzeile. */
+  /* Utility-Zeile: nur mit der Desktop-Navigation (ab 1360 px), Warmgrau, über der Kopfzeile. */
   .utility {
     display: none;
     background-color: var(--color-warmgrau);
@@ -270,6 +274,12 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     color: var(--color-tiefblau);
   }
 
+  /* Ohne JavaScript bleibt der Burger verborgen (Attribut hidden); die
+     Button-Regel in global.css würde ihn sonst einblenden. */
+  .burger[hidden] {
+    display: none;
+  }
+
   /* Die Icons stammen aus Icon.astro und liegen ausserhalb des Scopes. */
   .burger :global(.burger-zu),
   .menue-offen .burger :global(.burger-auf) {
@@ -372,15 +382,13 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     }
   }
 
-  /* Utility-Zeile ab Tablet quer. */
-  @media (min-width: 1024px) {
+  /* Desktop-Navigation in einer Zeile, darüber die Utility-Zeile. Beides
+     beim selben Breakpoint, an dem das Burger-Menü verschwindet. */
+  @media (min-width: 1360px) {
     .utility {
       display: block;
     }
-  }
 
-  /* Desktop-Navigation in einer Zeile */
-  @media (min-width: 1360px) {
     .kopfzeile-inhalt {
       flex-wrap: nowrap;
     }

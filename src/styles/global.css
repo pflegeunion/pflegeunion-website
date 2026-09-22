@@ -4,7 +4,7 @@
  * Farben, Schriftfamilien, Abstände, Radien und Textstile kommen aus
  * src/styles/tokens.css, die aus design/tokens.json erzeugt wird.
  * Hier stehen nur die Einbindung der Schriften, das Grundlayout und die
- * dokumentierten Web-Anpassungen gemäss Webseitenkonzept V3.0, Teil B5.
+ * dokumentierten Web-Anpassungen gemäss Webseitenkonzept V3.1, Teil B5.
  * Keine Hex-Werte, keine freien Pixelabstände.
  */
 
@@ -84,7 +84,7 @@
 /*
  * =====================================================================
  * Web-Anpassungen gegenüber design/tokens.json
- * gemäss Webseitenkonzept V3.0, Teil B5 (Zielgruppe über 50).
+ * gemäss Webseitenkonzept V3.1, Teil B5 (Zielgruppe über 50).
  *
  * Diese Werte überschreiben bewusst und nur für die Webseite die
  * Textstile aus tokens.css. Alle übrigen Werte kommen unverändert aus
@@ -192,13 +192,16 @@ body,
   color: var(--color-ocker);
 }
 
-/* Buttons: Lato Bold 17 px, Höhe 52 px, Innenabstand 14/28 px, Radius --radius-sm. */
+/* Buttons: Lato Bold 17 px, Höhe 52 px, Innenabstand 14/28 px, Radius --radius-sm.
+   Die 52 px sind die Gesamthöhe inklusive Rahmen:
+   1 px Rahmen + 14 px + 22 px Zeilenhöhe + 14 px + 1 px Rahmen. */
 button,
 .button {
+  box-sizing: border-box;
   display: inline-block;
   font-family: var(--font-sans);
   font-size: 17px;
-  line-height: 24px;
+  line-height: 22px;
   font-weight: 700;
   min-height: 52px;
   padding: 14px 28px;
@@ -244,6 +247,32 @@ input[type='checkbox'] {
 }
 
 /* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
+
+/*
+ * =====================================================================
+ * Breakpoints der Webseite. Einzige Stelle, an der sie festgelegt sind.
+ *
+ * CSS-Variablen wirken in Media Queries nicht. Die Komponenten tragen die
+ * Werte deshalb als Zahl ein, und zwar nur die Werte dieser Liste und nur
+ * in dieser Schreibweise:
+ *   ab X      (min-width: Xpx)        z. B. (min-width: 768px)
+ *   unter X   (max-width: X - 1 px)   z. B. (max-width: 767px)
+ * `npm test` (test/breakpoints.test.mjs) liest die Liste aus dieser Datei
+ * und prüft alle Media Queries in src/ dagegen. Neue Werte nur hier
+ * ergänzen.
+ *
+ *    480 px  klein: horizontales Logo statt Bildzeichen, Telefonnummer in
+ *            der Kopfzeile ausgeschrieben, Buttons nebeneinander
+ *    640 px  mittel: Karten, Schritte und Demnächst zweispaltig,
+ *            Lohntabelle ohne JavaScript als Tabelle statt als Liste
+ *    768 px  Tablet: breitere Seitenränder, Kopfzeile 72 px, H1 56 px,
+ *            Fusszeile dreispaltig
+ *   1024 px  Desktop: zweispaltige Abschnitte, Rechner und Formular
+ *            nebeneinander, Karten-, Schritt- und Kachelraster in voller Breite
+ *   1360 px  Desktop-Navigation: Menü in einer Zeile und Utility-Zeile;
+ *            darunter Burger-Menü ohne Utility-Zeile
+ * =====================================================================
+ */
 
 /*
  * Grundlayout. Alle Farben, Abstände und Schriften aus tokens.css.

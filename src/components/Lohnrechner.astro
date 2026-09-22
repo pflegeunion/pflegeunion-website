@@ -6,10 +6,13 @@
  * weisser Fläche: links die Eingaben (Radio-Gruppen mit sichtbaren Labels),
  * rechts das Ergebnis als Live-Region; auf Mobile untereinander.
  *
- * Ohne JavaScript zeigt die Seite die Fallback-Tabelle aus D1 (Stunden pro
- * Tag · Monat mit Pflegehelferkurs · Monat Einstieg) mit Fussnote und
- * Buttons. Das Skript src/scripts/lohnrechner.js blendet
- * `[data-rechner-fallback]` aus und `[data-rechner-ui]` ein.
+ * Ohne JavaScript zeigt die Seite die Fallback-Tabelle, Tabelle 2 der
+ * Korrektur Lohnrechner vom 22.09.2026 (Auswahl · Monat, mit Kurs · Jahr,
+ * mit Kurs · Monat, Einstieg · Jahr, Einstieg), mit Fussnote und Buttons.
+ * Unter 640 px steht jede Auswahl als eigener Block mit den vier Werten
+ * untereinander, damit die Seite nicht quer scrollt. Das Skript
+ * src/scripts/lohnrechner.js blendet `[data-rechner-fallback]` aus und
+ * `[data-rechner-ui]` ein.
  *
  * Sätze, Tage, Stundenstufen und Postleitzahlen stehen ausschliesslich im
  * Konfigurationsblock des Skripts (KONFIG); die Fallback-Tabelle wird beim
@@ -39,30 +42,39 @@ const { anker = 'lohnrechner', vollstaendig = false } = Astro.props;
 const vorbelegung = { stunden: '2', kurs: 'nein' };
 const start = ergebnis(stufeFuer(vorbelegung.stunden));
 
+// Spalten der Fallback-Tabelle (Tabelle 2 der Korrektur vom 22.09.2026).
+const spalten = [
+  { titel: 'Monat, mit Kurs', wert: 'monatMitKurs' },
+  { titel: 'Jahr, mit Kurs', wert: 'jahrMitKurs' },
+  { titel: 'Monat, Einstieg', wert: 'monatEinstieg' },
+  { titel: 'Jahr, Einstieg', wert: 'jahrEinstieg' },
+] as const;
+
+// Alle Werte aus derselben Rechenlogik und Konfiguration wie das Skript.
 const zeilen = KONFIG.stufen.map((s) => {
   const w = ergebnis(s);
   return {
     text: s.text,
     wert: s.wert,
-    mitKurs: chf(w.monatMitKurs, w.mehr),
-    einstieg: chf(w.monatEinstieg, w.mehr),
+    werte: spalten.map((sp) => chf(w[sp.wert], w.mehr)),
   };
 });
 
 // Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)»,
 // Fassung V3.1 mit 26 Tagen pro Monat (Entscheid GL 22.09.2026, Art. 20 ArG).
+// Nur zur Prüfung beim Build; angezeigt werden die berechneten Werte.
 const kontrolle = [
-  ["rund CHF 990.–", "rund CHF 880.–"],
-  ["rund CHF 1'480.–", "rund CHF 1'320.–"],
-  ["rund CHF 1'970.–", "rund CHF 1'770.–"],
-  ["rund CHF 2'470.–", "rund CHF 2'210.–"],
-  ["rund CHF 2'960.–", "rund CHF 2'650.–"],
-  ["über CHF 2'960.–", "über CHF 2'650.–"],
+  ["rund CHF 990.–", "rund CHF 11'800.–", "rund CHF 880.–", "rund CHF 10'600.–"],
+  ["rund CHF 1'480.–", "rund CHF 17'800.–", "rund CHF 1'320.–", "rund CHF 15'900.–"],
+  ["rund CHF 1'970.–", "rund CHF 23'700.–", "rund CHF 1'770.–", "rund CHF 21'200.–"],
+  ["rund CHF 2'470.–", "rund CHF 29'600.–", "rund CHF 2'210.–", "rund CHF 26'500.–"],
+  ["rund CHF 2'960.–", "rund CHF 35'500.–", "rund CHF 2'650.–", "rund CHF 31'800.–"],
+  ["über CHF 2'960.–", "über CHF 35'500.–", "über CHF 2'650.–", "über CHF 31'800.–"],
 ];
 zeilen.forEach((z, i) => {
-  if (z.mitKurs !== kontrolle[i][0] || z.einstieg !== kontrolle[i][1]) {
+  if (z.werte.join(' / ') !== kontrolle[i].join(' / ')) {
     throw new Error(
-      `Lohnrechner: Zeile «${z.text}» ergibt ${z.mitKurs} / ${z.einstieg}, erwartet ${kontrolle[i].join(' / ')}.`,
+      `Lohnrechner: Zeile «${z.text}» ergibt ${z.werte.join(' / ')}, erwartet ${kontrolle[i].join(' / ')}.`,
     );
   }
 });
@@ -101,14 +113,13 @@ const fussnote =
     </div>
 
     <div class="rechner" data-rechner data-stunden={nameStunden} data-kurs={nameKurs}>
-      <!-- Fallback ohne JavaScript: dieselben Werte als Tabelle (D1). -->
+      <!-- Fallback ohne JavaScript: dieselben Werte als Tabelle (Tabelle 2 der Korrektur vom 22.09.2026). -->
       <div class="fallback" data-rechner-fallback>
         <table>
           <thead>
             <tr>
-              <th scope="col">Stunden pro Tag</th>
-              <th scope="col">Monat mit Pflegehelferkurs</th>
-              <th scope="col">Monat Einstieg</th>
+              <th scope="col">Auswahl</th>
+              {spalten.map((sp) => <th scope="col">{sp.titel}</th>)}
             </tr>
           </thead>
           <tbody>
@@ -116,8 +127,7 @@ const fussnote =
               zeilen.map((z) => (
                 <tr>
                   <th scope="row">{z.text}</th>
-                  <td>{z.mitKurs}</td>
-                  <td>{z.einstieg}</td>
+                  {z.werte.map((w, i) => <td data-spalte={spalten[i].titel}>{w}</td>)}
                 </tr>
               ))
             }
@@ -309,20 +319,60 @@ const fussnote =
     overflow-x: auto;
   }
 
+  /* Fünf gleich breite Spalten, damit kein Betrag über drei Zeilen bricht. */
+  .fallback table {
+    table-layout: fixed;
+  }
+
   .fallback th,
   .fallback td {
     hyphens: auto;
     overflow-wrap: break-word;
   }
 
-  @media (max-width: 479px) {
-    .fallback table {
-      table-layout: fixed;
-    }
-
+  /* Unter 640 px: jede Auswahl als Block, die vier Werte untereinander mit
+     der Spaltenbezeichnung davor; reicht die Breite nicht, steht der Wert
+     ungetrennt unter der Bezeichnung. Der Tabellenkopf bleibt für
+     Screenreader. */
+  @media (max-width: 639px) {
+    .fallback table,
+    .fallback tbody,
+    .fallback tr,
     .fallback th,
     .fallback td {
-      padding: var(--space-1);
+      display: block;
+    }
+
+    .fallback thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .fallback tbody tr {
+      margin-bottom: var(--space-2);
+      border: 1px solid var(--color-linie);
+    }
+
+    .fallback tbody th,
+    .fallback td {
+      border: 0;
+    }
+
+    .fallback td {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      column-gap: var(--space-2);
+      white-space: nowrap;
+      border-top: 1px solid var(--color-linie);
+    }
+
+    .fallback td::before {
+      content: attr(data-spalte);
     }
   }
 
