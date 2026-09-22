@@ -1,6 +1,7 @@
 /**
  * Prüft die Rechenlogik des Lohnrechners gegen die Tabelle «Ergebniswerte
- * (zur Kontrolle der Umsetzung)» aus Webseitenkonzept V3.0, Teil D1:
+ * (zur Kontrolle der Umsetzung)» aus Webseitenkonzept V3.1, Teil D1
+ * (26 Tage pro Monat, 312 Tage pro Jahr; Entscheid GL 22.09.2026, Art. 20 ArG):
  * sechs Stufen × Monat mit Kurs, Jahr mit Kurs, Monat Einstieg, Jahr Einstieg.
  * Dazu Rundung, Anzeigeformat, Skriptgrösse und Postleitzahl-Liste.
  */
@@ -18,21 +19,22 @@ import {
   plzImKantonZug,
 } from '../src/scripts/lohnrechner.js';
 
-// Kontrollwerte wörtlich aus Konzept D1.
+// Kontrollwerte wörtlich aus Konzept D1 (Fassung V3.1).
 const tabelle = [
-  ['1 Stunde', "rund CHF 1'150.–", "rund CHF 13'900.–", "rund CHF 1'030.–", "rund CHF 12'400.–"],
-  ['1½ Stunden', "rund CHF 1'730.–", "rund CHF 20'800.–", "rund CHF 1'550.–", "rund CHF 18'600.–"],
-  ['2 Stunden', "rund CHF 2'310.–", "rund CHF 27'700.–", "rund CHF 2'060.–", "rund CHF 24'800.–"],
-  ['2½ Stunden', "rund CHF 2'880.–", "rund CHF 34'600.–", "rund CHF 2'580.–", "rund CHF 31'000.–"],
-  ['3 Stunden', "rund CHF 3'460.–", "rund CHF 41'600.–", "rund CHF 3'100.–", "rund CHF 37'200.–"],
-  ['mehr als 3 Stunden', "über CHF 3'460.–", "über CHF 41'600.–", "über CHF 3'100.–", "über CHF 37'200.–"],
+  ['1 Stunde', 'rund CHF 990.–', "rund CHF 11'800.–", 'rund CHF 880.–', "rund CHF 10'600.–"],
+  ['1½ Stunden', "rund CHF 1'480.–", "rund CHF 17'800.–", "rund CHF 1'320.–", "rund CHF 15'900.–"],
+  ['2 Stunden', "rund CHF 1'970.–", "rund CHF 23'700.–", "rund CHF 1'770.–", "rund CHF 21'200.–"],
+  ['2½ Stunden', "rund CHF 2'470.–", "rund CHF 29'600.–", "rund CHF 2'210.–", "rund CHF 26'500.–"],
+  ['3 Stunden', "rund CHF 2'960.–", "rund CHF 35'500.–", "rund CHF 2'650.–", "rund CHF 31'800.–"],
+  ['mehr als 3 Stunden', "über CHF 2'960.–", "über CHF 35'500.–", "über CHF 2'650.–", "über CHF 31'800.–"],
 ];
 
 test('Konfiguration entspricht D1', () => {
   assert.equal(KONFIG.satzMitKurs, 37.95);
   assert.equal(KONFIG.satzEinstieg, 33.95);
-  assert.equal(KONFIG.tageProMonat, 30.4);
-  assert.equal(KONFIG.tageProJahr, 365);
+  // Sechs Einsatztage pro Woche (Entscheid GL 22.09.2026, Art. 20 ArG).
+  assert.equal(KONFIG.tageProMonat, 26);
+  assert.equal(KONFIG.tageProJahr, 312);
   assert.deepEqual(
     KONFIG.stufen.map((s) => s.text),
     tabelle.map((z) => z[0]),
@@ -51,19 +53,19 @@ for (const [text, monatKurs, jahrKurs, monatEinstieg, jahrEinstieg] of tabelle) 
 }
 
 test('Rundung kaufmännisch auf CHF 10.– bzw. CHF 100.–', () => {
-  assert.equal(monatslohn(2, 37.95), 2310); // 2307.36
-  assert.equal(monatslohn(2.5, 37.95), 2880); // 2884.20
-  assert.equal(jahreslohn(1, 37.95), 13900); // 13851.75
-  assert.equal(jahreslohn(2.5, 33.95), 31000); // 30979.375
+  assert.equal(monatslohn(2, 37.95), 1970); // 1973.40
+  assert.equal(monatslohn(2.5, 37.95), 2470); // 2466.75
+  assert.equal(jahreslohn(1, 37.95), 11800); // 11840.40
+  assert.equal(jahreslohn(2.5, 33.95), 26500); // 26481.00
 });
 
 test('Anzeigeformat mit Apostroph und «.–»', () => {
-  assert.equal(ziffern(2310), "2'310");
-  assert.equal(ziffern(27700), "27'700");
-  assert.equal(ziffern(950), '950');
+  assert.equal(ziffern(1970), "1'970");
+  assert.equal(ziffern(23700), "23'700");
+  assert.equal(ziffern(990), '990');
   assert.equal(ziffern(1234567), "1'234'567");
-  assert.equal(chf(2310, false), "rund CHF 2'310.–");
-  assert.equal(chf(3460, true), "über CHF 3'460.–");
+  assert.equal(chf(1970, false), "rund CHF 1'970.–");
+  assert.equal(chf(2960, true), "über CHF 2'960.–");
 });
 
 test('Vorbelegung 2 Stunden, «mehr als 3» rechnet mit 3', () => {
