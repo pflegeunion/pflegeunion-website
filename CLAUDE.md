@@ -5,10 +5,14 @@ solange sie nicht ausdrücklich geändert werden.
 
 ## Massgebende Grundlagen
 
-- **Webseitenkonzept V3.1 vom 22.09.2026** (V3.0 mit eingearbeiteter Korrektur
-  Lohnrechner, 26 Tage pro Monat). Bei Widerspruch gilt die **Korrektur
-  Lohnrechner vom 22.09.2026**. V3.0 nicht mehr verwenden.
-- **Alle Webtexte wörtlich** aus Konzept V3.1 Teil C und D. Nicht
+- Massgebend ist das Webseitenkonzept in seiner aktuellen Fassung (Stand
+  heute: V3.3 vom 22.09.2026) und der Styleguide Pflegeunion in seiner
+  aktuellen Fassung (Stand heute: V1.2). Beide liegen im Claude-Projekt
+  «Webseite Pflegeunion», nicht im Repository (vertraulich); die betreffenden
+  Abschnitte werden dem Auftrag angehängt. Bei Widerspruch zwischen CLAUDE.md
+  und einem angehängten Konzeptauszug gilt der Auszug; melde den Widerspruch
+  im Pull Request.
+- **Alle Webtexte wörtlich** aus Konzept Teil C und D. Nicht
   umformulieren; wenn ein Text nicht passt, im Pull Request nachfragen.
   Texte ändern sich nur zusammen mit dem Konzept.
 - **Platzhalter in eckigen Klammern** (z. B. CHF [XX.–]) bleiben sichtbar
@@ -55,7 +59,7 @@ solange sie nicht ausdrücklich geändert werden.
   und dürfen nicht vorkommen – im Rechner, in der Fallback-Tabelle, in
   Lohnbeispielen und in allen Texten (Pfadkoordinaten in den Logo-SVG sind
   davon nicht betroffen). Referenztabelle: Tabelle 2 der Korrektur vom
-  22.09.2026, eingearbeitet in Webseitenkonzept V3.1, Teil D1:
+  22.09.2026, eingearbeitet ins Konzept, Teil D1:
 
   | Auswahl | Monat, mit Kurs | Jahr, mit Kurs | Monat, Einstieg | Jahr, Einstieg |
   | --- | --- | --- | --- | --- |
@@ -140,7 +144,7 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 - Farben, Schriften, Abstände und Radien **nur über Tokens** aus
   `design/tokens.json` bzw. `src/styles/tokens.css`; keine Hex-Werte in
   Komponenten (Einzelheiten unter Design-Tokens).
-- **Web-Schriftgrössen gemäss V3.1 Teil B5 gehen vor den Print-Werten** des
+- **Web-Schriftgrössen gemäss Konzept Teil B5 gehen vor den Print-Werten** des
   Design-Systems; sie sind in `src/styles/global.css` dokumentiert.
 - Textfarbe: `--color-schwarz` (`#1B1B19`)
 - Hintergrund: `--color-weiss` (`#FFFFFF`)
@@ -180,7 +184,7 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 - **Kein Rot.** Fehlerhinweise in Formularen als Tiefblau-Fläche mit weisser
   Schrift.
 - Ruhige, sachliche Gestaltung ohne Effekte. Keine Karussells, keine
-  Parallax-Effekte, kein Hover-Anheben. Erlaubt gemäss Konzept V3.1 B5: das
+  Parallax-Effekte, kein Hover-Anheben. Erlaubt gemäss Konzept B5: das
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
   beides mit `prefers-reduced-motion`.
 - Alle interaktiven Elemente mit sichtbarem Fokusring 2 px Tiefblau
@@ -211,7 +215,7 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
 - `src/styles/tokens.css` **nie von Hand bearbeiten**. Änderungen an Werten
   nur über `design/tokens.json` per Pull Request; die CSS-Datei wird beim
   Build neu erzeugt.
-- Die **Web-Abweichungen gemäss Webseitenkonzept V3.1, Teil B5** (Zielgruppe
+- Die **Web-Abweichungen gemäss Konzept, Teil B5** (Zielgruppe
   über 50) sind in `src/styles/global.css` dokumentiert und gewollt:
   grössere Textstile (`.text-h1` 56 px auf der Startseite, `.text-h1--sub`
   40 px auf Unterseiten, `.text-h2` 32/40 px, `.text-h3` 22/30 px,
@@ -244,7 +248,7 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
 
 ## Komponenten
 
-Die wiederkehrenden Bausteine aus Webseitenkonzept V3.1 (Teile B2, B3, B4,
+Die wiederkehrenden Bausteine aus dem Konzept (Teile B2, B3, B4,
 D2) liegen als Astro-Komponenten unter `src/components/`. Sie werden einmal
 gebaut und mehrfach eingesetzt; Texte und Beschriftungen stammen wörtlich aus
 dem Konzept (siehe Massgebende Grundlagen). Komponenten verwenden
