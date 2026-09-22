@@ -145,8 +145,28 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 - Textfarbe: `--color-schwarz` (`#1B1B19`)
 - Hintergrund: `--color-weiss` (`#FFFFFF`)
 - Tiefblau für Kopfzeile und Akzente: `--color-tiefblau` (`#1E3F6E`)
-- Ocker `--color-ocker` (`#C8963C`) nur als Akzent und für Schrift ab 24 px,
-  **nie als Lauftext oder Buttonfläche**.
+- **Ocker nie als Schrift** (auch nicht Übertitel, Etiketten, Schrittzahlen,
+  Zahlen); Ocker `--color-ocker` (`#C8963C`) nur für Linien-Icons, Linien und
+  Grafik. Übertitel und Etiketten in Tiefblau, auf Tiefblau-Flächen in Weiss.
+  Rahmen von Bedienelementen in text-gedaempft, linie nur für trennende
+  Haarlinien. Massgebend: Nachtrag Gestaltung vom 22.09.2026.
+  - Ocker-Icons erhalten die Farbe über `stroke`, nie über `color`.
+    `npm test` (`test/ocker.test.mjs`) schlägt fehl, sobald eine CSS-Regel in
+    `src/` die Eigenschaft `color` auf `--color-ocker` setzt.
+  - Kontrast (WCAG 2.1, nachgerechnet 22.09.2026):
+
+    | Kombination | Kontrast | Einsatz |
+    | --- | --- | --- |
+    | schwarz auf weiss | 17,3:1 | |
+    | schwarz auf warmgrau | 15,2:1 | |
+    | tiefblau auf weiss | 10,5:1 | |
+    | tiefblau auf warmgrau | 9,3:1 | |
+    | weiss auf tiefblau | 10,5:1 | |
+    | text-gedaempft auf weiss | 6,7:1 | |
+    | ocker auf weiss | 2,7:1 | nur Grafik, nie Schrift |
+    | ocker auf warmgrau | 2,4:1 | nur Grafik, nie Schrift |
+    | ocker auf tiefblau | 4,0:1 | nur Grafik, nie Schrift |
+    | linie auf weiss | 1,4:1 | nur trennende Linien, nie Rahmen von Eingabefeldern |
 - Playfair Display Bold nur für den H1 (siehe Schrift).
 - **Keine Schatten** (kein `box-shadow`, kein `text-shadow`), **keine
   Verläufe** (kein `gradient`).
@@ -196,7 +216,7 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `.text-menu` (Mobilmenü 24 px, B2), `.text-faq` (FAQ-Frage 20 px, B4) und
   `.text-trust` (Trust-Leiste 16 px, B4) und `.text-result-einheit` («rund»,
   «CHF» und «.–» in der Rechner-Zahl, 24 px, B5). Dazu `.button--sekundaer`,
-  `.etikette` (Übertitel in Ocker), `.textspalte` (680 px) und
+  `.etikette` (Übertitel in Tiefblau), `.textspalte` (680 px) und
   `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
   `global.css`: `--breite-inhalt` (1200 px), `--breite-kopfzeile` (1440 px),
@@ -228,7 +248,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Hero: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): Warmgrau mit Haarlinie, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
-| `Schritte.astro` | Nummerierte Schritte mit Zahl in `.text-step` (Ocker), Titel, Text; schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
+| `Schritte.astro` | Nummerierte Schritte mit Zahl in `.text-step` (Tiefblau), Titel, Text; schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
 | `Header.astro` | Kopfzeile (B2): sticky, Logo, fünf Menüpunkte, Telefon, Primär-Button, Burger-Menü unter 1360 px mit Menü-Skript, Utility-Zeile nur ab 1360 px zusammen mit der Desktop-Navigation (nie gleichzeitig mit dem Burger) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
@@ -316,7 +336,9 @@ src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
 test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1,
                      breakpoints.test.mjs die Media Queries,
-                     menue.test.mjs die Grösse des Menü-Skripts
+                     menue.test.mjs die Grösse des Menü-Skripts,
+                     ocker.test.mjs, dass Ocker nie als Schrift
+                     (color) gesetzt wird
 src/styles/          tokens.css (erzeugt, nicht bearbeiten) und global.css
                      mit Schrifteinbindung, Web-Anpassungen, Breakpoints und
                      Grundlayout

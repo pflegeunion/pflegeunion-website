@@ -320,8 +320,13 @@ const fragen = [
   .haken-icon {
     flex: none;
     display: inline-flex;
-    color: var(--color-ocker);
     margin-top: var(--space-1);
+  }
+
+  /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
+     stammt aus Icon.astro und liegt ausserhalb des Scopes. */
+  .haken-icon :global(.icon) {
+    stroke: var(--color-ocker);
   }
 
   .abschluss {

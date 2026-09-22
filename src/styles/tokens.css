@@ -97,7 +97,7 @@
   font-weight: 400;
 }
 
-/* Kategorie-Etiketten, Kolumnentitel, in ocker oder tiefblau. */
+/* Kategorie-Etiketten, Übertitel, Kolumnentitel, in tiefblau (auf tiefblauer Fläche weiss). */
 .text-label {
   font-family: var(--font-sans);
   font-size: 12px;

@@ -2,7 +2,9 @@
 /**
  * Linien-Icon als Inline-SVG (Lucide, ISC-Lizenz, siehe LICENSE-lucide.txt).
  *
- * Farbe über `color` des Elternelements (stroke: currentColor).
+ * Farbe über `color` des Elternelements (stroke: currentColor). Ocker wird
+ * nie über `color` gesetzt (Ocker nie als Schrift), sondern direkt als
+ * `stroke` auf dem Icon, z. B. `.x :global(.icon) { stroke: var(--color-ocker); }`.
  * Der Strich bleibt in jeder Grösse 2 px (vector-effect in global.css).
  * Icons sind dekorativ und für Screenreader ausgeblendet; der Text steht
  * immer daneben.

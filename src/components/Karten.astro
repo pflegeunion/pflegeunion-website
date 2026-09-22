@@ -52,8 +52,13 @@ const { karten } = Astro.props;
 
   .karte-icon {
     display: inline-flex;
-    color: var(--color-ocker);
     margin-bottom: var(--space-2);
+  }
+
+  /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
+     stammt aus Icon.astro und liegt ausserhalb des Scopes. */
+  .karte-icon :global(.icon) {
+    stroke: var(--color-ocker);
   }
 
   .karte h3 {
