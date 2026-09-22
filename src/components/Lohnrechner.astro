@@ -410,8 +410,9 @@ const fussnote =
     font-weight: 700;
   }
 
-  /* Auswahlfelder: eckig, 1-px-Rahmen linie, mindestens 56 px hoch;
-     Mobile drei mal zwei, Desktop sechs nebeneinander. */
+  /* Auswahlfelder: eckig, 1-px-Rahmen text-gedaempft (Nachtrag Gestaltung
+     22.09.2026), mindestens 56 px hoch; Mobile drei mal zwei, Desktop sechs
+     nebeneinander. */
   .felder {
     display: grid;
     gap: var(--space-1);
@@ -432,7 +433,7 @@ const fussnote =
     justify-content: center;
     min-height: var(--tippflaeche-gross);
     padding: var(--space-1);
-    border: 1px solid var(--color-linie);
+    border: 1px solid var(--color-text-gedaempft);
     background-color: var(--color-weiss);
     color: var(--color-schwarz);
     text-align: center;
@@ -441,13 +442,16 @@ const fussnote =
     hyphens: auto;
   }
 
-  /* Der Radio-Button bleibt fokussierbar, sichtbar ist das Feld selbst. */
+  /* Der Radio-Button bleibt fokussierbar, sichtbar ist das Feld selbst
+     (ohne Rahmen und Innenabstand des Radio-Buttons aus global.css). */
   .rechner-feld input {
     position: absolute;
     opacity: 0;
     width: 1px;
     height: 1px;
     margin: 0;
+    padding: 0;
+    border: 0;
   }
 
   .rechner-feld:has(input:checked) {

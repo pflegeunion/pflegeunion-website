@@ -90,6 +90,11 @@
  * Textstile aus tokens.css. Alle übrigen Werte kommen unverändert aus
  * den Tokens. Zeilenabstände der vergrösserten Titel folgen dem
  * 8-px-Raster.
+ *
+ * Übertitel/Etiketten und Schrittzahlen in Tiefblau gemäss Nachtrag
+ * Gestaltung 22.09.2026. Ocker nie als Schrift, nur für Linien-Icons,
+ * Linien und Grafik. Rahmen von Bedienelementen in text-gedaempft, linie
+ * nur für trennende Haarlinien.
  * =====================================================================
  */
 
@@ -183,13 +188,13 @@ body,
   line-height: 32px;
 }
 
-/* Schrittzahlen: Lato Bold 40 px, Ocker (Ocker nur ab 24 px, nie als Fliesstext). */
+/* Schrittzahlen: Lato Bold 40 px, Tiefblau (Nachtrag Gestaltung 22.09.2026: Ocker nie als Schrift). */
 .text-step {
   font-family: var(--font-sans);
   font-size: 40px;
   line-height: 48px;
   font-weight: 700;
-  color: var(--color-ocker);
+  color: var(--color-tiefblau);
 }
 
 /* Buttons: Lato Bold 17 px, Höhe 52 px, Innenabstand 14/28 px, Radius --radius-sm.
@@ -220,14 +225,15 @@ button,
 }
 
 /* Formularfelder (Konzept B5): Fliesstextgrösse, weisse Fläche,
-   1-px-Rahmen linie, Radius --radius-sm, Fokus 2 px Tiefblau. */
+   1-px-Rahmen text-gedaempft (Nachtrag Gestaltung 22.09.2026, linie nur
+   für trennende Haarlinien), Radius --radius-sm, Fokus 2 px Tiefblau. */
 input:not([type='hidden']):not([type='radio']):not([type='checkbox']),
 select,
 textarea {
   font: inherit;
   color: var(--color-schwarz);
   background-color: var(--color-weiss);
-  border: 1px solid var(--color-linie);
+  border: 1px solid var(--color-text-gedaempft);
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-2);
   width: 100%;
@@ -244,6 +250,30 @@ input[type='checkbox'] {
   height: var(--space-3);
   margin: 0;
   accent-color: var(--color-tiefblau);
+}
+
+/* Radio-Buttons: eigene Darstellung statt des Browser-Rahmens, damit der
+   Rahmen 1 px text-gedaempft ist (Nachtrag Gestaltung 22.09.2026). Grösse
+   und Kreisform wie bisher; ausgewählt Rahmen und Punkt in Tiefblau. Im
+   Kontrastmodus des Betriebssystems bleibt der Browser-Radio-Button. */
+input[type='radio'] {
+  appearance: none;
+  padding: calc(var(--space-1) / 2);
+  border: 1px solid var(--color-text-gedaempft);
+  border-radius: 50%;
+  background-color: var(--color-weiss);
+  background-clip: content-box;
+}
+
+input[type='radio']:checked {
+  border-color: var(--color-tiefblau);
+  background-color: var(--color-tiefblau);
+}
+
+@media (forced-colors: active) {
+  input[type='radio'] {
+    appearance: auto;
+  }
 }
 
 /* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
@@ -345,9 +375,10 @@ h3 {
   vector-effect: non-scaling-stroke;
 }
 
-/* Etikette / Übertitel (Konzept A7): .text-label in Ocker. */
+/* Etikette / Übertitel (Konzept A7): .text-label in Tiefblau (Nachtrag
+   Gestaltung 22.09.2026); auf Tiefblau-Flächen --color-auf-tiefblau. */
 .etikette {
-  color: var(--color-ocker);
+  color: var(--color-tiefblau);
   margin: 0 0 var(--space-1);
 }
 

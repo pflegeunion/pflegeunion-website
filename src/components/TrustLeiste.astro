@@ -76,7 +76,12 @@ const { belege = standard } = Astro.props;
   .beleg-icon {
     flex: none;
     display: inline-flex;
-    color: var(--color-ocker);
+  }
+
+  /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
+     stammt aus Icon.astro und liegt ausserhalb des Scopes. */
+  .beleg-icon :global(.icon) {
+    stroke: var(--color-ocker);
   }
 
   @media (min-width: 768px) {
