@@ -1,25 +1,32 @@
 ---
 /**
- * Hero (Konzept V3 C1, Abschnitt 1; Unterseiten analog).
+ * Hero (Konzept C1, Abschnitt 1; Claude Design Fassung A: D01_Hero_A,
+ * M01_Hero_A). Unterseiten analog.
  *
- * Weisse Fläche. Links Übertitel, H1 in Playfair (.text-h1: 56 px, auf
- * Mobile 40 px), Text (max. 560 px), Primär- und Sekundär-Button, darunter
- * die Telefonzeile. Rechts eine eckige Bildfläche 3:2; dahinter einmal der
- * Ring aus dem Logo, gross, angeschnitten, einfarbig tiefblau-hell als
- * Inline-SVG-Kreisring. Mobile: Text vor Bild, Buttons volle Breite.
+ * Weisse Fläche. Links Übertitel, H1 in Playfair (.text-h1: 56 px, unter
+ * 768 px 40 px), Text (max. 560 px), Primär- und Sekundär-Button, darunter
+ * die Telefonzeile und die WhatsApp-Zeile. Rechts eine eckige Bildfläche
+ * 3:2 (Desktop 5 von 12 Spalten); dahinter einmal der Ring aus dem Logo,
+ * gross, angeschnitten, einfarbig tiefblau-hell. Unter 1024 px steht das
+ * Bild unter dem Text und der Ring beginnt erst unter dem Textblock, damit
+ * er weder Text noch Telefonzeile noch Buttons überdeckt. Mobil: Buttons in
+ * voller Breite untereinander.
  *
  * Parameter:
  *   etikette   Übertitel
- *   titel      H1
+ *   titel      H1; als Liste werden die Teile mit Zeilenumbruch gesetzt
  *   text       Fliesstext
  *   primaer    { text, ziel } Primär-Button
  *   sekundaer  { text, ziel } Sekundär-Button (optional)
  *   telefon    Telefonzeile anzeigen (Standard true)
+ *   whatsapp   WhatsApp-Zeile «Lieber schreiben? Auf WhatsApp» anzeigen (Standard true)
+ *   bild       Basisname der WebP-Dateien unter public/bilder/ (siehe Bildflaeche)
+ *   bildAlt    Alternativtext zum Bild
  *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt
- *   bildSrc, bildAlt  Bilddatei, sobald vorhanden
  *   ring       Ring hinter dem Bild (Standard true; nur einmal pro Seite)
  */
 import Bildflaeche from './Bildflaeche.astro';
+import Icon from './Icon.astro';
 
 interface Knopf {
   text: string;
@@ -28,14 +35,15 @@ interface Knopf {
 
 interface Props {
   etikette: string;
-  titel: string;
+  titel: string | string[];
   text: string;
   primaer: Knopf;
   sekundaer?: Knopf;
   telefon?: boolean;
-  bildIdee: string;
-  bildSrc?: string;
+  whatsapp?: boolean;
+  bild?: string;
   bildAlt?: string;
+  bildIdee?: string;
   ring?: boolean;
 }
 
@@ -46,18 +54,24 @@ const {
   primaer,
   sekundaer,
   telefon = true,
-  bildIdee,
-  bildSrc,
+  whatsapp = true,
+  bild,
   bildAlt,
+  bildIdee,
   ring = true,
 } = Astro.props;
+
+const titelTeile = Array.isArray(titel) ? titel : [titel];
+const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
 ---
 
-<section class="hero">
+<section class="hero" aria-label="Einstieg">
   <div class="hero-inhalt">
     <div class="hero-text">
       <p class="text-label etikette">{etikette}</p>
-      <h1 class="text-h1">{titel}</h1>
+      <h1 class="text-h1">
+        {titelTeile.map((teil, i) => (i === 0 ? teil : [<br />, teil]))}
+      </h1>
       <p class="hero-absatz">{text}</p>
       <div class="knoepfe">
         <a class="button" href={primaer.ziel}>{primaer.text}</a>
@@ -70,37 +84,60 @@ const {
           </p>
         )
       }
+      {
+        whatsapp && (
+          <p class="whatsapp">
+            Lieber schreiben?{' '}
+            <a href={whatsappLink}>
+              <Icon name="message-circle" groesse={20} />
+              <span>Auf WhatsApp</span>
+            </a>
+          </p>
+        )
+      }
     </div>
 
     <div class="hero-bild">
       {
         ring && (
-          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--color-tiefblau-hell)" stroke-width="12" />
+          <svg class="ring" viewBox="10 10 80 80" aria-hidden="true" focusable="false">
+            <path d="M24.29 19.36A40 40 0 0 1 80.64 75.71L72.21 68.64A29 29 0 0 0 31.36 27.79Z" />
+            <path d="M75.71 80.64A40 40 0 0 1 19.36 24.29L27.79 31.36A29 29 0 0 0 68.64 72.21Z" />
           </svg>
         )
       }
-      <Bildflaeche verhaeltnis="3:2" idee={bildIdee} src={bildSrc} alt={bildAlt} prioritaet class="bildflaeche" />
+      <Bildflaeche
+        verhaeltnis="3:2"
+        bild={bild}
+        alt={bildAlt}
+        idee={bildIdee}
+        sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 32px)"
+        prioritaet
+        class="bildflaeche"
+      />
     </div>
   </div>
 </section>
 
 <style>
   .hero {
+    position: relative;
     background-color: var(--color-weiss);
     overflow: hidden;
   }
 
   .hero-inhalt {
-    max-width: var(--breite-inhalt);
+    position: relative;
+    max-width: calc(var(--breite-inhalt) + 2 * var(--seitenrand));
     margin: 0 auto;
-    padding: var(--space-8) var(--space-2);
+    padding: calc(var(--space-4) + var(--space-1)) var(--seitenrand) var(--space-8);
     display: grid;
     gap: var(--space-6);
   }
 
   .hero-text {
-    max-width: var(--breite-hero-text);
+    position: relative;
+    z-index: 1;
   }
 
   .hero-text h1 {
@@ -108,6 +145,7 @@ const {
   }
 
   .hero-absatz {
+    max-width: var(--breite-hero-text);
     margin-bottom: var(--space-4);
   }
 
@@ -116,23 +154,38 @@ const {
     gap: var(--space-2);
   }
 
-  .knoepfe .button {
-    text-align: center;
-  }
-
   .telefon {
-    margin-top: var(--space-3);
+    margin: var(--space-3) 0 0;
   }
 
-  .telefon a {
+  .whatsapp {
+    margin: var(--space-2) 0 0;
+  }
+
+  .telefon a,
+  .whatsapp a {
     font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* Tippfläche 44 px: 28 px Zeilenhöhe plus je 8 px oben und unten. */
+  .telefon a {
+    display: inline-block;
+    padding-block: var(--space-1);
+    margin-block: calc(-1 * var(--space-1));
+  }
+
+  .whatsapp a {
     display: inline-flex;
     align-items: center;
-    min-height: var(--tippflaeche);
+    gap: var(--space-1);
+    vertical-align: top;
+    padding-block: var(--space-1);
+    margin-block: calc(-1 * var(--space-1));
   }
 
-  /* Bild mit Ring dahinter: der Ring liegt hinter dem Bild und wird vom
-     Abschnitt angeschnitten. */
+  /* Bild mit Ring dahinter. Unter 1024 px liegt der Ring hinter dem Bild und
+     beginnt 48 px über dem Bild, also unter dem Textblock (Board M01_Hero_A). */
   .hero-bild {
     position: relative;
   }
@@ -140,10 +193,11 @@ const {
   .ring {
     position: absolute;
     z-index: 0;
-    width: 120%;
+    left: 32%;
+    top: calc(-1 * var(--space-6));
+    width: 112%;
     height: auto;
-    right: -35%;
-    top: -30%;
+    fill: var(--color-tiefblau-hell);
     pointer-events: none;
   }
 
@@ -152,33 +206,59 @@ const {
     z-index: 1;
   }
 
-  /* Unter 1024 px steht das Bild unter dem Text. Der Ring beginnt dort erst
-     unter dem Textblock (Grid-Abstand --space-6), damit er weder Text noch
-     Telefonzeile noch Buttons überdeckt (Konzept C1 Abschnitt 1). */
-  @media (max-width: 1023px) {
-    .ring {
-      top: calc(-1 * var(--space-6));
-    }
-  }
-
   @media (min-width: 480px) {
     .knoepfe {
       display: flex;
       flex-wrap: wrap;
+      gap: var(--space-2);
     }
   }
 
   @media (min-width: 768px) {
     .hero-inhalt {
-      padding-inline: var(--space-3);
+      padding-top: var(--space-8);
     }
   }
 
+  /* Desktop: 12-Spalten-Raster, Text 7 Spalten, Bild 5 Spalten. Der Ring
+     (720 px bei 1440 px Breite) steht rechts oben im Abschnitt, rechts vom
+     Textblock, und wird vom Abschnitt angeschnitten (Board D01_Hero_A). */
   @media (min-width: 1024px) {
     .hero-inhalt {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
       align-items: center;
-      gap: var(--space-8);
+      padding-block: var(--abstand-abschnitt);
+    }
+
+    .hero-text {
+      grid-column: 1 / span 7;
+    }
+
+    .hero-text .etikette {
+      margin-bottom: var(--space-3);
+    }
+
+    .hero-text h1 {
+      margin-bottom: var(--space-4);
+    }
+
+    .hero-absatz {
+      margin-bottom: calc(var(--space-4) + var(--space-1));
+    }
+
+    .hero-bild {
+      grid-column: 8 / span 5;
+      position: static;
+    }
+
+    /* Bezogen auf die Innenbreite plus Seitenränder (1248 px bei 1440 px):
+       Ring 720 px breit, 940 px vom linken Rand, 100 px über dem Abschnitt. */
+    .ring {
+      left: 67.6%;
+      top: 0;
+      margin-top: -8%;
+      width: 57.7%;
     }
   }
 </style>

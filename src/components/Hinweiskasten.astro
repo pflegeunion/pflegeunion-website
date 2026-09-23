@@ -1,9 +1,14 @@
 ---
 /**
- * Baustein C – Hinweiskasten «Gut zu wissen» (Konzept V3 B4).
+ * Baustein C – Hinweiskasten «Gut zu wissen» (Konzept B4).
  *
  * Fläche tiefblau-hell, Etikette in Tiefblau, Titel Lato Bold, Inhalt als Slot.
  * Für Definitionen und ehrliche Grenzen. Mehrfach pro Seite erlaubt.
+ *
+ * Mit `seitlich` (Claude Design Fassung A, D07_Ehrlich/M07_Ehrlich, Abschnitt
+ * «Ehrlich gesagt»): Innenabstand 32/24 px, ab 1024 px 64 px; ab 1024 px
+ * stehen Etikette und Titel links (4 von 12 Spalten), der Inhalt rechts
+ * (8 Spalten, max. 680 px).
  *
  * Parameter:
  *   etikette  Übertitel (Standard «GUT ZU WISSEN»)
@@ -11,19 +16,23 @@
  *   ebene     Überschriftenebene des Titels: 3 (Standard, Kasten in einem
  *             Abschnitt) oder 2 (der Kasten ist selbst der Abschnitt, z. B.
  *             «Ehrlich gesagt» auf der Startseite)
+ *   seitlich  Titel ab 1024 px links neben dem Inhalt (Standard false)
  */
 interface Props {
   etikette?: string;
   titel: string;
   ebene?: 2 | 3;
+  seitlich?: boolean;
 }
 
-const { etikette = 'GUT ZU WISSEN', titel, ebene = 3 } = Astro.props;
+const { etikette = 'GUT ZU WISSEN', titel, ebene = 3, seitlich = false } = Astro.props;
 ---
 
-<div class="kasten">
-  <p class="text-label etikette">{etikette}</p>
-  {ebene === 2 ? <h2 class="text-h2">{titel}</h2> : <h3 class="text-h3">{titel}</h3>}
+<div class:list={['kasten', { 'kasten--seitlich': seitlich }]}>
+  <div class="kasten-kopf">
+    <p class="text-label etikette">{etikette}</p>
+    {ebene === 2 ? <h2 class="text-h2">{titel}</h2> : <h3 class="text-h3">{titel}</h3>}
+  </div>
   <div class="kasten-inhalt">
     <slot />
   </div>
@@ -47,9 +56,39 @@ const { etikette = 'GUT ZU WISSEN', titel, ebene = 3 } = Astro.props;
     max-width: var(--breite-text);
   }
 
+  .kasten--seitlich {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .kasten--seitlich .kasten-kopf h2 {
+    margin-bottom: var(--space-3);
+  }
+
   @media (min-width: 768px) {
     .kasten {
       padding: var(--space-4);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kasten--seitlich {
+      padding: var(--space-8);
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: start;
+    }
+
+    .kasten--seitlich .kasten-kopf {
+      grid-column: 1 / span 4;
+    }
+
+    .kasten--seitlich .kasten-kopf h2 {
+      margin-bottom: 0;
+    }
+
+    .kasten--seitlich .kasten-inhalt {
+      grid-column: 5 / span 8;
     }
   }
 </style>

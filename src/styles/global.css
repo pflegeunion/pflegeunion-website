@@ -197,6 +197,14 @@ body,
   color: var(--color-tiefblau);
 }
 
+/* Beschriftung von Buttons und Auswahlfeldern (Lohnrechner): Lato Bold 17/22 px. */
+.text-button {
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 22px;
+  font-weight: 700;
+}
+
 /* Buttons: Lato Bold 17 px, Höhe 52 px, Innenabstand 14/28 px, Radius --radius-sm.
    Die 52 px sind die Gesamthöhe inklusive Rahmen:
    1 px Rahmen + 14 px + 22 px Zeilenhöhe + 14 px + 1 px Rahmen. */
@@ -204,6 +212,7 @@ button,
 .button {
   box-sizing: border-box;
   display: inline-block;
+  text-align: center;
   font-family: var(--font-sans);
   font-size: 17px;
   line-height: 22px;
@@ -224,9 +233,10 @@ button,
   color: var(--color-tiefblau);
 }
 
-/* Formularfelder (Konzept B5): Fliesstextgrösse, weisse Fläche,
-   1-px-Rahmen text-gedaempft (Nachtrag Gestaltung 22.09.2026, linie nur
-   für trennende Haarlinien), Radius --radius-sm, Fokus 2 px Tiefblau. */
+/* Formularfelder (Konzept B5, Claude Design Fassung A): Fliesstextgrösse,
+   weisse Fläche, 1-px-Rahmen text-gedaempft (Nachtrag Gestaltung
+   22.09.2026, linie nur für trennende Haarlinien), Radius --radius-sm,
+   Fokus 2 px Tiefblau, Höhe 52 px wie die Buttons, Innenabstand 12/16 px. */
 input:not([type='hidden']):not([type='radio']):not([type='checkbox']),
 select,
 textarea {
@@ -235,13 +245,15 @@ textarea {
   background-color: var(--color-weiss);
   border: 1px solid var(--color-text-gedaempft);
   border-radius: var(--radius-sm);
-  padding: var(--space-1) var(--space-2);
+  padding: calc(var(--space-1) * 1.5) var(--space-2);
   width: 100%;
-  min-height: var(--tippflaeche);
+  min-height: calc(var(--tippflaeche) + var(--space-1));
 }
 
+/* Nachricht: mindestens vier Zeilen hoch. */
 textarea {
   resize: vertical;
+  min-height: calc(var(--space-8) * 2 + var(--space-1) / 2);
 }
 
 input[type='radio'],
@@ -276,6 +288,33 @@ input[type='radio']:checked {
   }
 }
 
+/* Titel und Text, die unter 768 px kleiner stehen (Claude Design, Fassung A:
+   Demnächst-Liste mobil, Personen im Abschnitt «Wer dahintersteht»):
+   unter 768 px 18/28 Bold bzw. 16/24, ab 768 px wie .text-h3 bzw. .text-body. */
+.text-h3-verdichtet {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 700;
+}
+
+.text-body-verdichtet {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+@media (min-width: 768px) {
+  .text-h3-verdichtet {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .text-body-verdichtet {
+    font-size: 18px;
+    line-height: 1.55;
+  }
+}
+
 /* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
 
 /*
@@ -291,16 +330,25 @@ input[type='radio']:checked {
  * und prüft alle Media Queries in src/ dagegen. Neue Werte nur hier
  * ergänzen.
  *
- *    480 px  klein: horizontales Logo statt Bildzeichen, Telefonnummer in
- *            der Kopfzeile ausgeschrieben, Buttons nebeneinander
- *    640 px  mittel: Karten, Schritte und Demnächst zweispaltig,
+ *    360 px  sehr klein: Kopfzeile mit Zwischenräumen und vollem
+ *            Button-Innenabstand (darunter ohne Zwischenräume, Button-
+ *            Innenabstand 16 px), Trust-Leiste zweispaltig mit Icon über
+ *            dem Text (darunter eine Spalte)
+ *    480 px  klein: Trust-Leiste mit Icon links vom Text, Buttons
+ *            nebeneinander (Hero, Lohnrechner)
+ *    640 px  mittel: horizontales Logo statt Bildzeichen in der Kopfzeile,
  *            Lohntabelle ohne JavaScript als Tabelle statt als Liste
- *    768 px  Tablet: breitere Seitenränder, Kopfzeile 72 px, H1 56 px,
- *            Fusszeile dreispaltig
- *   1024 px  Desktop: zweispaltige Abschnitte, Rechner und Formular
- *            nebeneinander, Karten-, Schritt- und Kachelraster in voller Breite
- *   1360 px  Desktop-Navigation: Menü in einer Zeile und Utility-Zeile;
- *            darunter Burger-Menü ohne Utility-Zeile
+ *    768 px  Tablet: Telefonnummer in der Kopfzeile ausgeschrieben,
+ *            breitere Seitenränder, Kopfzeile 72 px, H1 56 px,
+ *            Mobil-Verdichtung aufgeklappt (details/summary immer offen),
+ *            Bilder «Passt es?» und Betreuung sichtbar, Karten und
+ *            Demnächst zweispaltig, Fusszeile dreispaltig
+ *   1024 px  Desktop: Kopfzeile zweizeilig (Hauptzeile 72 px, Menüzeile
+ *            50 px) mit Utility-Zeile, kein Burger; zweispaltige Abschnitte
+ *            im 12-Spalten-Raster, Abschnittsabstand 96 px, Trust-Leiste in
+ *            einer Zeile, Demnächst dreispaltig
+ *   1360 px  Desktop-Navigation: Kopfzeile in einer Zeile (Logo, Menü,
+ *            Telefon, Button); darunter zweizeilig bzw. Burger-Menü
  * =====================================================================
  */
 
@@ -316,8 +364,42 @@ input[type='radio']:checked {
   --breite-hero-text: 560px;
   --hoehe-kopfzeile: 72px;
   --hoehe-kopfzeile-mobil: 60px;
+  --hoehe-menuezeile: 50px;
   --tippflaeche: 44px;
   --tippflaeche-gross: 56px;
+
+  /* Spalte der Schrittzahlen (Abschnitt «So funktioniert es», ab 768 px). */
+  --schritt-zahl-spalte: calc(var(--space-8) + var(--space-2));
+
+  /* Abstand oben und unten in jedem Abschnitt (64 px, ab 1024 px 96 px)
+     und Seitenrand (16 px, ab 768 px 24 px), Claude Design Fassung A. */
+  --abstand-abschnitt: var(--space-8);
+  --seitenrand: var(--space-2);
+
+  /* Höhe der sticky Kopfzeile für Sprungziele (#kontakt, #lohnrechner,
+     #ablauf), damit der Anfang des Abschnitts nicht darunter liegt. */
+  --hoehe-sticky: var(--hoehe-kopfzeile-mobil);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --seitenrand: var(--space-3);
+    --hoehe-sticky: var(--hoehe-kopfzeile);
+  }
+}
+
+/* 1024–1359 px: Hauptzeile und Menüzeile bleiben beim Scrollen sichtbar. */
+@media (min-width: 1024px) {
+  :root {
+    --abstand-abschnitt: calc(var(--space-6) * 2);
+    --hoehe-sticky: calc(var(--hoehe-kopfzeile) + var(--hoehe-menuezeile));
+  }
+}
+
+@media (min-width: 1360px) {
+  :root {
+    --hoehe-sticky: var(--hoehe-kopfzeile);
+  }
 }
 
 *,
@@ -330,6 +412,7 @@ html {
   color: var(--color-schwarz);
   background-color: var(--color-weiss);
   -webkit-text-size-adjust: 100%;
+  scroll-padding-top: var(--hoehe-sticky);
 }
 
 body {
@@ -384,10 +467,11 @@ h3 {
 }
 
 /* Etikette / Übertitel (Konzept A7): .text-label in Tiefblau (Nachtrag
-   Gestaltung 22.09.2026); auf Tiefblau-Flächen --color-auf-tiefblau. */
+   Gestaltung 22.09.2026); auf Tiefblau-Flächen --color-auf-tiefblau.
+   Abstand zum Titel darunter 16 px (Claude Design, Fassung A). */
 .etikette {
   color: var(--color-tiefblau);
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--space-2);
 }
 
 /* Textspalte: maximal 680 px (Konzept B5). */
@@ -446,6 +530,62 @@ p:last-child {
 a {
   color: var(--color-link);
   text-decoration: underline;
+  text-underline-offset: 0.17em;
+}
+
+/* Links im Fliesstext mit Tippfläche 44 px: Innenabstand oben und unten,
+   ohne dass sich die Zeile verschiebt (1lh = Zeilenhöhe). */
+.tippflaeche-zeile {
+  display: inline-block;
+  padding-block: calc((var(--tippflaeche) - 1lh) / 2);
+  margin-block: calc((1lh - var(--tippflaeche)) / 2);
+}
+
+/*
+ * Mobil-Verdichtung (Claude Design, Fassung A): unter 768 px stehen längere
+ * Inhalte in <details class="klappe">; die Zeile zum Antippen ist der
+ * bestehende Titel mit Plus/Minus-Icon (.klappe-plus / .klappe-minus) wie im
+ * FAQ, Tippfläche mindestens 44 px. Der Inhalt steht vollständig im HTML,
+ * ohne JavaScript. Ab 768 px ist der Inhalt immer offen und die Zeile zum
+ * Antippen verschwindet. Browser ohne ::details-content zeigen auch ab
+ * 768 px die Zeile zum Antippen (Inhalt bleibt erreichbar).
+ */
+.klappe > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tippflaeche);
+  padding-block: var(--space-2);
+  list-style: none;
+  cursor: pointer;
+}
+
+.klappe-icon {
+  flex: none;
+  display: inline-flex;
+  color: var(--color-tiefblau);
+}
+
+.klappe > summary::-webkit-details-marker {
+  display: none;
+}
+
+.klappe:not([open]) .klappe-minus,
+.klappe[open] .klappe-plus {
+  display: none;
+}
+
+@supports selector(::details-content) {
+  @media (min-width: 768px) {
+    .klappe::details-content {
+      content-visibility: visible;
+    }
+
+    .klappe > summary {
+      display: none;
+    }
+  }
 }
 
 main {

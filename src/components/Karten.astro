@@ -1,10 +1,17 @@
 ---
 /**
- * Karten (Konzept V3 C1 Abschnitt 4; B5 «Karten und Kacheln»).
+ * Karten (Konzept C1 Abschnitt 4, B5; Claude Design Fassung A:
+ * D04_Erhalten_A, M04_Erhalten_A, M04_Erhalten_offen).
  *
- * Warmgrau-Fläche mit Haarlinie, Linien-Icon Ocker oben links (32 px),
- * Kartentitel .text-h3, Text. Keine Buttons. Vier Spalten Desktop, zwei mal
- * zwei Tablet, untereinander Mobile.
+ * Ab 768 px: Raster zwei mal zwei, Karten auf Warmgrau ohne Rahmen, Linien-
+ * Icon Ocker (32 px), Kartentitel .text-h3, Text. Keine Buttons.
+ * Unter 768 px Mobil-Verdichtung (details/summary, .klappe in global.css):
+ * Icon und Kartentitel bleiben sichtbar, der Text klappt aus; Haarlinien
+ * zwischen den Karten, Plus/Minus-Icon wie im FAQ.
+ *
+ * Der Kartentitel steht zweimal im HTML: in der Zeile zum Antippen (mobil)
+ * und über dem Text (ab 768 px, immer offen); sichtbar und vorgelesen wird
+ * immer nur einer.
  *
  * Parameter:
  *   karten  Liste { icon, titel, text }
@@ -28,31 +35,57 @@ const { karten } = Astro.props;
   {
     karten.map((k) => (
       <li class="karte">
-        <span class="karte-icon">
-          <Icon name={k.icon} groesse={32} />
-        </span>
-        <h3 class="text-h3">{k.titel}</h3>
-        <p>{k.text}</p>
+        <details class="klappe">
+          <summary>
+            <span class="zeile-kopf">
+              <span class="karte-icon">
+                <Icon name={k.icon} groesse={32} />
+              </span>
+              <h3 class="text-faq zeile-titel">{k.titel}</h3>
+            </span>
+            <span class="klappe-icon">
+              <Icon name="plus" class="klappe-plus" />
+              <Icon name="minus" class="klappe-minus" />
+            </span>
+          </summary>
+          <div class="karte-inhalt">
+            <span class="karte-icon offen">
+              <Icon name={k.icon} groesse={32} />
+            </span>
+            <h3 class="text-h3 karte-titel offen">{k.titel}</h3>
+            <p class="karte-text">{k.text}</p>
+          </div>
+        </details>
       </li>
     ))
   }
 </ul>
 
 <style>
+  /* Mobil: Liste mit Haarlinien; die Zeile zum Antippen (summary) ist in
+     global.css gestaltet (.klappe). */
   .karten {
-    display: grid;
-    gap: var(--space-3);
+    border-top: 1px solid var(--color-linie);
   }
 
   .karte {
-    background-color: var(--color-warmgrau);
-    border: 1px solid var(--color-linie);
-    padding: var(--space-3);
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .zeile-kopf {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .zeile-titel {
+    margin: 0;
   }
 
   .karte-icon {
+    flex: none;
     display: inline-flex;
-    margin-bottom: var(--space-2);
   }
 
   /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
@@ -61,20 +94,47 @@ const { karten } = Astro.props;
     stroke: var(--color-ocker);
   }
 
-  .karte h3 {
-    margin-bottom: var(--space-1);
+  /* Text eingerückt unter den Titel: 32 px Icon plus 16 px Abstand. */
+  .karte-text {
+    margin: 0;
+    padding: 0 0 var(--space-2) var(--space-6);
   }
 
-  @media (min-width: 640px) {
+  .offen {
+    display: none;
+  }
+
+  /* Ab 768 px: Raster zwei mal zwei, Karten auf Warmgrau, immer offen. */
+  @media (min-width: 768px) {
     .karten {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+      border-top: 0;
+    }
+
+    .karte {
+      background-color: var(--color-warmgrau);
+      padding: calc(var(--space-4) + var(--space-1));
+      border-bottom: 0;
     }
   }
 
-  @media (min-width: 1024px) {
-    .karten {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--space-4);
+  @supports selector(::details-content) {
+    @media (min-width: 768px) {
+      .karte-icon.offen {
+        display: inline-flex;
+      }
+
+      .karte-titel.offen {
+        display: block;
+        margin: var(--space-3) 0 0;
+      }
+
+      .karte-text {
+        margin-top: calc(var(--space-1) * 1.5);
+        padding: 0;
+      }
     }
   }
 </style>

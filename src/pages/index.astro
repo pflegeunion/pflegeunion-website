@@ -1,7 +1,9 @@
 ---
 /**
- * Startseite gemäss Webseitenkonzept V3.0, Abschnitt C1 (zwölf Abschnitte).
- * Alle Texte wörtlich aus dem Konzept.
+ * Startseite: zwölf Abschnitte gemäss Konzept C1 in der Gestaltung aus
+ * Claude Design, Fassung A (Boards Main und Desktop_A_2 mit D01–D13,
+ * Mobil_A_1 bis Mobil_A_3 mit M01–M13). Alle Texte wörtlich aus den
+ * Boards, von der Geschäftsleitung freigegeben.
  */
 import Basis from '../layouts/Basis.astro';
 import Hero from '../components/Hero.astro';
@@ -17,49 +19,51 @@ import Demnaechst from '../components/Demnaechst.astro';
 import FAQ from '../components/FAQ.astro';
 import Anfrage from '../components/Anfrage.astro';
 
+const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
+
 const karten = [
   {
     icon: 'banknote',
-    titel: 'Fairer Lohn',
-    text: 'CHF 37.95 brutto pro Stunde für die geleistete Grundpflege mit Pflegehelferkurs; im ersten Jahr, bis zum Kurs, CHF 33.95 – mit AHV, Pensionskasse, Unfallversicherung und Ferienanspruch. Ihre Pflegearbeit zählt, auch für Ihre Altersvorsorge.',
+    titel: 'Fairer Lohn.',
+    text: "CHF 37.95 brutto pro Stunde für die geleistete Grundpflege mit Pflegehelferkurs; im ersten Jahr, bis zum Kurs, CHF 33.95 – mit AHV, Unfall- und Krankentaggeldversicherung, Ferienanspruch und ab einem Jahreslohn von CHF 22'680.– auch mit Pensionskasse. Ihre Pflegearbeit zählt, auch für Ihre Altersvorsorge.",
   },
   {
     icon: 'graduation-cap',
-    titel: 'Bezahlte Ausbildung',
+    titel: 'Bezahlte Ausbildung.',
     text: 'Sie absolvieren im ersten Jahr berufsbegleitend einen anerkannten Pflegehelferkurs. Wir organisieren ihn und übernehmen die Kosten.',
   },
   {
     icon: 'heart-handshake',
-    titel: 'Eine Pflegefachperson an Ihrer Seite',
+    titel: 'Eine Pflegefachperson an Ihrer Seite.',
     text: 'Eine diplomierte Pflegefachperson leitet Sie an, besucht Sie in den ersten vier Wochen jede Woche zu Hause, danach mindestens einmal im Monat – und ist erreichbar, wenn Sie unsicher sind.',
   },
   {
     icon: 'shield-check',
-    titel: 'Vertretung und Sicherheit',
-    text: 'Ferien, Krankheit, eine Pause: Wir organisieren die Vertretung. Die pflegerische Verantwortung liegt bei uns. Verändert sich die Situation, passen wir den Pflegeplan an.',
+    titel: 'Vertretung und Sicherheit.',
+    text: 'Ferien, Krankheit, eine Pause: Wir organisieren die Vertretung. Werden Sie selbst krank, sind Sie über unsere Krankentaggeldversicherung abgesichert. Die pflegerische Verantwortung liegt bei uns. Verändert sich die Situation, passen wir den Pflegeplan an.',
   },
 ] as const;
 
 const schritte = [
   {
-    titel: 'Erstgespräch',
+    titel: 'Erstgespräch.',
     text: 'Sie erzählen, wir hören zu – am Telefon oder bei Ihnen zu Hause. Kostenlos und unverbindlich. Wir melden uns innert 24 Stunden an Werktagen.',
   },
   {
-    titel: 'Abklärung zu Hause',
+    titel: 'Abklärung zu Hause.',
     text: 'Unsere Pflegefachperson erfasst den Pflegebedarf mit interRAI, dem in der Schweiz anerkannten Instrument. Daraus ergibt sich, wie viele Stunden Grundpflege die Krankenversicherung vergütet.',
   },
   {
-    titel: 'Anstellung',
+    titel: 'Anstellung.',
     text: 'Sie erhalten einen Arbeitsvertrag mit Stundenlohn, Sozialversicherungen und klar geregelten Aufgaben – schriftlich und verständlich. Sie wissen vor der Unterschrift, was Sie verdienen.',
   },
   {
-    titel: 'Instruktion und Start',
+    titel: 'Instruktion und Start.',
     text: 'Ihre Pflegefachperson leitet Sie Schritt für Schritt an: Pflegetechniken, Hygiene, Dokumentation in unserer App, Verhalten im Notfall. Dann starten Sie – mit Rückhalt.',
   },
   {
-    titel: 'Lohn und Begleitung',
-    text: 'Ihr Lohn kommt monatlich aufs Konto, spätestens am 7. des Folgemonats. Ihre Pflegefachperson bleibt an Ihrer Seite: anfangs wöchentlich, danach mindestens einmal im Monat bei Ihnen zu Hause.',
+    titel: 'Lohn und Begleitung.',
+    text: 'Ihr Lohn kommt monatlich aufs Konto. Ihre Pflegefachperson bleibt an Ihrer Seite: anfangs wöchentlich, danach mindestens einmal im Monat bei Ihnen zu Hause.',
   },
 ];
 
@@ -132,40 +136,54 @@ const fragen = [
   <!-- 1 Hero -->
   <Hero
     etikette="CHF 37.95 PRO STUNDE MIT PFLEGEHELFERKURS · SPITEX IM KANTON ZUG"
-    titel="Sie pflegen. Wir stellen Sie dafür an."
-    text="Sie helfen Ihrer Mutter beim Aufstehen, Ihrem Mann beim Waschen, Ihrem Vater beim Essen – Tag für Tag, meist unbezahlt. Bei der Pflegeunion werden Sie dafür angestellt: mit Stundenlohn und Sozialversicherungen, bezahltem Pflegehelferkurs und einer diplomierten Pflegefachperson, die Sie begleitet. Sie starten mit CHF 33.95 pro Stunde; den Pflegehelferkurs bezahlen wir, danach gelten CHF 37.95. Nicht gewinnorientiert, kantonal bewilligt, im ganzen Kanton Zug."
+    titel={['Sie pflegen.', 'Wir stellen Sie dafür an.']}
+    text="Sie helfen Ihrer Mutter beim Aufstehen, Ihrem Mann beim Waschen, Ihrem Vater beim Essen – Tag für Tag, meist unbezahlt. Bei der Pflegeunion werden Sie dafür angestellt: mit Lohn, Sozialversicherungen und einer diplomierten Pflegefachperson an Ihrer Seite. Mit Pflegehelferkurs verdienen Sie CHF 37.95 pro Stunde – den Kurs bezahlen wir, bis dahin gelten CHF 33.95."
     primaer={{ text: 'Lohn berechnen', ziel: '#lohnrechner' }}
     sekundaer={{ text: 'Erstgespräch vereinbaren', ziel: '#kontakt' }}
-    bildIdee="Bild folgt: Tochter oder Sohn mit Mutter oder Vater am Küchentisch oder beim Aufstehen, Tageslicht, beide im Tun."
+    bild="hero-sohn-vater"
+    bildAlt="Ein Sohn kämmt seinem betagten Vater zu Hause die Haare."
   />
 
-  <!-- 2 Lohnrechner (Baustein F, D1; kompakt, ohne Postleitzahl) -->
+  <!-- 2 Lohnrechner (Baustein F, nur die Stundenfrage) -->
   <Lohnrechner anker="lohnrechner" />
 
   <!-- 3 Trust-Leiste -->
   <TrustLeiste />
 
   <!-- 4 Was Sie erhalten -->
-  <Abschnitt flaeche="warmgrau" etikette="IHRE ANSTELLUNG BEI DER PFLEGEUNION" titel="Mehr als ein Lohn.">
+  <Abschnitt label="Was Sie erhalten" etikette="IHRE ANSTELLUNG BEI DER PFLEGEUNION" titel="Mehr als ein Lohn.">
     <Karten karten={karten} />
   </Abschnitt>
 
   <!-- 5 So funktioniert es -->
-  <Abschnitt anker="ablauf" etikette="IN FÜNF SCHRITTEN ZUR ANSTELLUNG" titel="Vom ersten Anruf bis zum ersten Lohn.">
+  <Abschnitt
+    flaeche="warmgrau"
+    anker="ablauf"
+    label="So funktioniert es"
+    etikette="IN FÜNF SCHRITTEN ZUR ANSTELLUNG"
+    titel="Vom ersten Anruf bis zum ersten Lohn."
+    seitlich
+    inhaltSpalte={6}
+  >
     <Schritte name="Vom ersten Anruf bis zum ersten Lohn." schritte={schritte} />
-    <p class="knopfzeile">
+    <p class="knopfzeile ablauf-knopf">
       <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
     </p>
   </Abschnitt>
 
   <!-- 6 Passt es? -->
-  <Abschnitt flaeche="warmgrau" etikette="PASST ES?" titel="Das sind die Voraussetzungen.">
-    <div class="zweispaltig zweispaltig--bild-links">
+  <Abschnitt label="Passt es?">
+    <div class="zweispaltig passt">
       <Bildflaeche
-        verhaeltnis="4:3"
-        idee="Bild folgt: Angehörige und Pflegefachperson im Gespräch."
+        bild="passt-familie-tisch"
+        alt="Eine ältere Frau im Rollstuhl sitzt mit ihrer Familie zu Hause am Tisch und trinkt ein Glas Wasser."
+        sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 48px)"
+        abTablet
+        class="passt-bild"
       />
-      <div>
+      <div class="passt-text">
+        <p class="text-label etikette">PASST ES?</p>
+        <h2 class="text-h2">Das sind die Voraussetzungen.</h2>
         <ul class="haken liste-blank">
           {
             voraussetzungen.map((v) => (
@@ -179,45 +197,50 @@ const fragen = [
           }
         </ul>
         <p class="abschluss">
-          Unsicher, ob es bei Ihnen passt? Rufen Sie an. Wir sagen es Ihnen ehrlich – auch wenn die
-          Antwort «nein» ist.
+          Unsicher, ob es bei Ihnen passt? Rufen Sie an oder schreiben Sie uns auf WhatsApp. Wir sagen es
+          Ihnen ehrlich – auch wenn die Antwort «nein» ist.
         </p>
-        <p><a class="telefon" href="tel:+41417842655">041 784 26 55</a></p>
+        <p class="kontaktzeile text-h3">
+          <a href="tel:+41417842655">041 784 26 55</a>
+        </p>
+        <p class="kontaktzeile kontaktzeile--whatsapp text-h3">
+          <a href={whatsapp}>
+            <Icon name="message-circle" />
+            <span>Auf WhatsApp schreiben</span>
+          </a>
+        </p>
       </div>
     </div>
   </Abschnitt>
 
   <!-- 7 Ehrlich gesagt -->
-  <Abschnitt>
-    <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht." ebene={2}>
-      <p>
-        <strong>Vergütet wird die Grundpflege:</strong> Hilfe bei Körperpflege, Anziehen, Essen und
-        Trinken, Bewegen, Toilettengang. Je nach Situation sind das etwa ein bis drei Stunden pro Tag.
-        Wie viele es bei Ihnen sind, zeigt die Abklärung.
-      </p>
-      <p>
-        <strong>
-          Nicht über die Krankenversicherung vergütet werden Gesellschaft und Beaufsichtigung,
-          Nachtpräsenz, Haushalt und Administratives.
-        </strong>
-        Das ist gesetzlich geregelt und bei allen Anbietern in der Schweiz gleich. Wenn Sie diese
-        Unterstützung brauchen, bieten wir sie als Betreuung und Hauswirtschaft an – zu einem festen
-        Stundentarif, den Sie vorher kennen.
-      </p>
-      <p>
-        <strong>
-          Medizinische Pflege wie Medikamente richten, Wundversorgung oder Injektionen bieten wir
-          zurzeit noch nicht an.
-        </strong>
-        Braucht die gepflegte Person solche Leistungen, klären wir im Erstgespräch mit Ihnen, wer sie
-        übernimmt.
-      </p>
-      <p>
-        <strong>Für die gepflegte Person ändert sich finanziell wenig:</strong> Sie bezahlt den
-        gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen
-        Spitex-Organisation. Ansprüche wie die Hilflosenentschädigung bleiben bestehen.
-      </p>
-      <p class="abschluss">
+  <Abschnitt flaeche="warmgrau" label="Ehrlich gesagt">
+    <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht." ebene={2} seitlich>
+      <div class="ehrlich-absaetze">
+        <p>
+          <strong>Vergütet wird die Grundpflege:</strong> Hilfe bei Körperpflege, Anziehen, Essen und
+          Trinken, Bewegen, Toilettengang. Je nach Situation sind das etwa ein bis drei Stunden pro Tag.
+          Wie viele es bei Ihnen sind, zeigt die Abklärung.
+        </p>
+        <p>
+          <strong>Nicht über die Krankenversicherung vergütet</strong> werden Gesellschaft und
+          Beaufsichtigung, Nachtpräsenz, Haushalt und Administratives. Das ist gesetzlich geregelt und bei
+          allen Anbietern in der Schweiz gleich. Wenn Sie diese Unterstützung brauchen, bieten wir sie als
+          Betreuung und Hauswirtschaft an – zu einem festen Stundentarif, den Sie vorher kennen.
+        </p>
+        <p>
+          <strong>Medizinische Pflege</strong> wie Medikamente richten, Wundversorgung oder Injektionen
+          bieten wir zurzeit noch nicht an. Braucht die gepflegte Person solche Leistungen, klären wir im
+          Erstgespräch mit Ihnen, wer sie übernimmt.
+        </p>
+        <p>
+          <strong>Für die gepflegte Person</strong> ändert sich finanziell wenig: Sie bezahlt den
+          gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen
+          Spitex-Organisation. Ansprüche wie die Hilflosenentschädigung bleiben bestehen.
+        </p>
+      </div>
+      <hr class="ehrlich-linie" />
+      <p class="text-h3 ehrlich-schluss">
         Wir versprechen Ihnen nichts, was wir nicht halten können. Dafür halten wir, was wir
         versprechen.
       </p>
@@ -225,74 +248,104 @@ const fragen = [
   </Abschnitt>
 
   <!-- 8 Betreuung & Hauswirtschaft -->
-  <Abschnitt flaeche="warmgrau" etikette="BETREUUNG & HAUSWIRTSCHAFT" titel="Und wenn es mehr braucht als Pflege?">
-    <div class="zweispaltig">
-      <div class="textspalte">
-        <p>
+  <Abschnitt label="Betreuung und Hauswirtschaft">
+    <div class="zweispaltig betreuung">
+      <div class="betreuung-text">
+        <p class="text-label etikette">BETREUUNG & HAUSWIRTSCHAFT</p>
+        <h2 class="text-h2">Und wenn es mehr braucht als Pflege?</h2>
+        <p class="einstieg">
           Ein Einkauf, der zu schwer geworden ist. Ein Mittagessen, das allein nicht schmeckt. Ein
-          Arzttermin, zu dem niemand begleiten kann. Ein Nachmittag, an dem Sie selbst einmal
-          durchatmen möchten. Unsere Betreuungspersonen kommen ins Haus – als Ergänzung zu Ihrer Pflege
-          oder für Haushalte im Kanton Zug, die einfach jemanden brauchen, der regelmässig da ist.
+          Arzttermin, zu dem niemand begleiten kann. Ein Nachmittag, an dem Sie selbst einmal durchatmen
+          möchten. Unsere Betreuungspersonen kommen ins Haus – als Ergänzung zu Ihrer Pflege oder für
+          Haushalte im Kanton Zug, die einfach jemanden brauchen, der regelmässig da ist.
         </p>
-        <ul class="leistungen">
-          {betreuungLeistungen.map((l) => <li>{l}</li>)}
+        <ul class="haken haken--eng liste-blank">
+          {
+            betreuungLeistungen.map((l) => (
+              <li>
+                <span class="haken-icon">
+                  <Icon name="check" />
+                </span>
+                <span>{l}</span>
+              </li>
+            ))
+          }
         </ul>
-        <p>
+        <p class="tarif">
           Private Leistung zu einem festen Stundentarif von CHF [XX.–], ohne Zuschläge.
           Ergänzungsleistungen und Zusatzversicherungen können sich beteiligen – wir prüfen das mit
           Ihnen.
         </p>
         <p class="knopfzeile">
-          <a class="button" href="/betreuung-hauswirtschaft/">Betreuung & Hauswirtschaft ansehen</a>
+          <a class="button button--sekundaer" href="/betreuung-hauswirtschaft/">Betreuung & Hauswirtschaft ansehen</a>
         </p>
       </div>
       <Bildflaeche
-        verhaeltnis="3:2"
-        idee="Bild folgt: Betreuungsperson und ältere Person beim Kochen oder Spaziergang."
+        bild="betreuung-kueche"
+        alt="Eine Betreuerin und eine ältere Frau bereiten zusammen in der Küche das Essen zu."
+        sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 48px)"
+        abTablet
+        class="betreuung-bild"
       />
     </div>
   </Abschnitt>
 
   <!-- 9 Wer dahintersteht -->
-  <Abschnitt etikette="ÜBER DIE PFLEGEUNION" titel="Ein Verein, drei Gesichter, ein Versprechen.">
-    <p class="textspalte">
-      Die Pflegeunion Schweiz ist ein nicht gewinnorientierter Verein mit Sitz in Rotkreuz, gegründet
-      2026 von Menschen aus der Spitex, die zwei Dinge zu oft gesehen haben: Angehörige, die längst
-      pflegen, aber weder Anleitung noch Anerkennung erhalten – und Pflegefachpersonen, die Formulare
-      statt Menschen betreuen. Wir stellen die einen an und entlasten die anderen von der
-      Administration. Es gibt keine Aktionäre. Überschüsse bleiben in der Pflege.
-    </p>
-    <ul class="personen liste-blank">
-      {
-        personen.map((p) => (
-          <li class="person">
-            <span class="person-name">{p.name}</span>
-            <span class="person-funktion text-small">{p.funktion}</span>
-          </li>
-        ))
-      }
-    </ul>
-    <p class="knopfzeile">
-      <a class="button button--sekundaer" href="/ueber-uns/">Mehr über uns</a>
-    </p>
+  <Abschnitt flaeche="warmgrau" label="Wer dahintersteht">
+    <div class="team">
+      <div class="team-text">
+        <p class="text-label etikette">ÜBER DIE PFLEGEUNION</p>
+        <h2 class="text-h2">Ein Verein, drei Gesichter, ein Versprechen.</h2>
+        <p class="einstieg">
+          Die Pflegeunion Schweiz ist ein nicht gewinnorientierter Verein mit Sitz in Rotkreuz, gegründet
+          2026 von Menschen aus der Spitex, die zwei Dinge zu oft gesehen haben: Angehörige, die längst
+          pflegen, aber weder Anleitung noch Anerkennung erhalten – und Pflegefachpersonen, die Formulare
+          statt Menschen betreuen. Wir stellen die einen an und entlasten die anderen von der
+          Administration. Es gibt keine Aktionäre. Überschüsse bleiben in der Pflege.
+        </p>
+      </div>
+      <ul class="personen liste-blank">
+        {
+          personen.map((p) => (
+            <li class="person">
+              <p class="text-h3-verdichtet person-name">{p.name}</p>
+              <p class="text-body-verdichtet person-funktion">{p.funktion}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="knopfzeile team-knopf">
+        <a class="button button--sekundaer" href="/ueber-uns/">Mehr über uns</a>
+      </p>
+    </div>
   </Abschnitt>
 
   <!-- 10 Demnächst -->
-  <Abschnitt etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt.">
-    <p class="textspalte einleitung">
+  <Abschnitt label="Demnächst" etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt." abstand="eng">
+    <p class="demnaechst-einleitung">
       Wir starten mit dem, was wir heute verlässlich leisten können: der Anstellung und Begleitung
       pflegender Angehöriger sowie Betreuung und Hauswirtschaft. Schritt für Schritt bauen wir unser
       Angebot aus. Diese Leistungen sind in Vorbereitung:
     </p>
-    <Demnaechst />
-    <p class="textspalte nachsatz">
+    <div class="demnaechst-modul">
+      <Demnaechst />
+    </div>
+    <p class="demnaechst-nachsatz">
       Sie brauchen eine dieser Leistungen schon heute? Rufen Sie uns trotzdem an – wir sagen Ihnen, ab
       wann wir sie anbieten, und nennen Ihnen bis dahin eine Anlaufstelle.
     </p>
   </Abschnitt>
 
   <!-- 11 Häufige Fragen -->
-  <Abschnitt flaeche="warmgrau" anker="fragen" etikette="HÄUFIGE FRAGEN" titel="Kurz beantwortet.">
+  <Abschnitt
+    flaeche="warmgrau"
+    anker="fragen"
+    label="Häufige Fragen"
+    etikette="HÄUFIGE FRAGEN"
+    titel="Kurz beantwortet."
+    abstand="mittel"
+    seitlich
+  >
     <FAQ fragen={fragen} />
   </Abschnitt>
 
@@ -301,26 +354,67 @@ const fragen = [
 </Basis>
 
 <style>
+  /* Buttons mobil in voller Breite, ab 480 px in natürlicher Breite. */
   .knopfzeile {
-    margin-top: var(--space-4);
+    margin: var(--space-4) 0 0;
   }
 
+  .knopfzeile .button {
+    display: block;
+    width: 100%;
+  }
+
+  @media (min-width: 480px) {
+    .knopfzeile .button {
+      display: inline-block;
+      width: auto;
+    }
+  }
+
+  /* So funktioniert es: Button unter dem Text der Schritte. */
+  @media (min-width: 1024px) {
+    .ablauf-knopf {
+      margin-top: calc(var(--space-4) + var(--space-1));
+      margin-left: calc(var(--schritt-zahl-spalte) + var(--space-3));
+    }
+  }
+
+  /* Zweispaltige Abschnitte (Passt es?, Betreuung): mobil Text allein, das
+     Bild erscheint ab 768 px (Bildflaeche mit abTablet). */
   .zweispaltig {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-6);
     align-items: start;
+  }
+
+  .zweispaltig h2 {
+    margin-bottom: 0;
+  }
+
+  /* Listen mit Haken: Icon Ocker (nur als Strich), 16 px Abstand zum Text. */
+  .haken {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  .haken--eng {
+    gap: calc(var(--space-1) * 1.5);
+    margin-top: var(--space-4);
   }
 
   .haken li {
     display: flex;
-    gap: var(--space-1);
-    margin-bottom: var(--space-2);
+    align-items: flex-start;
+    gap: var(--space-2);
   }
 
+  /* Icon mittig zur ersten Zeile (28 px Zeilenhöhe, 24 px Icon). */
   .haken-icon {
     flex: none;
     display: inline-flex;
-    margin-top: var(--space-1);
+    margin-top: calc(var(--space-1) / 4);
   }
 
   /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
@@ -330,77 +424,178 @@ const fragen = [
   }
 
   .abschluss {
-    margin-top: var(--space-3);
+    margin: var(--space-4) 0 0;
     font-weight: 700;
   }
 
-  .telefon {
+  /* Telefon und WhatsApp in Lato Bold 22 px Tiefblau, Tippfläche 44 px. */
+  .kontaktzeile {
+    margin: var(--space-1) 0 0;
+    color: var(--color-tiefblau);
+  }
+
+  .kontaktzeile--whatsapp {
+    margin-top: var(--space-2);
+  }
+
+  .kontaktzeile a {
     display: inline-flex;
     align-items: center;
-    min-height: var(--tippflaeche);
-    font-weight: 700;
+    gap: var(--space-1);
+    vertical-align: top;
+    padding-block: calc((var(--tippflaeche) - 1lh) / 2);
+    margin-block: calc((1lh - var(--tippflaeche)) / 2);
+    white-space: nowrap;
   }
 
-  .leistungen {
-    margin: 0 0 var(--space-2);
-    padding-left: var(--space-3);
+  .einstieg {
+    margin: var(--space-2) 0 0;
+    max-width: calc(var(--breite-text) - var(--space-4) - var(--space-1));
   }
 
-  .leistungen li {
-    margin-bottom: var(--space-1);
+  .tarif {
+    margin: var(--space-3) 0 0;
+  }
+
+  /* Ehrlich gesagt: Absätze im Abstand von 24 px, Linie in Tiefblau. */
+  .ehrlich-absaetze {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .ehrlich-absaetze p {
+    margin: 0;
+  }
+
+  .ehrlich-linie {
+    height: 0;
+    margin: var(--space-4) 0;
+    border: 0;
+    border-top: 1px solid var(--color-tiefblau);
+  }
+
+  .ehrlich-schluss {
+    margin: 0;
+  }
+
+  /* Wer dahintersteht */
+  .team-text h2 {
+    margin-bottom: 0;
   }
 
   .personen {
-    display: grid;
-    gap: var(--space-3);
-    margin-top: var(--space-4);
-  }
-
-  .person {
-    display: flex;
-    flex-direction: column;
-    padding-top: var(--space-2);
+    margin-top: var(--space-3);
     border-top: 1px solid var(--color-linie);
   }
 
-  .person-name {
-    font-weight: 700;
-    color: var(--color-tiefblau);
+  .person {
+    padding: calc(var(--space-1) * 1.5) 0;
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .person p {
+    margin: 0;
   }
 
   .person-funktion {
     color: var(--color-text-gedaempft);
   }
 
-  .einleitung {
-    margin-bottom: var(--space-4);
+  /* Demnächst */
+  .demnaechst-einleitung {
+    max-width: calc(var(--breite-text) - var(--space-4) - var(--space-1));
+    margin: 0;
   }
 
-  .nachsatz {
+  .demnaechst-modul {
     margin-top: var(--space-4);
   }
 
+  .demnaechst-nachsatz {
+    max-width: var(--breite-text);
+    margin: var(--space-4) 0 0;
+  }
+
   @media (min-width: 768px) {
-    .personen {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .person {
+      padding-block: var(--space-3);
+    }
+
+    .person-funktion {
+      margin-top: calc(var(--space-1) / 2);
     }
   }
 
   @media (min-width: 1024px) {
+    .haken {
+      margin-top: var(--space-4);
+    }
+
+    .abschluss {
+      margin-top: calc(var(--space-4) + var(--space-1));
+    }
+
+    .einstieg {
+      margin-top: var(--space-3);
+    }
+
+    .tarif {
+      margin-top: var(--space-4);
+    }
+
+    /* 12-Spalten-Raster wie im Board. */
     .zweispaltig {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: var(--space-6);
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      row-gap: 0;
     }
 
-    /* Mobile: Text vor Bild; Desktop: Bild links */
-    .zweispaltig--bild-links > :first-child {
-      order: 0;
+    /* Passt es?: Bild links (5 Spalten), Text ab Spalte 7. */
+    .passt :global(.passt-bild) {
+      grid-column: 1 / span 5;
+      grid-row: 1;
     }
-  }
 
-  @media (max-width: 1023px) {
-    .zweispaltig--bild-links > :first-child {
-      order: 1;
+    .passt-text {
+      grid-column: 7 / span 6;
+    }
+
+    /* Betreuung: Text 6 Spalten, Bild ab Spalte 8, 32 px tiefer. */
+    .betreuung-text {
+      grid-column: 1 / span 6;
+    }
+
+    .betreuung :global(.betreuung-bild) {
+      grid-column: 8 / span 5;
+      margin-top: var(--space-4);
+    }
+
+    /* Wer dahintersteht: Text und Button 7 Spalten, Personen ab Spalte 9. */
+    .team {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: start;
+    }
+
+    .team-text,
+    .team-knopf {
+      grid-column: 1 / span 7;
+    }
+
+    .personen {
+      grid-column: 9 / span 4;
+      grid-row: 1 / span 2;
+      margin-top: 0;
+    }
+
+    .demnaechst-modul {
+      margin-top: var(--space-6);
+    }
+
+    .demnaechst-nachsatz {
+      margin-top: calc(var(--space-4) + var(--space-1));
     }
   }
 </style>

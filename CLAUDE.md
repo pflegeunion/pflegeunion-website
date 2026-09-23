@@ -48,13 +48,24 @@ solange sie nicht ausdrücklich geändert werden.
     Grösse.
   - Ebenfalls erlaubt: **weiche Akkordeons** (FAQ mit `details`/`summary`,
     das Öffnen nur per CSS).
+  - **Mobil-Verdichtung** unter 768 px mit `details`/`summary` (Klasse
+    `.klappe` in `global.css`), ohne JavaScript, Inhalt vollständig im HTML,
+    ab 768 px immer offen. Zeile zum Antippen = der bestehende Titel mit
+    Plus/Minus-Icon wie im FAQ, Tippfläche mindestens 44 px.
   - Strukturierte Daten als `<script type="application/ld+json">` sind Daten,
     kein Skript, und erlaubt.
+- **WhatsApp** nur als Textlink mit Sprechblasen-Icon (Lucide
+  «message-circle», Tiefblau, auf Tiefblau Weiss), überall derselbe Link
+  `https://wa.me/41417842655?text=…`; kein schwebender Button, kein grünes
+  WhatsApp-Logo, kein Skript oder Widget von Meta.
 - **Lohnrechner**: Stundensätze **37.95** (mit Kurs) und **33.95**
   (Einstieg), **26 Tage pro Monat**, **312 Tage pro Jahr** (sechs Einsatztage
-  pro Woche; Entscheid GL 22.09.2026, Art. 20 ArG), an einer einzigen Stelle
-  konfiguriert: im Block `KONFIG` von `src/scripts/lohnrechner.js`. Monat
-  gerundet auf CHF 10, Jahr auf CHF 100. Die Zahlen 30,4 und 365 sowie
+  pro Woche; Entscheid GL 22.09.2026, Art. 20 ArG) und BVG-Schwelle
+  **22'680** (Jahreslohn), an einer einzigen Stelle konfiguriert: im Block
+  `KONFIG` von `src/scripts/lohnrechner.js` (`SATZ_KURS`, `SATZ_EINSTIEG`,
+  `TAGE_MONAT`, `TAGE_JAHR`, `BVG_SCHWELLE`). Monat
+  gerundet auf CHF 10, Jahr auf CHF 100. Das Ergebnis zeigt immer den Lohn
+  mit Kurs; die Pensionskasse steht nur ab der BVG-Schwelle (ab 2 Stunden). Die Zahlen 30,4 und 365 sowie
   CHF 2'310.–, 27'700.–, 2'060.–, 1'150.–, 3'460.– und 39.90 sind überholt
   und dürfen nicht vorkommen – im Rechner, in der Fallback-Tabelle, in
   Lohnbeispielen und in allen Texten (Pfadkoordinaten in den Logo-SVG sind
@@ -70,11 +81,12 @@ solange sie nicht ausdrücklich geändert werden.
   | 3 Stunden | rund CHF 2'960.– | rund CHF 35'500.– | rund CHF 2'650.– | rund CHF 31'800.– |
   | mehr als 3 Stunden | über CHF 2'960.– | über CHF 35'500.– | über CHF 2'650.– | über CHF 31'800.– |
 
-- **Formular**: sieben Felder, vier davon Pflicht (Anliegen, Name, Telefon,
-  Postleitzahl und Ort); Spam-Schutz mit Honeypot und Zeitprüfung, kein
-  Captcha; keine Speicherung der Anfragen beim Hoster; keine
-  Gesundheitsangaben als Pflichtfeld; Rechnerwerte als versteckte Felder
-  (`stunden`, `kurs`, `ergebnis`); Zugangsdaten nur über
+- **Formular**: acht Felder, vier davon Pflicht (Anliegen, Name, Telefon,
+  Postleitzahl und Ort); Feld 2 (Pflegehelferkurs) nur bei «Anstellung als
+  pflegender Angehöriger», per CSS `:has()`; Spam-Schutz mit Honeypot und
+  Zeitprüfung, kein Captcha; keine Speicherung der Anfragen beim Hoster;
+  keine Gesundheitsangaben als Pflichtfeld; Rechnerwerte als versteckte
+  Felder (`stunden`, `ergebnis`); Zugangsdaten nur über
   Umgebungsvariablen. Stand: Das Formular hat noch kein Versandziel;
   Versand, Eingangsbestätigung und Zeitprüfung folgen in einem eigenen Pull
   Request. Damit kommt auch die Funktion des Buttons «Ergebnis per E-Mail
@@ -188,8 +200,9 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
   beides mit `prefers-reduced-motion`.
 - Alle interaktiven Elemente mit sichtbarem Fokusring 2 px Tiefblau
-  (`:focus-visible` in `global.css`) und Tippflächen von mindestens 44 px
-  (`--tippflaeche`). Auf Tiefblau-Flächen ist der Fokusring 2 px
+  (`:focus-visible` in `global.css`). **Alle Links und Tippflächen
+  mindestens 44 px** (`--tippflaeche`; Links im Fliesstext mit
+  `.tippflaeche-zeile`). Auf Tiefblau-Flächen ist der Fokusring 2 px
   `--color-auf-tiefblau` (Entscheid GL 22.09.2026): zentral über die Klasse
   `.flaeche-tiefblau` in `global.css`, die jede Tiefblau-Fläche mit
   fokussierbaren Elementen trägt (Anfrage-Abschnitt links, Fusszeile).
@@ -227,7 +240,10 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
 - Weitere Web-Textstile in `global.css`, ebenfalls aus dem Konzept:
   `.text-menu` (Mobilmenü 24 px, B2), `.text-faq` (FAQ-Frage 20 px, B4) und
   `.text-trust` (Trust-Leiste 16 px, B4) und `.text-result-einheit` («rund»,
-  «CHF» und «.–» in der Rechner-Zahl, 24 px, B5). Dazu `.button--sekundaer`,
+  «CHF» und «.–» in der Rechner-Zahl, 24 px, B5). Aus Claude Design
+  (Fassung A): `.text-button` (17/22 px Bold, Auswahlfelder des Rechners),
+  `.text-h3-verdichtet` und `.text-body-verdichtet` (unter 768 px 18/28 bzw.
+  16/24 px, darüber wie `.text-h3` bzw. `.text-body`). Dazu `.button--sekundaer`,
   `.etikette` (Übertitel in Tiefblau), `.textspalte` (680 px) und
   `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
@@ -235,9 +251,13 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `--breite-text` (680 px), `--breite-hero-text` (560 px),
   `--hoehe-kopfzeile` (72 px),
   `--hoehe-kopfzeile-mobil` (60 px), `--tippflaeche` (44 px),
-  `--tippflaeche-gross` (56 px, Auswahlfelder des Lohnrechners).
+  `--tippflaeche-gross` (56 px, Auswahlfelder des Lohnrechners),
+  `--hoehe-menuezeile` (50 px, Menüzeile 1024–1359 px),
+  `--abstand-abschnitt` (64 px, ab 1024 px 96 px), `--seitenrand` (16 px,
+  ab 768 px 24 px), `--hoehe-sticky` (Höhe der sticky Kopfzeile für
+  Sprungziele), `--schritt-zahl-spalte` (Spalte der Schrittzahlen).
 - **Breakpoints** stehen an einer einzigen Stelle, im Abschnitt «Breakpoints
-  der Webseite» in `global.css`: **480, 640, 768, 1024 und 1360 px**. Da
+  der Webseite» in `global.css`: **360, 480, 640, 768, 1024 und 1360 px**. Da
   CSS-Variablen in Media Queries nicht wirken, tragen die Komponenten die
   Zahl ein, und zwar nur diese Werte in der Schreibweise `(min-width: Xpx)`
   bzw. `(max-width: X−1 px)`. `npm test` prüft alle Media Queries in `src/`.
@@ -257,20 +277,20 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
-| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter; der Ring überdeckt auf keiner Breite Text, Telefonzeile oder Buttons (unter 1024 px beginnt er unter dem Textblock) | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
+| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter; der Ring überdeckt auf keiner Breite Text, Telefonzeile oder Buttons (unter 1024 px beginnt er unter dem Textblock) | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Hero: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht; keine Stockbilder, keine Icons als Ersatz |
-| `Karten.astro` | Karten (C1 Abschnitt 4, B5): Warmgrau mit Haarlinie, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
-| `Schritte.astro` | Nummerierte Schritte mit Zahl in `.text-step` (Tiefblau), Titel, Text; schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
-| `Header.astro` | Kopfzeile (B2): sticky, Logo, fünf Menüpunkte, Telefon, Primär-Button, Burger-Menü unter 1360 px mit Menü-Skript, Utility-Zeile nur ab 1360 px zusammen mit der Desktop-Navigation (nie gleichzeitig mit dem Burger) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
+| `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar) | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
+| `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
+| `Header.astro` | Kopfzeile (B2): sticky; ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
 | `TrustLeiste.astro` | Baustein A: fünf Belege mit Linien-Icon in Ocker | Unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt jeder Unterseite |
-| `Anfrage.astro` | Baustein B: Anfrage-Abschnitt mit Formular (D2), Anker `#kontakt` | Am Ende jeder Seite; H2 je Seite per Parameter `titel` |
+| `Anfrage.astro` | Baustein B: Anfrage-Abschnitt mit Kontaktangaben (Telefon, E-Mail, WhatsApp) und Formular (D2, acht Felder), Anker `#kontakt`; mobil E-Mail, Erreichbarkeit und Nachricht unter «Weitere Angaben (freiwillig)» | Am Ende jeder Seite; H2 je Seite per Parameter `titel` |
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
-| `FAQ.astro` | Baustein E: Akkordeon mit details/summary und schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit zwei Fragen als Radio-Gruppen (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden / «Nein, noch nicht»), Ergebnis als `aria-live`-Region mit Zahl in `.text-result`, Hinweiskasten bei «mehr als 3 Stunden», Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, versteckte Felder stunden/kurs/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schliessen-Button in `Anfrage.astro`). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1 sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
-| `Demnaechst.astro` | Baustein G: sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
+| `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (immer Lohn mit Kurs), Zusatzhinweis bei «mehr als 3 Stunden», Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1 sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
+| `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
 - Die Parameter jeder Komponente sind im Kommentarkopf der Datei beschrieben.
@@ -279,9 +299,11 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   Was Sie erhalten · So funktioniert es (`#ablauf`) · Passt es? · Ehrlich
   gesagt · Betreuung & Hauswirtschaft · Wer dahintersteht · Demnächst ·
   Häufige Fragen · Anfrage (`#kontakt`).
-- Bilder liegen noch nicht vor. `Bildflaeche.astro` zeigt bis dahin die
-  Bildidee aus der Regieanweisung; sobald Fotos vorliegen, werden `src` und
-  `alt` gesetzt (WebP, maximal 1600 px breit, Lizenz dokumentiert).
+- Fotos liegen als WebP unter `public/bilder/` (je 480, 800 und 1200 px
+  breit, `srcset`, eckig), Herkunft und Lizenz in `LIZENZEN.md`.
+  `Bildflaeche.astro` bindet sie über `bild` ein; ohne Foto zeigt sie die
+  Bildidee aus der Regieanweisung. Neue Fotos: WebP, maximal 1600 px breit,
+  Lizenz in `LIZENZEN.md` dokumentiert.
 - Die Lohnrechner-Seite `/lohnrechner/` (Konzept C2) besteht noch nicht.
   Der Lohnrechner erhält dort `anker="rechner"`, damit der Header-Button
   (`#rechner`) ihn erreicht. Beim Bau der Seite werden diese Inhalte aus der
@@ -321,6 +343,10 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   Gedankenstrich für ganze Franken).
 - Hauptbegriff **«pflegende Angehörige»**.
 - **«nicht gewinnorientiert»**, niemals «gemeinnützig» oder «Non-Profit».
+- Lohn: **CHF 37.95 mit Kurs immer zuerst**, CHF 33.95 danach, **nie «ab»**.
+- **Kein Lohndatum** auf der Webseite (kein Auszahlungstag).
+- **Krankentaggeldversicherung** überall nennen, wo Versicherungen stehen;
+  **Pensionskasse nur mit Bedingung** (ab BVG-Schwelle).
 - Buttons sagen, was passiert («Lohn berechnen», «Erstgespräch vereinbaren»,
   «Anfrage senden»); nie «Mehr erfahren», «Absenden», «Jetzt …».
 - Sachlicher, ruhiger Ton.
@@ -331,10 +357,12 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 design/tokens.json   Design-Tokens, einzige Quelle für Farben, Schriften,
                      Abstände und Radien
 design/brand-book.md Brand Book (Corporate Design)
+LIZENZEN.md          Herkunft und Lizenzen von Fotos, Schriften und Icons
 scripts/             build-tokens.mjs erzeugt src/styles/tokens.css
 public/fonts/        lokale Lato- und Playfair-Display-Dateien (WOFF2) und
                      Lizenzen
 public/logos/        Logo-Dateien (SVG)
+public/bilder/       Fotos als WebP (480, 800, 1200 px)
 public/              favicon-32.png und apple-touch-icon.png
 src/components/      wiederkehrende Bausteine (Header, Footer, Hero, Abschnitt,
                      Lohnrechner, TrustLeiste, Karten, Schritte, Bildflaeche,

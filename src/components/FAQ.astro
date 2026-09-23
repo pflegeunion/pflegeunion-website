@@ -1,15 +1,17 @@
 ---
 /**
- * Baustein E – FAQ (Konzept V3 B4).
+ * Baustein E – FAQ (Konzept B4; Claude Design Fassung A: D11_FAQ, M11_FAQ).
  *
- * Akkordeon mit details/summary: Frage Lato Bold 20 px Tiefblau, Antwort
- * 18 px, Haarlinie zwischen den Einträgen, Plus/Minus-Icon rechts. Alle
- * Antworten stehen im HTML. Öffnet weich, respektiert
- * prefers-reduced-motion. Dieselben Daten werden als schema.org FAQPage
- * (JSON-LD) ausgegeben.
+ * Akkordeon mit details/summary auf allen Breiten: Frage als H3 in Lato Bold
+ * 20 px Tiefblau (.text-faq), Antwort 18 px (max. 680 px), Haarlinie
+ * zwischen den Einträgen, Plus/Minus-Icon rechts. Die erste Frage ist
+ * geöffnet (wie im Board). Alle Antworten stehen im HTML. Öffnet weich,
+ * respektiert prefers-reduced-motion. Dieselben Daten werden als schema.org
+ * FAQPage (JSON-LD) ausgegeben.
  *
  * Parameter:
- *   fragen  Liste { frage, antwort }; die Antwort ist Text ohne HTML
+ *   fragen      Liste { frage, antwort }; die Antwort ist Text ohne HTML
+ *   ersteOffen  erste Frage geöffnet (Standard true)
  */
 import Icon from './Icon.astro';
 
@@ -20,9 +22,10 @@ interface Frage {
 
 interface Props {
   fragen: Frage[];
+  ersteOffen?: boolean;
 }
 
-const { fragen } = Astro.props;
+const { fragen, ersteOffen = true } = Astro.props;
 
 const faqPage = {
   '@context': 'https://schema.org',
@@ -37,10 +40,10 @@ const faqPage = {
 
 <div class="faq">
   {
-    fragen.map((f) => (
-      <details class="eintrag">
-        <summary class="frage text-faq">
-          <span class="frage-text">{f.frage}</span>
+    fragen.map((f, i) => (
+      <details class="eintrag" open={ersteOffen && i === 0}>
+        <summary class="frage">
+          <h3 class="text-faq frage-text">{f.frage}</h3>
           <span class="frage-icon">
             <Icon name="plus" class="icon-plus" />
             <Icon name="minus" class="icon-minus" />
@@ -66,11 +69,11 @@ const faqPage = {
 
   .frage {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-2);
+    gap: var(--space-3);
     min-height: var(--tippflaeche);
-    padding-block: var(--space-2);
+    padding-block: calc(var(--space-2) + var(--space-1) / 2);
     list-style: none;
     cursor: pointer;
   }
@@ -79,9 +82,15 @@ const faqPage = {
     display: none;
   }
 
+  .frage-text {
+    margin: 0;
+  }
+
+  /* Icon mittig zur ersten Zeile der Frage (28 px Zeilenhöhe, 24 px Icon). */
   .frage-icon {
     flex: none;
     display: inline-flex;
+    margin-top: calc(var(--space-1) / 4);
     color: var(--color-tiefblau);
   }
 
@@ -93,7 +102,7 @@ const faqPage = {
 
   .antwort {
     max-width: var(--breite-text);
-    padding-bottom: var(--space-3);
+    padding-bottom: calc(var(--space-2) + var(--space-1) / 2);
   }
 
   .eintrag[open] .antwort {
@@ -113,6 +122,16 @@ const faqPage = {
   @media (prefers-reduced-motion: reduce) {
     .eintrag[open] .antwort {
       animation: none;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .frage {
+      padding-block: var(--space-3);
+    }
+
+    .antwort {
+      padding-bottom: var(--space-3);
     }
   }
 </style>

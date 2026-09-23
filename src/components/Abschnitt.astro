@@ -1,41 +1,69 @@
 ---
 /**
- * Rahmen für jeden Seitenabschnitt (Konzept V3 B5).
+ * Rahmen für jeden Seitenabschnitt (Konzept B5, Claude Design Fassung A).
  *
- * Fläche weiss oder warmgrau, Innenbreite maximal 1200 px, Abstand
- * --space-8 oben und unten. Etikette und H2 stehen in der Textspalte
- * (maximal 680 px); weiterer Inhalt kommt über den Slot und kann mit der
- * Klasse `textspalte` ebenfalls auf 680 px begrenzt werden.
+ * Fläche weiss oder warmgrau, Innenbreite maximal 1200 px plus Seitenrand,
+ * Abstand oben und unten 64 px, ab 1024 px 96 px (--abstand-abschnitt).
+ * Etikette und H2 stehen über dem Inhalt; mit `seitlich` ab 1024 px links
+ * in den Spalten 1–4 des 12-Spalten-Rasters, der Inhalt rechts ab Spalte
+ * `inhaltSpalte`. Weiterer Inhalt kommt über den Slot.
  *
  * Parameter:
- *   flaeche   'weiss' (Standard) oder 'warmgrau'
- *   anker     id des Abschnitts, z. B. 'ablauf' für /#ablauf
- *   etikette  Übertitel in Versalien (optional)
- *   titel     H2 (optional)
- *   class     zusätzliche Klassen
+ *   flaeche       'weiss' (Standard) oder 'warmgrau'
+ *   anker         id des Abschnitts, z. B. 'ablauf' für /#ablauf
+ *   label         aria-label des Abschnitts (Name aus dem Board)
+ *   etikette      Übertitel in Versalien (optional)
+ *   titel         H2 (optional)
+ *   abstand       Abstand vom Titel zum Inhalt: 'eng' (16 px, ab 1024 px
+ *                 24 px; Titel gefolgt von Text), 'weit' (Standard, 24 px,
+ *                 ab 1024 px 48 px) oder 'mittel' (32 px, ab 1024 px 48 px)
+ *   seitlich      Titel ab 1024 px links neben dem Inhalt (Standard false)
+ *   inhaltSpalte  erste Rasterspalte des Inhalts bei `seitlich` (Standard 5)
+ *   class         zusätzliche Klassen
  */
 interface Props {
   flaeche?: 'weiss' | 'warmgrau';
   anker?: string;
+  label?: string;
   etikette?: string;
   titel?: string;
+  abstand?: 'eng' | 'weit' | 'mittel';
+  seitlich?: boolean;
+  inhaltSpalte?: number;
   class?: string;
 }
 
-const { flaeche = 'weiss', anker, etikette, titel, class: klasse } = Astro.props;
+const {
+  flaeche = 'weiss',
+  anker,
+  label,
+  etikette,
+  titel,
+  abstand = 'weit',
+  seitlich = false,
+  inhaltSpalte = 5,
+  class: klasse,
+} = Astro.props;
 ---
 
-<section id={anker} class:list={['abschnitt', `abschnitt--${flaeche}`, klasse]}>
+<section
+  id={anker}
+  aria-label={label}
+  class:list={['abschnitt', `abschnitt--${flaeche}`, `abschnitt--${abstand}`, { 'abschnitt--seitlich': seitlich }, klasse]}
+  style={seitlich ? `--inhalt-spalte: ${inhaltSpalte}` : undefined}
+>
   <div class="abschnitt-inhalt">
     {
       (etikette || titel) && (
-        <div class="abschnitt-kopf textspalte">
+        <div class="abschnitt-kopf">
           {etikette && <p class="text-label etikette">{etikette}</p>}
           {titel && <h2 class="text-h2">{titel}</h2>}
         </div>
       )
     }
-    <slot />
+    <div class="abschnitt-rumpf">
+      <slot />
+    </div>
   </div>
 </section>
 
@@ -49,12 +77,21 @@ const { flaeche = 'weiss', anker, etikette, titel, class: klasse } = Astro.props
   }
 
   .abschnitt-inhalt {
-    max-width: var(--breite-inhalt);
+    max-width: calc(var(--breite-inhalt) + 2 * var(--seitenrand));
     margin: 0 auto;
-    padding: var(--space-8) var(--space-2);
+    padding: var(--abstand-abschnitt) var(--seitenrand);
   }
 
   .abschnitt-kopf {
+    max-width: var(--breite-text);
+    margin-bottom: var(--space-3);
+  }
+
+  .abschnitt--eng .abschnitt-kopf {
+    margin-bottom: var(--space-2);
+  }
+
+  .abschnitt--mittel .abschnitt-kopf {
     margin-bottom: var(--space-4);
   }
 
@@ -62,9 +99,34 @@ const { flaeche = 'weiss', anker, etikette, titel, class: klasse } = Astro.props
     margin-bottom: 0;
   }
 
-  @media (min-width: 768px) {
-    .abschnitt-inhalt {
-      padding-inline: var(--space-3);
+  .abschnitt-rumpf {
+    min-width: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .abschnitt--eng .abschnitt-kopf {
+      margin-bottom: var(--space-3);
+    }
+
+    .abschnitt--weit .abschnitt-kopf,
+    .abschnitt--mittel .abschnitt-kopf {
+      margin-bottom: var(--space-6);
+    }
+
+    .abschnitt--seitlich .abschnitt-inhalt {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: start;
+    }
+
+    .abschnitt--seitlich .abschnitt-kopf {
+      grid-column: 1 / span 4;
+      margin-bottom: 0;
+    }
+
+    .abschnitt--seitlich .abschnitt-rumpf {
+      grid-column: var(--inhalt-spalte) / -1;
     }
   }
 </style>

@@ -1,34 +1,42 @@
 ---
 /**
- * Baustein F – Lohnrechner (Konzept V3 C1 Abschnitt 2, D1).
+ * Baustein F – Lohnrechner (Konzept C1 Abschnitt 2, D1; Claude Design
+ * Fassung A: D02_Lohnrechner_A, M02_Lohnrechner_A).
  *
  * Warmgrau-Fläche mit Übertitel, H2 und Einleitung, darunter der Rechner auf
- * weisser Fläche: links die Eingaben (Radio-Gruppen mit sichtbaren Labels),
- * rechts das Ergebnis als Live-Region; auf Mobile untereinander.
+ * weisser Fläche: eine Frage (Stunden pro Tag) als Radio-Gruppe mit sechs
+ * Auswahlfeldern (mindestens 56 px hoch, aktiv Tiefblau mit weisser
+ * Schrift; Desktop in einer Reihe, mobil drei mal zwei), vorbelegt mit
+ * 2 Stunden, bedienbar mit Tab und Pfeiltasten. Darunter das Ergebnis als
+ * Streifen in Ocker hell (Live-Region): links die Zahl (Lohn mit
+ * Pflegehelferkurs, nie «ab»), rechts Jahreslohn und Buttons; mobil
+ * untereinander. Das Ergebnis ändert sich sofort, ohne Berechnen-Button.
+ * Zeile 2 nennt die Pensionskasse nur ab der BVG-Schwelle. Bei «mehr als 3
+ * Stunden» steht «über» statt «rund» und der Zusatzhinweis erscheint.
  *
- * Ohne JavaScript zeigt die Seite die Fallback-Tabelle, Tabelle 2 der
- * Korrektur Lohnrechner vom 22.09.2026 (Auswahl · Monat, mit Kurs · Jahr,
- * mit Kurs · Monat, Einstieg · Jahr, Einstieg), mit Fussnote und Buttons.
+ * Ohne JavaScript zeigt die Seite die Fallback-Tabelle (Auswahl · Monat, mit
+ * Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg) mit den Buttons.
  * Unter 640 px steht jede Auswahl als eigener Block mit den vier Werten
  * untereinander, damit die Seite nicht quer scrollt. Das Skript
  * src/scripts/lohnrechner.js blendet `[data-rechner-fallback]` aus und
  * `[data-rechner-ui]` ein.
  *
- * Sätze, Tage, Stundenstufen und Postleitzahlen stehen ausschliesslich im
- * Konfigurationsblock des Skripts (KONFIG); die Fallback-Tabelle wird beim
- * Build aus derselben Rechenlogik erzeugt und gegen die Kontrollwerte aus D1
- * geprüft.
+ * Sätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen stehen
+ * ausschliesslich im Konfigurationsblock des Skripts (KONFIG); Rechner und
+ * Fallback-Tabelle nutzen dieselbe Rechenlogik, die Tabelle wird beim Build
+ * gegen die Kontrollwerte aus D1 geprüft.
+ *
+ * «Erstgespräch vereinbaren» springt zu #kontakt und übergibt die Schätzung
+ * an das Formular (siehe Anfrage.astro).
  *
  * Parameter:
  *   anker         id des Abschnitts (Standard 'lohnrechner')
- *   vollstaendig  Vollständige Fassung für die Lohnrechner-Seite (Standard
- *                 false): zusätzlich Frage 3 (Postleitzahl, freiwillig) mit
- *                 den Meldungen aus D1 und der Sekundär-Button «Ergebnis per
+ *   vollstaendig  Fassung für die Lohnrechner-Seite (Standard false):
+ *                 zusätzlich die Frage nach der Postleitzahl mit den
+ *                 Meldungen aus D1 und der Sekundär-Button «Ergebnis per
  *                 E-Mail erhalten» (vorerst ohne Funktion, folgt mit dem
- *                 Formularversand); der Sekundär-Button «Alle Details zum
- *                 Lohn» entfällt dort.
+ *                 Formularversand) statt «Alle Details zum Lohn».
  */
-import Hinweiskasten from './Hinweiskasten.astro';
 import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
 
 interface Props {
@@ -38,9 +46,9 @@ interface Props {
 
 const { anker = 'lohnrechner', vollstaendig = false } = Astro.props;
 
-// Vorbelegung gemäss D1: 2 Stunden, «Nein, noch nicht».
-const vorbelegung = { stunden: '2', kurs: 'nein' };
-const start = ergebnis(stufeFuer(vorbelegung.stunden));
+// Vorbelegung gemäss D1: 2 Stunden.
+const vorbelegung = '2';
+const start = ergebnis(stufeFuer(vorbelegung));
 
 // Spalten der Fallback-Tabelle (Tabelle 2 der Korrektur vom 22.09.2026).
 const spalten = [
@@ -60,9 +68,9 @@ const zeilen = KONFIG.stufen.map((s) => {
   };
 });
 
-// Kontrollwerte aus Konzept D1, «Ergebniswerte (zur Kontrolle der Umsetzung)»,
-// Fassung V3.1 mit 26 Tagen pro Monat (Entscheid GL 22.09.2026, Art. 20 ArG).
-// Nur zur Prüfung beim Build; angezeigt werden die berechneten Werte.
+// Kontrollwerte aus Konzept D1 (26 Tage pro Monat, 312 Tage pro Jahr;
+// Entscheid GL 22.09.2026, Art. 20 ArG). Nur zur Prüfung beim Build;
+// angezeigt werden die berechneten Werte.
 const kontrolle = [
   ["rund CHF 990.–", "rund CHF 11'800.–", "rund CHF 880.–", "rund CHF 10'600.–"],
   ["rund CHF 1'480.–", "rund CHF 17'800.–", "rund CHF 1'320.–", "rund CHF 15'900.–"],
@@ -79,41 +87,33 @@ zeilen.forEach((z, i) => {
   }
 });
 
-const kursAntworten = [
-  { wert: 'nein', text: 'Nein, noch nicht' },
-  { wert: 'ja', text: 'Ja' },
-];
-
 // Eindeutige Namen und ids je Einsatz der Komponente.
 const id = anker;
 const nameStunden = `${id}-stunden`;
-const nameKurs = `${id}-kurs`;
 
-const satzMitKurs = KONFIG.satzMitKurs.toFixed(2);
-const satzEinstieg = KONFIG.satzEinstieg.toFixed(2);
+const satzKurs = KONFIG.SATZ_KURS.toFixed(2);
+const satzEinstieg = KONFIG.SATZ_EINSTIEG.toFixed(2);
 
-// Fussnote wörtlich aus D1 (Fassung V3.1): sechs Einsatztage pro Woche.
+// Fussnote wörtlich aus dem Board (sechs Einsatztage pro Woche).
 const fussnote =
-  `Bruttolohn bei CHF ${satzMitKurs} (mit Pflegehelferkurs) bzw. CHF ${satzEinstieg} (Einstieg) pro Stunde, ` +
-  `gerechnet auf sechs Einsatztage pro Woche (${KONFIG.tageProMonat} Tage pro Monat). Ein freier Tag pro Woche ` +
+  `Bruttolohn bei CHF ${satzKurs} (mit Pflegehelferkurs) bzw. CHF ${satzEinstieg} (Einstieg) pro Stunde, ` +
+  `gerechnet auf sechs Einsatztage pro Woche (${KONFIG.TAGE_MONAT} Tage pro Monat). Ein freier Tag pro Woche ` +
   'ist gesetzlich vorgeschrieben; die Pflege an diesem Tag stellen wir über die Vertretung sicher. ' +
   'Massgebend ist der Pflegebedarf, den unsere Pflegefachperson bei Ihnen zu Hause erfasst. ' +
   'Der definitive Lohn steht in Ihrem Arbeitsvertrag.';
 ---
 
-<section id={anker} class="rechner-abschnitt">
+<section id={anker} class="rechner-abschnitt" aria-label="Lohnrechner">
   <div class="rechner-inhalt">
-    <div class="kopf textspalte">
-      <p class="text-label etikette">IHR LOHN · IN 60 SEKUNDEN</p>
-      <h2 class="text-h2">Was würde ich verdienen?</h2>
-      <p>
-        Zwei Angaben genügen. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
-        kostenlosen Abklärung bei Ihnen zu Hause.
-      </p>
-    </div>
+    <p class="text-label etikette">IHR LOHN · IN 60 SEKUNDEN</p>
+    <h2 class="text-h2">Was würde ich verdienen?</h2>
+    <p class="einleitung">
+      Eine Angabe genügt. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
+      kostenlosen Abklärung bei Ihnen zu Hause.
+    </p>
 
-    <div class="rechner" data-rechner data-stunden={nameStunden} data-kurs={nameKurs}>
-      <!-- Fallback ohne JavaScript: dieselben Werte als Tabelle (Tabelle 2 der Korrektur vom 22.09.2026). -->
+    <div class="rechner" data-rechner data-stunden={nameStunden}>
+      <!-- Ohne JavaScript: dieselben Werte als Tabelle. -->
       <div class="fallback" data-rechner-fallback>
         <table>
           <thead>
@@ -134,8 +134,6 @@ const fussnote =
           </tbody>
         </table>
 
-        <p class="fussnote text-small textspalte">{fussnote}</p>
-
         <div class="knoepfe">
           <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
           {
@@ -150,53 +148,31 @@ const fussnote =
 
       <!-- Rechner: wird vom Skript eingeblendet. -->
       <div class="ui" data-rechner-ui hidden>
-        <div class="eingaben">
-          <fieldset class="frage">
+        <div class="eingabe">
+          <fieldset class="frage" aria-describedby={`${id}-hilfe`}>
             <legend>
               Wie viele Stunden pro Tag helfen Sie bei Körperpflege, Anziehen, Essen, Trinken und
               Bewegen?
             </legend>
-            <div class="felder felder--sechs">
+            <p class="hilfe text-small" id={`${id}-hilfe`}>
+              Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
+              Gesellschaft zählen hier nicht – dazu weiter unten mehr.
+            </p>
+            <div class="felder">
               {
                 zeilen.map((z) => (
-                  <label class="rechner-feld">
-                    <input
-                      type="radio"
-                      name={nameStunden}
-                      value={z.wert}
-                      checked={z.wert === vorbelegung.stunden}
-                    />
+                  <label class="rechner-feld text-button">
+                    <input type="radio" name={nameStunden} value={z.wert} checked={z.wert === vorbelegung} />
                     <span>{z.text}</span>
                   </label>
                 ))
               }
             </div>
-            <p class="hilfe text-small">
-              Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
-              Gesellschaft zählen hier nicht – dazu weiter unten mehr.
-            </p>
-          </fieldset>
-
-          <fieldset class="frage">
-            <legend>Haben Sie einen Pflegehelferkurs abgeschlossen?</legend>
-            <div class="felder felder--zwei">
-              {
-                kursAntworten.map((a) => (
-                  <label class="rechner-feld">
-                    <input
-                      type="radio"
-                      name={nameKurs}
-                      value={a.wert}
-                      checked={a.wert === vorbelegung.kurs}
-                    />
-                    <span>{a.text}</span>
-                  </label>
-                ))
-              }
-            </div>
-            <p class="hilfe text-small">
-              Mit Kurs verdienen Sie CHF {satzMitKurs} pro Stunde. Noch ohne Kurs starten Sie mit
-              CHF {satzEinstieg} und holen den Kurs im ersten Jahr nach – wir bezahlen ihn.
+            <p class="mehr-hinweis text-small" data-mehr hidden>
+              Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um die
+              Uhr. Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im Gespräch
+              zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
+              Hilflosenentschädigung, Ergänzungsleistungen.
             </p>
           </fieldset>
 
@@ -222,69 +198,59 @@ const fussnote =
         </div>
 
         <div class="ergebnis" aria-live="polite">
-          <p class="text-label etikette">IHRE SCHÄTZUNG</p>
-          <p class="ergebnis-titel" data-titel>Ihr Lohn nach dem Pflegehelferkurs, den wir bezahlen</p>
-          <p class="text-result zahl" aria-hidden="true">
-            <span class="text-result-einheit" data-praefix>rund</span>{' '}
-            <span class="text-result-einheit">CHF</span>{' '}
-            <span data-monat>{ziffern(start.monatMitKurs)}</span><span class="text-result-einheit">.–</span>
-          </p>
-          <p class="visually-hidden" data-vorlesen></p>
-          <p class="zeile-1">brutto pro Monat</p>
-          <p>
-            Das sind <span data-jahr>{chf(start.jahrMitKurs, start.mehr)}</span> pro Jahr – versichert mit AHV,
-            Pensionskasse und Unfallversicherung.
-          </p>
-          <p data-zeile3>
-            Bis zum Kursabschluss im ersten Jahr: <span data-einstieg>{chf(start.monatEinstieg, start.mehr)}</span> pro
-            Monat.
-          </p>
-
-          <div class="zusatz" data-mehr hidden>
-            <Hinweiskasten etikette="WICHTIG" titel="Die Krankenversicherung vergütet die Grundpflege">
-              <p>
-                Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um
-                die Uhr. Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im
-                Gespräch zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
-                Hilflosenentschädigung, Ergänzungsleistungen.
-              </p>
-            </Hinweiskasten>
+          <div class="ergebnis-zahl">
+            <p class="text-label etikette">IHRE SCHÄTZUNG</p>
+            <p class="ergebnis-titel">Ihr Lohn mit Pflegehelferkurs</p>
+            <p class="text-result zahl" aria-hidden="true">
+              <span class="text-result-einheit" data-praefix>rund</span>{' '}
+              <span class="text-result-einheit">CHF</span>{' '}
+              <span data-monat>{ziffern(start.monatMitKurs)}</span><span class="text-result-einheit">.–</span>
+            </p>
+            <p class="visually-hidden" data-vorlesen>{chf(start.monatMitKurs, start.mehr)} brutto pro Monat</p>
+            <p aria-hidden="true">brutto pro Monat</p>
           </div>
 
-          {
-            vollstaendig && (
-              <>
-                <p class="plz-meldung" data-plz-innerhalb hidden>
-                  Wir sind bei Ihnen im Einsatz.
-                </p>
-                <p class="plz-meldung" data-plz-ausserhalb hidden>
-                  Ehrlich gesagt: An diesem Ort sind wir noch nicht im Einsatz. Lassen Sie uns Ihre
-                  Kontaktdaten da – wir melden uns, sobald wir Ihre Region erschliessen, und nennen
-                  Ihnen auf Wunsch eine Anlaufstelle in Ihrer Nähe.
-                </p>
-              </>
-            )
-          }
+          <div class="ergebnis-rest">
+            <p class="zeile-2">
+              Das sind <span data-jahr>{chf(start.jahrMitKurs, start.mehr)}</span> pro Jahr – versichert mit
+              AHV, Unfall- und Krankentaggeldversicherung<span data-bvg hidden={!start.pensionskasse}>{' und Pensionskasse'}</span>.
+            </p>
 
-          <p class="fussnote text-small">{fussnote}</p>
-
-          <div class="knoepfe">
-            <a class="button" href="#kontakt" data-erstgespraech>Erstgespräch vereinbaren</a>
             {
-              vollstaendig ? (
-                <button type="button" class="button button--sekundaer" data-email>
-                  Ergebnis per E-Mail erhalten
-                </button>
-              ) : (
-                <a class="button button--sekundaer" href="/lohnrechner/">
-                  Alle Details zum Lohn
-                </a>
+              vollstaendig && (
+                <>
+                  <p class="plz-meldung" data-plz-innerhalb hidden>
+                    Wir sind bei Ihnen im Einsatz.
+                  </p>
+                  <p class="plz-meldung" data-plz-ausserhalb hidden>
+                    Ehrlich gesagt: An diesem Ort sind wir noch nicht im Einsatz. Lassen Sie uns Ihre
+                    Kontaktdaten da – wir melden uns, sobald wir Ihre Region erschliessen, und nennen
+                    Ihnen auf Wunsch eine Anlaufstelle in Ihrer Nähe.
+                  </p>
+                </>
               )
             }
+
+            <div class="knoepfe">
+              <a class="button" href="#kontakt" data-erstgespraech>Erstgespräch vereinbaren</a>
+              {
+                vollstaendig ? (
+                  <button type="button" class="button button--sekundaer" data-email>
+                    Ergebnis per E-Mail erhalten
+                  </button>
+                ) : (
+                  <a class="button button--sekundaer" href="/lohnrechner/">
+                    Alle Details zum Lohn
+                  </a>
+                )
+              }
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <p class="fussnote text-small">{fussnote}</p>
   </div>
 </section>
 
@@ -296,27 +262,29 @@ const fussnote =
   }
 
   .rechner-inhalt {
-    max-width: var(--breite-inhalt);
+    max-width: calc(var(--breite-inhalt) + 2 * var(--seitenrand));
     margin: 0 auto;
-    padding: var(--space-8) var(--space-2);
+    padding: var(--abstand-abschnitt) var(--seitenrand);
   }
 
-  .kopf {
-    margin-bottom: var(--space-4);
+  .rechner-inhalt h2 {
+    margin-bottom: 0;
   }
 
-  .kopf h2 {
-    margin-bottom: var(--space-2);
+  .einleitung {
+    max-width: calc(var(--breite-text) - var(--space-4) - var(--space-1));
+    margin: var(--space-2) 0 0;
   }
 
+  /* Weisse Rechnerfläche; mobil über die ganze Breite. */
   .rechner {
+    margin: var(--space-3) calc(-1 * var(--seitenrand)) 0;
     background-color: var(--color-weiss);
-    padding: var(--space-3);
   }
 
   /* Fallback-Tabelle ohne JavaScript */
   .fallback {
-    overflow-x: auto;
+    padding: var(--space-3) var(--seitenrand);
   }
 
   /* Fünf gleich breite Spalten, damit kein Betrag über drei Zeilen bricht. */
@@ -376,54 +344,48 @@ const fussnote =
     }
   }
 
-  .fallback .fussnote {
-    margin: var(--space-3) 0 var(--space-4);
+  .fallback .knoepfe {
+    margin-top: var(--space-4);
   }
 
-  /* Rechner: Eingaben und Ergebnis, auf Mobile untereinander */
-  .ui {
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  /* hidden gilt auch für die Grid-Fläche (ohne JavaScript bleibt der Rechner versteckt). */
+  /* hidden gilt auch für die Fläche (ohne JavaScript bleibt der Rechner versteckt). */
   .ui[hidden] {
     display: none;
   }
 
+  /* Eingabe: die Frage mit sechs Auswahlfeldern */
+  .eingabe {
+    padding: var(--space-3) var(--seitenrand);
+  }
+
   .frage {
-    margin: 0 0 var(--space-4);
+    margin: 0;
     padding: 0;
     border: 0;
     min-width: 0;
   }
 
-  .frage:last-child {
-    margin-bottom: 0;
-  }
-
   .frage legend,
   .frage--plz label {
     display: block;
+    max-width: var(--breite-text);
     padding: 0;
-    margin-bottom: var(--space-2);
     font-weight: 700;
   }
 
-  /* Auswahlfelder: eckig, 1-px-Rahmen text-gedaempft (Nachtrag Gestaltung
-     22.09.2026), mindestens 56 px hoch; Mobile drei mal zwei, Desktop sechs
-     nebeneinander. */
+  .hilfe {
+    max-width: var(--breite-text);
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-gedaempft);
+  }
+
+  /* Auswahlfelder: eckig, 1-px-Rahmen text-gedaempft, mindestens 56 px hoch;
+     mobil drei mal zwei, ab 1024 px sechs in einer Reihe. */
   .felder {
     display: grid;
-    gap: var(--space-1);
-  }
-
-  .felder--sechs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .felder--zwei {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-1);
+    margin-top: var(--space-2);
   }
 
   .rechner-feld {
@@ -432,14 +394,12 @@ const fussnote =
     align-items: center;
     justify-content: center;
     min-height: var(--tippflaeche-gross);
-    padding: var(--space-1);
+    padding: var(--space-1) calc(var(--space-1) * 1.5);
     border: 1px solid var(--color-text-gedaempft);
     background-color: var(--color-weiss);
     color: var(--color-schwarz);
     text-align: center;
-    font-weight: 700;
     cursor: pointer;
-    hyphens: auto;
   }
 
   /* Der Radio-Button bleibt fokussierbar, sichtbar ist das Feld selbst
@@ -465,91 +425,140 @@ const fussnote =
     outline-offset: 2px;
   }
 
-  .hilfe {
+  .mehr-hinweis {
+    max-width: var(--breite-text);
     margin: var(--space-2) 0 0;
-    color: var(--color-text-gedaempft);
+  }
+
+  .frage--plz {
+    margin-top: var(--space-4);
+  }
+
+  .frage--plz label {
+    margin-bottom: var(--space-1);
   }
 
   .frage--plz input {
     max-width: calc(var(--space-8) * 2);
   }
 
-  /* Ergebnis */
+  /* Ergebnis: Streifen in Ocker hell, mobil untereinander. */
   .ergebnis {
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--color-linie);
+    background-color: var(--color-ocker-hell);
+    padding: var(--space-4) var(--seitenrand);
   }
 
   .ergebnis-titel {
-    font-weight: 700;
-    margin-bottom: var(--space-1);
-  }
-
-  .zahl {
     margin: 0;
   }
 
-  .zeile-1 {
-    margin-bottom: var(--space-2);
+  .zahl {
+    margin: var(--space-1) 0 0;
+    white-space: nowrap;
   }
 
-  .zusatz,
-  .plz-meldung {
-    margin: var(--space-3) 0;
+  .ergebnis-zahl p:last-child {
+    margin: 0;
+  }
+
+  /* Mobil: Ocker-Linie zwischen Zahl und Jahreslohn (Grafik, keine Schrift). */
+  .ergebnis-rest {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-ocker);
+  }
+
+  /* Zeile 2 reserviert Platz, damit der Rechner beim Wechsel nicht springt. */
+  .zeile-2 {
+    margin: 0;
+    min-height: calc(4 * 1.55em);
   }
 
   .plz-meldung {
+    margin: var(--space-3) 0 0;
     padding: var(--space-2) var(--space-3);
     background-color: var(--color-tiefblau-hell);
   }
 
-  .fussnote {
-    margin: var(--space-3) 0 var(--space-4);
-    color: var(--color-text-gedaempft);
-  }
-
   .knoepfe {
     display: grid;
-    gap: var(--space-2);
+    gap: calc(var(--space-1) * 1.5);
+    margin-top: var(--space-4);
   }
 
-  .knoepfe .button {
-    text-align: center;
+  .fussnote {
+    max-width: var(--breite-text);
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-gedaempft);
   }
 
   @media (min-width: 480px) {
     .knoepfe {
       display: flex;
       flex-wrap: wrap;
+      gap: var(--space-2);
     }
   }
 
   @media (min-width: 768px) {
-    .rechner-inhalt {
-      padding-inline: var(--space-3);
-    }
-
     .rechner {
-      padding: var(--space-4);
+      margin-inline: 0;
     }
 
-    .felder--sechs {
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+    .fallback,
+    .eingabe {
+      padding: var(--space-6);
+    }
+
+    .ergebnis {
+      padding: var(--space-6);
     }
   }
 
   @media (min-width: 1024px) {
-    .ui {
-      grid-template-columns: 7fr 5fr;
-      gap: var(--space-6);
-      align-items: start;
+    .einleitung {
+      margin-top: var(--space-3);
     }
 
+    .rechner {
+      margin-top: var(--space-6);
+    }
+
+    .felder {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: calc(var(--space-1) * 1.5);
+      margin-top: var(--space-3);
+    }
+
+    /* Desktop: Zahl links (5 von 12 Spalten), rechts Jahreslohn und Buttons
+       mit Ocker-Linie davor. */
     .ergebnis {
-      padding-top: 0;
-      padding-left: var(--space-6);
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: stretch;
+    }
+
+    .ergebnis-zahl {
+      grid-column: 1 / span 5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .ergebnis-rest {
+      grid-column: 6 / span 7;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: 0;
+      padding: 0 0 0 var(--space-4);
       border-top: 0;
-      border-left: 1px solid var(--color-linie);
+      border-left: 1px solid var(--color-ocker);
+    }
+
+    .zeile-2 {
+      min-height: calc(2 * 1.55em);
     }
   }
 </style>

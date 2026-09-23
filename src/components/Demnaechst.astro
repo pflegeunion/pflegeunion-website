@@ -1,10 +1,15 @@
 ---
 /**
- * Baustein G – Demnächst-Modul (Konzept V3 B4).
+ * Baustein G – Demnächst-Modul (Konzept B4; Claude Design Fassung A:
+ * D10_Demnaechst, M10_Demnaechst, M10_Demnaechst_offen).
  *
- * Weisse Fläche mit Haarlinien-Raster: sechs Kacheln, jede mit Linien-Icon
- * in Tiefblau, Titel und einem Satz, oben rechts die Etikette «DEMNÄCHST»
- * in Tiefblau (Nachtrag Gestaltung 22.09.2026). Kein Button, kein Preis.
+ * Ab 768 px: weisse Fläche mit Haarlinien-Raster (zwei, ab 1024 px drei
+ * Spalten), jede Kachel mit Linien-Icon in Tiefblau, oben rechts die
+ * Etikette «DEMNÄCHST» in Tiefblau, Titel und ein Satz. Kein Button, kein
+ * Preis.
+ * Unter 768 px Mobil-Verdichtung (details/summary, .klappe in global.css):
+ * die Leistungen stehen hinter der Zeile «6 Leistungen in Vorbereitung»,
+ * die Etikette steht einmal über der Liste, ohne Icons.
  * Einsatz: Startseite Abschnitt 10 (kompakt), Über uns (mit Text).
  *
  * Parameter:
@@ -27,32 +32,32 @@ interface Props {
 const standard: Kachel[] = [
   {
     icon: 'cross',
-    titel: 'Behandlungspflege',
+    titel: 'Behandlungspflege.',
     text: 'Medikamente, Wundversorgung, Injektionen – durch diplomierte Pflegefachpersonen, in Absprache mit Ihrem Arzt.',
   },
   {
     icon: 'home',
-    titel: 'Pflege durch unser Fachpersonal',
+    titel: 'Pflege durch unser Fachpersonal.',
     text: 'Grundpflege für Haushalte ohne pflegende Angehörige.',
   },
   {
     icon: 'brain',
-    titel: 'Demenzbetreuung',
+    titel: 'Demenzbetreuung.',
     text: 'Geschulte Begleitung für Menschen mit Demenz und ihre Familien.',
   },
   {
     icon: 'heart',
-    titel: 'Palliative Care',
+    titel: 'Palliative Care.',
     text: 'Begleitung in der letzten Lebensphase – zu Hause, mit Ruhe und Fachwissen.',
   },
   {
     icon: 'activity',
-    titel: 'Onkologische Pflege',
+    titel: 'Onkologische Pflege.',
     text: 'Unterstützung während und nach einer Krebsbehandlung.',
   },
   {
     icon: 'message-circle',
-    titel: 'Psychiatrische Pflege',
+    titel: 'Psychiatrische Pflege.',
     text: 'Pflege und Begleitung bei psychischen Erkrankungen zu Hause.',
   },
 ];
@@ -60,59 +65,135 @@ const standard: Kachel[] = [
 const { kacheln = standard, etikette = 'DEMNÄCHST' } = Astro.props;
 ---
 
-<ul class="raster">
-  {
-    kacheln.map((k) => (
-      <li class="kachel">
-        <span class="kachel-icon">
-          <Icon name={k.icon} groesse={32} />
-        </span>
-        <span class="kachel-etikette text-label">{etikette}</span>
-        <h3 class="text-h3">{k.titel}</h3>
-        <p>{k.text}</p>
-      </li>
-    ))
-  }
-</ul>
+<details class="klappe demnaechst">
+  <summary>
+    <span class="text-faq">{kacheln.length} Leistungen in Vorbereitung</span>
+    <span class="klappe-icon">
+      <Icon name="plus" class="klappe-plus" />
+      <Icon name="minus" class="klappe-minus" />
+    </span>
+  </summary>
+  <div class="demnaechst-inhalt">
+    <p class="text-label etikette liste-etikette">{etikette}</p>
+    <ul class="raster">
+      {
+        kacheln.map((k) => (
+          <li class="kachel">
+            <div class="kachel-kopf">
+              <span class="kachel-icon">
+                <Icon name={k.icon} groesse={32} />
+              </span>
+              <span class="kachel-etikette text-label">{etikette}</span>
+            </div>
+            <h3 class="text-h3-verdichtet kachel-titel">{k.titel}</h3>
+            <p class="text-body-verdichtet kachel-text">{k.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</details>
 
 <style>
-  /* Haarlinien-Raster: 1 px Lücke auf linienfarbenem Grund. */
+  /* Mobil: eine Zeile zum Antippen mit Haarlinien oben und unten. */
+  .demnaechst {
+    border-top: 1px solid var(--color-linie);
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .demnaechst-inhalt {
+    padding-bottom: var(--space-2);
+  }
+
+  /* Die Etikette steht mobil einmal über der Liste. */
+  .liste-etikette {
+    margin: 0;
+  }
+
   .raster {
     list-style: none;
-    margin: 0;
+    margin: var(--space-2) 0 0;
     padding: 0;
-    display: grid;
-    gap: 1px;
-    background-color: var(--color-linie);
-    border: 1px solid var(--color-linie);
   }
 
   .kachel {
-    position: relative;
-    background-color: var(--color-weiss);
-    padding: var(--space-3);
+    padding: calc(var(--space-1) * 1.5) 0;
+    border-top: 1px solid var(--color-linie);
   }
 
-  .kachel-icon {
-    display: inline-flex;
-    color: var(--color-tiefblau);
-    margin-bottom: var(--space-2);
+  .kachel:first-child {
+    padding-top: 0;
+    border-top: 0;
   }
 
-  .kachel-etikette {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    color: var(--color-tiefblau);
+  .kachel:last-child {
+    padding-bottom: 0;
   }
 
-  .kachel h3 {
-    margin-bottom: var(--space-1);
+  .kachel-kopf {
+    display: none;
   }
 
-  @media (min-width: 640px) {
+  .kachel-titel {
+    margin: 0;
+    color: var(--color-schwarz);
+  }
+
+  .kachel-text {
+    margin: calc(var(--space-1) / 2) 0 0;
+  }
+
+  /* Ab 768 px: Haarlinien-Raster, 1 px Lücke auf linienfarbenem Grund;
+     Icon und Etikette auf jeder Kachel. */
+  @media (min-width: 768px) {
+    .demnaechst {
+      border: 0;
+    }
+
+    .demnaechst-inhalt {
+      padding-bottom: 0;
+    }
+
+    .liste-etikette {
+      display: none;
+    }
+
     .raster {
+      margin: 0;
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background-color: var(--color-linie);
+      border: 1px solid var(--color-linie);
+    }
+
+    .kachel,
+    .kachel:first-child,
+    .kachel:last-child {
+      background-color: var(--color-weiss);
+      padding: var(--space-4);
+      border-top: 0;
+    }
+
+    .kachel-kopf {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+
+    .kachel-icon {
+      display: inline-flex;
+      color: var(--color-tiefblau);
+    }
+
+    .kachel-etikette {
+      color: var(--color-tiefblau);
+    }
+
+    .kachel-text {
+      margin-top: var(--space-1);
     }
   }
 
