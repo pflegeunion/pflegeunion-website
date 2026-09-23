@@ -1,9 +1,10 @@
 /**
  * Prüft die Rechenlogik des Lohnrechners gegen die Tabelle «Ergebniswerte
- * (zur Kontrolle der Umsetzung)» aus Webseitenkonzept V3.1, Teil D1
- * (26 Tage pro Monat, 312 Tage pro Jahr; Entscheid GL 22.09.2026, Art. 20 ArG):
+ * (zur Kontrolle der Umsetzung)» aus dem Konzept, Teil D1 (26 Tage pro
+ * Monat, 312 Tage pro Jahr; Entscheid GL 22.09.2026, Art. 20 ArG):
  * sechs Stufen × Monat mit Kurs, Jahr mit Kurs, Monat Einstieg, Jahr Einstieg.
- * Dazu Rundung, Anzeigeformat, Skriptgrösse und Postleitzahl-Liste.
+ * Dazu Pensionskasse ab BVG-Schwelle, Übergabezeile, Rundung, Anzeigeformat,
+ * Skriptgrösse und Postleitzahl-Liste.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,9 +18,10 @@ import {
   jahreslohn,
   stufeFuer,
   plzImKantonZug,
+  uebergabeText,
 } from '../src/scripts/lohnrechner.js';
 
-// Kontrollwerte wörtlich aus Konzept D1 (Fassung V3.1).
+// Kontrollwerte wörtlich aus Konzept D1.
 const tabelle = [
   ['1 Stunde', 'rund CHF 990.–', "rund CHF 11'800.–", 'rund CHF 880.–', "rund CHF 10'600.–"],
   ['1½ Stunden', "rund CHF 1'480.–", "rund CHF 17'800.–", "rund CHF 1'320.–", "rund CHF 15'900.–"],
@@ -30,11 +32,12 @@ const tabelle = [
 ];
 
 test('Konfiguration entspricht D1', () => {
-  assert.equal(KONFIG.satzMitKurs, 37.95);
-  assert.equal(KONFIG.satzEinstieg, 33.95);
+  assert.equal(KONFIG.SATZ_KURS, 37.95);
+  assert.equal(KONFIG.SATZ_EINSTIEG, 33.95);
   // Sechs Einsatztage pro Woche (Entscheid GL 22.09.2026, Art. 20 ArG).
-  assert.equal(KONFIG.tageProMonat, 26);
-  assert.equal(KONFIG.tageProJahr, 312);
+  assert.equal(KONFIG.TAGE_MONAT, 26);
+  assert.equal(KONFIG.TAGE_JAHR, 312);
+  assert.equal(KONFIG.BVG_SCHWELLE, 22680);
   assert.deepEqual(
     KONFIG.stufen.map((s) => s.text),
     tabelle.map((z) => z[0]),
@@ -51,6 +54,24 @@ for (const [text, monatKurs, jahrKurs, monatEinstieg, jahrEinstieg] of tabelle) 
     assert.equal(chf(w.jahrEinstieg, w.mehr), jahrEinstieg, 'Jahr Einstieg');
   });
 }
+
+test('Pensionskasse erst ab BVG-Schwelle (ab 2 Stunden)', () => {
+  const mit = KONFIG.stufen.filter((s) => ergebnis(s).pensionskasse).map((s) => s.text);
+  assert.deepEqual(mit, ['2 Stunden', '2½ Stunden', '3 Stunden', 'mehr als 3 Stunden']);
+  assert.equal(ergebnis(stufeFuer('1')).pensionskasse, false);
+  assert.equal(ergebnis(stufeFuer('1.5')).pensionskasse, false);
+});
+
+test('Übergabezeile über dem Formular', () => {
+  assert.equal(
+    uebergabeText(stufeFuer('2')),
+    "Ihre Schätzung aus dem Rechner: rund CHF 1'970.– pro Monat bei 2 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+  );
+  assert.equal(
+    uebergabeText(stufeFuer('mehr')),
+    "Ihre Schätzung aus dem Rechner: über CHF 2'960.– pro Monat bei mehr als 3 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+  );
+});
 
 test('Rundung kaufmännisch auf CHF 10.– bzw. CHF 100.–', () => {
   assert.equal(monatslohn(2, 37.95), 1970); // 1973.40

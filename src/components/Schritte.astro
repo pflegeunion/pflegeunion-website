@@ -1,16 +1,24 @@
 ---
 /**
- * Schritte (Konzept V3 C1 Abschnitt 5; Betreuung «drei Schritte»).
+ * Schritte (Konzept C1 Abschnitt 5; Betreuung «drei Schritte»; Claude
+ * Design Fassung A: D05_Ablauf_A, M05_Ablauf_A, M05_Ablauf_offen).
  *
- * Nummerierte Schritte: Zahl in .text-step (Lato Bold 40 px Tiefblau), darunter
- * Titel und Text. Keine Kreise, keine Verbindungslinien. Auf dem Desktop
- * nebeneinander (eine Spalte pro Schritt), auf Mobile untereinander.
- * Dieselben Daten werden als schema.org HowTo (JSON-LD) ausgegeben.
+ * Nummerierte Liste mit Haarlinien: Zahl in .text-step (Lato Bold 40 px
+ * Tiefblau), daneben Titel (.text-h3) und Text. Keine Kreise, keine
+ * Verbindungslinien. Unter 768 px Mobil-Verdichtung (details/summary,
+ * .klappe in global.css): Zahl und Schritttitel bleiben sichtbar, der Text
+ * klappt aus. Ab 768 px immer offen.
+ *
+ * Der Schritttitel steht zweimal im HTML: in der Zeile zum Antippen (mobil)
+ * und neben der Zahl (ab 768 px); sichtbar und vorgelesen wird immer nur
+ * einer. Dieselben Daten werden als schema.org HowTo (JSON-LD) ausgegeben.
  *
  * Parameter:
  *   name      Name des Ablaufs für HowTo (in der Regel die H2 des Abschnitts)
  *   schritte  Liste { titel, text }
  */
+import Icon from './Icon.astro';
+
 interface Schritt {
   titel: string;
   text: string;
@@ -36,13 +44,33 @@ const howTo = {
 };
 ---
 
-<ol class="schritte liste-blank" style={`--spalten: ${schritte.length}`}>
+<ol class="schritte liste-blank">
   {
     schritte.map((s, i) => (
       <li class="schritt">
-        <span class="text-step zahl" aria-hidden="true">{i + 1}</span>
-        <h3 class="text-h3">{s.titel}</h3>
-        <p>{s.text}</p>
+        <details class="klappe">
+          <summary>
+            <span class="zeile-kopf">
+              <span class="text-step zeile-zahl" aria-hidden="true">
+                {i + 1}
+              </span>
+              <h3 class="text-faq zeile-titel">{s.titel}</h3>
+            </span>
+            <span class="klappe-icon">
+              <Icon name="plus" class="klappe-plus" />
+              <Icon name="minus" class="klappe-minus" />
+            </span>
+          </summary>
+          <div class="schritt-inhalt">
+            <span class="text-step zahl offen" aria-hidden="true">
+              {i + 1}
+            </span>
+            <div>
+              <h3 class="text-h3 schritt-titel offen">{s.titel}</h3>
+              <p class="schritt-text">{s.text}</p>
+            </div>
+          </div>
+        </details>
       </li>
     ))
   }
@@ -51,30 +79,63 @@ const howTo = {
 
 <style>
   .schritte {
-    display: grid;
-    gap: var(--space-4);
-    counter-reset: schritt;
+    border-top: 1px solid var(--color-linie);
   }
 
-  .zahl {
-    display: block;
-    margin-bottom: var(--space-1);
+  .schritt {
+    border-bottom: 1px solid var(--color-linie);
   }
 
-  .schritt h3 {
-    margin-bottom: var(--space-1);
+  .zeile-kopf {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
   }
 
-  @media (min-width: 640px) {
-    .schritte {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .zeile-zahl {
+    flex: none;
+    width: calc(var(--space-4) + var(--space-1));
   }
 
-  @media (min-width: 1024px) {
-    .schritte {
-      grid-template-columns: repeat(var(--spalten), minmax(0, 1fr));
-      gap: var(--space-3);
+  .zeile-titel {
+    margin: 0;
+  }
+
+  /* Text eingerückt unter den Titel: 40 px Zahl plus 16 px Abstand. */
+  .schritt-text {
+    margin: 0;
+    padding: 0 0 var(--space-2) calc(var(--space-4) + var(--space-1) + var(--space-2));
+  }
+
+  .offen {
+    display: none;
+  }
+
+  /* Ab 768 px: Zahl links in eigener Spalte, Titel und Text daneben. */
+  @supports selector(::details-content) {
+    @media (min-width: 768px) {
+      .schritt-inhalt {
+        display: grid;
+        grid-template-columns: var(--schritt-zahl-spalte) minmax(0, 1fr);
+        column-gap: var(--space-3);
+        padding-block: var(--space-4);
+      }
+
+      .zahl.offen {
+        display: block;
+      }
+
+      .schritt-titel.offen {
+        display: block;
+        margin: 0;
+      }
+
+      .schritt-text {
+        max-width: var(--breite-text);
+        margin-top: var(--space-1);
+        padding: 0;
+      }
     }
   }
 </style>

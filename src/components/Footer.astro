@@ -1,17 +1,28 @@
 ---
 /**
- * Fusszeile (Konzept V3 B3).
+ * Fusszeile (Konzept B3, Claude Design Fassung A: D13_Fusszeile,
+ * M13_Fusszeile).
  *
  * Tiefblau-Fläche (.flaeche-tiefblau: Fokusrahmen in --color-auf-tiefblau,
- * global.css), weisse Schrift 15 px, Negativ-Logo oben links, drei
- * Spalten (Kontakt, Angebot, Pflegeunion), darunter Vertrauenszeile und
- * Copyright. Adresse zusätzlich als schema.org Organization (JSON-LD).
- * Auf Mobile stehen die Spalten untereinander.
+ * global.css), weisse Schrift 15 px, oben eine weisse Haarlinie, darunter
+ * das Negativ-Logo. Drei Spalten (Kontakt, Angebot, Pflegeunion), darunter
+ * Vertrauenszeile und Copyright. Mobil steht «Kontakt» über der ganzen
+ * Breite, «Angebot» und «Pflegeunion» nebeneinander.
+ *
+ * WhatsApp als Textlink mit Sprechblasen-Icon (Lucide «message-circle»),
+ * weiss auf Tiefblau, normal gesetzt wie Telefon und E-Mail (gewollte
+ * Abweichung vom Board, das «WhatsApp» fett zeigt). Alle Links mit
+ * Tippfläche 44 px.
+ *
+ * Adresse, Telefon und Logo zusätzlich als schema.org Organization (JSON-LD).
  *
  * Keine Parameter.
  */
+import Icon from './Icon.astro';
+
 const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 const email = 'info@pflegeunion.ch';
+const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
 
 const angebot = [
   { text: 'Angehörige anstellen', ziel: '/#ablauf' },
@@ -69,49 +80,47 @@ const organisation = {
 
 <footer class="fusszeile flaeche-tiefblau text-small">
   <div class="fusszeile-inhalt">
-    <a class="logo" href="/">
-      <img
-        src="/logos/logo-horizontal-negativ.svg"
-        alt="Pflegeunion Schweiz, zur Startseite"
-        width="242"
-        height="48"
-      />
-    </a>
+    <img class="logo" src="/logos/logo-horizontal-negativ.svg" alt="Pflegeunion Schweiz" width="242" height="48" />
 
     <div class="spalten">
-      <div class="spalte">
-        <h2 class="spalte-titel text-small">Kontakt</h2>
-        <address class="adresse">
-          Pflegeunion Schweiz<br />
-          Grundstrasse 4b<br />
-          6343 Rotkreuz<br />
-          <a href={telefon.href}>{telefon.text}</a><br />
-          <a href={`mailto:${email}`}>{email}</a><br />
-          Geschäftsstelle Mo–Fr, 08.00–17.00 Uhr<br />
-          Pflegeeinsätze täglich 06.00–22.00 Uhr
-        </address>
+      <div class="spalte spalte--kontakt">
+        <h2 class="spalte-titel text-label">Kontakt</h2>
+        <ul class="liste">
+          <li class="zeile">Pflegeunion Schweiz</li>
+          <li class="zeile">Grundstrasse 4b</li>
+          <li class="zeile">6343 Rotkreuz</li>
+          <li class="kanaele">
+            <a href={telefon.href}>{telefon.text}</a>
+            <a class="whatsapp" href={whatsapp}>
+              <Icon name="message-circle" groesse={18} />
+              <span>WhatsApp</span>
+            </a>
+            <a href={`mailto:${email}`}>{email}</a>
+          </li>
+          <li class="zeile">Geschäftsstelle Mo–Fr, 08.00–17.00 Uhr</li>
+          <li class="zeile">Pflegeeinsätze täglich 06.00–22.00 Uhr</li>
+        </ul>
       </div>
 
       <div class="spalte">
-        <h2 class="spalte-titel text-small">Angebot</h2>
+        <h2 class="spalte-titel text-label">Angebot</h2>
         <ul class="liste">
           {angebot.map((p) => <li><a href={p.ziel}>{p.text}</a></li>)}
         </ul>
       </div>
 
       <div class="spalte">
-        <h2 class="spalte-titel text-small">Pflegeunion</h2>
+        <h2 class="spalte-titel text-label">Pflegeunion</h2>
         <ul class="liste">
           {pflegeunion.map((p) => <li><a href={p.ziel}>{p.text}</a></li>)}
         </ul>
       </div>
     </div>
 
-    <p class="vertrauen">
-      Kantonal bewilligte Spitex-Organisation · Nicht gewinnorientierter Verein · Tätig im ganzen
-      Kanton Zug
-    </p>
-    <p class="copyright">© 2026 Verein Pflegeunion Schweiz</p>
+    <div class="basis">
+      <p>Kantonal bewilligte Spitex-Organisation · Nicht gewinnorientierter Verein · Tätig im ganzen Kanton Zug</p>
+      <p>© 2026 Verein Pflegeunion Schweiz</p>
+    </div>
   </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(organisation)} />
@@ -121,12 +130,15 @@ const organisation = {
   .fusszeile {
     background-color: var(--color-tiefblau);
     color: var(--color-auf-tiefblau);
+    padding: 0 var(--seitenrand) var(--space-3);
   }
 
+  /* Weisse Haarlinie oben trennt die Fusszeile vom Anfrage-Abschnitt. */
   .fusszeile-inhalt {
     max-width: var(--breite-inhalt);
     margin: 0 auto;
-    padding: var(--space-6) var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-auf-tiefblau);
   }
 
   .fusszeile a {
@@ -134,13 +146,6 @@ const organisation = {
   }
 
   .logo {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tippflaeche);
-    margin-bottom: var(--space-4);
-  }
-
-  .logo img {
     display: block;
     height: var(--space-6);
     width: auto;
@@ -148,53 +153,102 @@ const organisation = {
 
   .spalten {
     display: grid;
-    gap: var(--space-4);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3) var(--space-2);
+    margin-top: var(--space-3);
+    align-items: start;
+  }
+
+  .spalte--kontakt {
+    grid-column: 1 / -1;
   }
 
   .spalte-titel {
-    margin: 0 0 var(--space-1);
-    font-weight: 700;
+    margin: 0;
     color: var(--color-auf-tiefblau);
-  }
-
-  .adresse {
-    font-style: normal;
   }
 
   .liste {
     list-style: none;
-    margin: 0;
+    margin: var(--space-1) 0 0;
     padding: 0;
   }
 
-  .liste li {
-    display: flex;
-  }
-
+  /* Alle Links mit Tippfläche 44 px. */
   .liste a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    gap: var(--space-1);
     min-height: var(--tippflaeche);
   }
 
-  .vertrauen {
-    margin: var(--space-6) 0 var(--space-1);
-    padding-top: var(--space-3);
+  /* Telefon, WhatsApp und E-Mail: mobil in zwei Spalten, spaltenweise
+     gelesen (Telefon und WhatsApp links, E-Mail rechts). */
+  .kanaele {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    column-gap: var(--space-2);
+  }
+
+  .whatsapp {
+    white-space: nowrap;
+  }
+
+  .basis {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
     border-top: 1px solid var(--color-auf-tiefblau);
   }
 
-  .copyright {
+  .basis p {
     margin: 0;
   }
 
   @media (min-width: 768px) {
+    .fusszeile {
+      padding-bottom: var(--space-6);
+    }
+
     .fusszeile-inhalt {
-      padding-inline: var(--space-3);
+      padding-top: var(--space-8);
     }
 
     .spalten {
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--space-6);
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+    }
+
+    .spalte--kontakt {
+      grid-column: auto;
+    }
+
+    .liste {
+      margin-top: var(--space-2);
+    }
+
+    .liste li {
+      display: flex;
+      align-items: center;
+      min-height: var(--space-4);
+    }
+
+    /* Desktop: Telefon, WhatsApp und E-Mail untereinander. */
+    .liste .kanaele {
+      display: block;
+    }
+
+    .basis {
+      flex-direction: row;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-top: var(--space-6);
+      padding-top: var(--space-3);
     }
   }
 </style>

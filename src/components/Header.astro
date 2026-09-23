@@ -1,15 +1,22 @@
 ---
 /**
- * Kopfzeile mit Navigation (Konzept V3.1 B2) und Utility-Zeile.
+ * Kopfzeile mit Navigation (Konzept B2, Claude Design Fassung A:
+ * Kopfzeile_Desktop, Kopfzeile_1280, Kopfzeile_1280_Scroll,
+ * Kopfzeile_1440_Scroll, Kopfzeile_Mobil, Trust_320).
  *
- * Sticky, 72 px Desktop / 60 px Mobile, weisse Fläche mit Haarlinie unten.
- * Logo links (horizontales Logo DE, unter 480 px Breite nur das Bildzeichen),
- * fünf Menüpunkte, Telefon, Primär-Button. Unterhalb von 1360 px ein
- * Burger-Menü; Telefon und Button bleiben ausserhalb des Menüs sichtbar.
- * Die Desktop-Navigation braucht rund 1310 px (Logo, fünf Punkte in 18 px,
- * Telefon, Button), deshalb ist die Kopfzeile bis --breite-kopfzeile breit.
- * Die Utility-Zeile erscheint nur zusammen mit der Desktop-Navigation ab
- * 1360 px, nie gleichzeitig mit dem Burger-Menü.
+ * Ab 1360 px eine Zeile, 72 px, sticky: Logo, fünf Menüpunkte, Telefon,
+ * Primär-Button. Darüber die Utility-Zeile (Warmgrau), die wegscrollt.
+ *
+ * 1024–1359 px zwei Zeilen: Hauptzeile 72 px (Logo, Telefon, Button),
+ * darunter die Menüzeile 50 px. Beide bleiben beim Scrollen sichtbar
+ * (zusammen 122 px, position: sticky, ohne JavaScript); die Utility-Zeile
+ * darüber scrollt weg.
+ *
+ * Unter 1024 px: Logo (unter 640 px nur das Bildzeichen), Telefon-Icon
+ * (Nummer ab 768 px ausgeschrieben), Primär-Button und Burger rechts,
+ * Tippflächen 44 × 44 px, keine Utility-Zeile. Unter 360 px stehen die
+ * Elemente ohne Zwischenräume und der Button hat 16 px Innenabstand
+ * (Board Kopfzeile_Mobil bzw. Trust_320).
  *
  * Primär-Button je Seite (B2): auf der Lohnrechner-Seite «Lohn berechnen» →
  * #rechner (dort erhält der Lohnrechner anker="rechner"), auf Betreuung &
@@ -19,14 +26,14 @@
  * Menü-Skript: neben dem Lohnrechner die einzige zweite Ausnahme vom
  * Verzicht auf JavaScript, inline, unter 1 KB, ohne Framework. Ohne
  * JavaScript bleibt die Navigation sichtbar (unter der Kopfzeile
- * umbrechend). Das Skript blendet den Burger ein, hält aria-expanded
- * aktuell und schliesst das Menü per Escape-Taste und beim Antippen eines
- * Menüpunkts. `npm test` prüft die Grösse.
+ * umbrechend) und der Burger verborgen. Das Skript blendet den Burger ein,
+ * hält aria-expanded aktuell und schliesst das Menü per Escape-Taste und
+ * beim Antippen eines Menüpunkts. `npm test` prüft die Grösse.
  *
  * Parameter:
  *   buttonText  Beschriftung des Primär-Buttons (Standard je Seite, siehe oben)
  *   buttonZiel  Ziel des Primär-Buttons (Standard je Seite, siehe oben)
- *   utility     Utility-Zeile über der Kopfzeile anzeigen (Standard true, nur Desktop)
+ *   utility     Utility-Zeile über der Kopfzeile anzeigen (Standard true, ab 1024 px)
  */
 import Icon from './Icon.astro';
 
@@ -59,6 +66,7 @@ const menue = [
 ];
 
 const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
+const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
 ---
 
 {
@@ -66,7 +74,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     <div class="utility text-small">
       <p class="utility-inhalt">
         Sie sind Arzt, Spital oder Beratungsstelle? Rufen Sie unsere Pflegedienstleitung an:{' '}
-        <a href={telefon.href}>{telefon.text}</a>
+        <a class="tippflaeche-zeile" href={telefon.href}>{telefon.text}</a>
       </p>
     </div>
   )
@@ -75,20 +83,8 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 <header class="kopfzeile" id="kopfzeile">
   <div class="kopfzeile-inhalt">
     <a class="logo" href="/">
-      <img
-        class="logo-horizontal"
-        src="/logos/logo-horizontal-de.svg"
-        alt="Pflegeunion Schweiz, zur Startseite"
-        width="242"
-        height="48"
-      />
-      <img
-        class="logo-bildzeichen"
-        src="/logos/bildzeichen-farbig.svg"
-        alt="Pflegeunion Schweiz, zur Startseite"
-        width="48"
-        height="48"
-      />
+      <img class="logo-horizontal" src="/logos/logo-horizontal-de.svg" alt={logoAlt} width="242" height="48" />
+      <img class="logo-bildzeichen" src="/logos/bildzeichen-farbig.svg" alt={logoAlt} width="48" height="48" />
     </a>
 
     <nav class="navigation" id="navigation" aria-label="Hauptnavigation">
@@ -109,17 +105,16 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
       </a>
     </nav>
 
-    <a class="telefon" href={telefon.href}>
+    <a class="telefon" href={telefon.href} aria-label={`Anrufen: ${telefon.text}`}>
       <Icon name="phone" />
       <span class="telefon-nummer">{telefon.text}</span>
     </a>
 
-    <a class="button" href={buttonZiel}>{buttonText}</a>
+    <a class="button kopf-button" href={buttonZiel}>{buttonText}</a>
 
-    <button class="burger" type="button" aria-expanded="false" aria-controls="navigation" hidden>
+    <button class="burger" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="navigation" hidden>
       <Icon name="menu" class="burger-auf" />
       <Icon name="x" class="burger-zu" />
-      <span class="visually-hidden">Menü</span>
     </button>
   </div>
 </header>
@@ -154,7 +149,8 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 </script>
 
 <style>
-  /* Utility-Zeile: nur mit der Desktop-Navigation (ab 1360 px), Warmgrau, über der Kopfzeile. */
+  /* Utility-Zeile: ab 1024 px (nie zusammen mit dem Burger), Warmgrau,
+     über der Kopfzeile, scrollt weg. Höhe 40 px: 8 + 24 + 8. */
   .utility {
     display: none;
     background-color: var(--color-warmgrau);
@@ -165,6 +161,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     max-width: var(--breite-kopfzeile);
     margin: 0 auto;
     padding: var(--space-1) var(--space-3);
+    line-height: var(--space-3);
   }
 
   .utility a {
@@ -181,16 +178,17 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     border-bottom: 1px solid var(--color-linie);
   }
 
+  /* Höhe inklusive 1-px-Haarlinie unten: 60 px, ab 768 px 72 px. */
   .kopfzeile-inhalt {
     position: relative;
     max-width: var(--breite-kopfzeile);
-    min-height: var(--hoehe-kopfzeile-mobil);
+    min-height: calc(var(--hoehe-kopfzeile-mobil) - 1px);
     margin: 0 auto;
-    padding-inline: var(--space-2);
+    padding-inline: var(--space-1);
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--space-1);
+    gap: 0;
   }
 
   /* Logo: Höhe 48 px, verlinkt auf die Startseite. */
@@ -208,7 +206,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     width: auto;
   }
 
-  /* Unter 480 px Breite nur das Bildzeichen (Mindestbreite des Logos 140 px). */
+  /* Unter 640 px nur das Bildzeichen (weniger als 140 px für das Logo frei). */
   .logo .logo-horizontal {
     display: none;
   }
@@ -217,7 +215,6 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
   .navigation {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
   }
 
   .menue {
@@ -229,12 +226,14 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     gap: 0 var(--space-3);
   }
 
+  /* Menüpunkte: Lato 18 px, Tiefblau, ohne Unterstreichung. */
   .menue-link {
     display: inline-flex;
     align-items: center;
     min-height: var(--tippflaeche);
     color: var(--color-tiefblau);
     text-decoration: none;
+    white-space: nowrap;
   }
 
   .menue-link:hover {
@@ -245,7 +244,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     display: none;
   }
 
-  /* Telefon: Lato Bold Tiefblau, Icon plus Nummer. */
+  /* Telefon: Icon mit Tippfläche 44 × 44 px, ab 768 px mit Nummer in Lato Bold Tiefblau. */
   .telefon {
     display: inline-flex;
     align-items: center;
@@ -259,7 +258,15 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     white-space: nowrap;
   }
 
-  /* Burger: eigene Darstellung statt des Primär-Buttons. */
+  .telefon-nummer {
+    display: none;
+  }
+
+  .kopf-button {
+    white-space: nowrap;
+  }
+
+  /* Burger rechts, Tippfläche 44 × 44 px, eigene Darstellung statt des Primär-Buttons. */
   .burger {
     display: inline-flex;
     align-items: center;
@@ -290,9 +297,9 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     display: block;
   }
 
-  /* Mobile: Navigation ohne JavaScript unter der Kopfzeile, mit JavaScript
-     hinter dem Burger. */
-  @media (max-width: 1359px) {
+  /* Unter 1024 px: Navigation ohne JavaScript unter der Kopfzeile, mit
+     JavaScript hinter dem Burger. */
+  @media (max-width: 1023px) {
     .navigation {
       order: 10;
       flex-basis: 100%;
@@ -309,7 +316,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
       left: 0;
       right: 0;
       top: 100%;
-      padding: var(--space-3) var(--space-2) var(--space-4);
+      padding: var(--space-3) var(--seitenrand) var(--space-4);
       background-color: var(--color-weiss);
       border-bottom: 1px solid var(--color-linie);
     }
@@ -319,6 +326,7 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
       gap: 0;
     }
 
+    /* Geöffnetes Mobilmenü: Lato Bold 24 px (B2, .text-menu). */
     .kopfzeile[data-js] .menue-link {
       display: flex;
       padding-block: var(--space-1);
@@ -336,35 +344,35 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
     }
   }
 
-  /* Ohne JavaScript: Menüpunkte in Fliesstextgrösse, nicht 24 px. */
+  /* Ohne JavaScript und in der Desktop-Navigation: Menüpunkte in
+     Fliesstextgrösse (Lato 18 px), nicht 24 px. */
   .kopfzeile:not([data-js]) .menue-link {
     font-size: inherit;
     line-height: inherit;
     font-weight: 400;
   }
 
-  /* Sehr schmale Geräte: engerer Rand, Telefonnummer nur für Screenreader,
-     Icon bleibt sichtbar. */
-  @media (max-width: 479px) {
-    .kopfzeile-inhalt {
-      padding-inline: var(--space-1);
-    }
-
-    .kopfzeile[data-js].menue-offen .navigation {
+  /* Unter 360 px: ohne Zwischenräume, Button-Innenabstand 16 px (Trust_320). */
+  @media (max-width: 359px) {
+    .kopf-button {
       padding-inline: var(--space-2);
     }
+  }
 
-    .telefon-nummer {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
+  /* Ab 360 px: Zwischenräume 8 px (Kopfzeile_Mobil). */
+  @media (min-width: 360px) {
+    .kopfzeile-inhalt {
+      gap: var(--space-1);
     }
   }
 
   @media (min-width: 480px) {
+    .kopfzeile-inhalt {
+      padding-inline: var(--space-2);
+    }
+  }
+
+  @media (min-width: 640px) {
     .logo .logo-horizontal {
       display: block;
     }
@@ -376,36 +384,68 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 
   @media (min-width: 768px) {
     .kopfzeile-inhalt {
-      min-height: var(--hoehe-kopfzeile);
+      min-height: calc(var(--hoehe-kopfzeile) - 1px);
       padding-inline: var(--space-3);
-      gap: var(--space-3);
+      gap: var(--space-2);
+    }
+
+    .telefon-nummer {
+      display: inline;
     }
   }
 
-  /* Desktop-Navigation in einer Zeile, darüber die Utility-Zeile. Beides
-     beim selben Breakpoint, an dem das Burger-Menü verschwindet. */
-  @media (min-width: 1360px) {
+  /* 1024–1359 px: zwei Zeilen, Hauptzeile 72 px ohne Unterkante, darunter
+     die Menüzeile 50 px mit Haarlinie oben und unten; beide sticky. */
+  @media (min-width: 1024px) {
     .utility {
       display: block;
     }
 
+    .burger {
+      display: none;
+    }
+
+    .kopfzeile {
+      border-bottom: 0;
+    }
+
     .kopfzeile-inhalt {
-      flex-wrap: nowrap;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-rows: var(--hoehe-kopfzeile) var(--hoehe-menuezeile);
+      column-gap: var(--space-2);
+      row-gap: 0;
+      min-height: 0;
+    }
+
+    .logo {
+      grid-row: 1;
+      grid-column: 1;
+      justify-self: start;
+    }
+
+    .telefon {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    .kopf-button {
+      grid-row: 1;
+      grid-column: 3;
     }
 
     .navigation {
-      order: 0;
-      flex-basis: auto;
-      padding-block: 0;
+      grid-row: 2;
+      grid-column: 1 / -1;
+      margin-inline: calc(-1 * var(--space-3));
+      padding-inline: var(--space-3);
+      border-top: 1px solid var(--color-linie);
+      border-bottom: 1px solid var(--color-linie);
     }
 
     .menue {
       flex-wrap: nowrap;
-      gap: 0 var(--space-2);
-    }
-
-    .menue-link {
-      white-space: nowrap;
+      gap: 0 var(--space-4);
     }
 
     .menue-link {
@@ -413,9 +453,29 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
       line-height: inherit;
       font-weight: 400;
     }
+  }
 
-    .burger {
-      display: none;
+  /* Ab 1360 px: eine Zeile, Menü zwischen Logo und Telefon. */
+  @media (min-width: 1360px) {
+    .kopfzeile {
+      border-bottom: 1px solid var(--color-linie);
+    }
+
+    .kopfzeile-inhalt {
+      display: flex;
+      flex-wrap: nowrap;
+      min-height: calc(var(--hoehe-kopfzeile) - 1px);
+      gap: var(--space-3);
+    }
+
+    .navigation {
+      margin-inline: 0;
+      padding-inline: 0;
+      border: 0;
+    }
+
+    .menue {
+      gap: 0 var(--space-2);
     }
   }
 </style>

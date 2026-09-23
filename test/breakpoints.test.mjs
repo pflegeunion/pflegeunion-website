@@ -28,7 +28,7 @@ function dateien(ordner) {
 }
 
 test('Breakpoints sind in global.css festgelegt', () => {
-  assert.deepEqual(breakpoints(), [480, 640, 768, 1024, 1360]);
+  assert.deepEqual(breakpoints(), [360, 480, 640, 768, 1024, 1360]);
 });
 
 test('Media Queries verwenden nur die festgelegten Breakpoints', () => {

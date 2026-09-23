@@ -2,41 +2,74 @@
 /**
  * Bildfläche: eckig, festes Seitenverhältnis, ohne Schatten.
  *
- * Solange keine Fotos vorliegen, zeigt die Fläche Warmgrau mit einem kurzen,
- * gedämpften Text zur Bildidee (Regieanweisung aus dem Konzept). Sobald ein
- * Bild vorhanden ist, werden `src` und `alt` gesetzt; die Fläche rendert dann
- * ein <img> im selben Seitenverhältnis. Kein Stockbild, kein Icon als Ersatz.
+ * Mit Foto: `bild` ist der Basisname der WebP-Dateien unter public/bilder/
+ * (je 480, 800 und 1200 px breit, z. B. «hero-sohn-vater» für
+ * /bilder/hero-sohn-vater-800.webp); die Fläche rendert ein <img> mit
+ * srcset und Lazy Loading (Hero: `prioritaet`). Herkunft und Lizenz der
+ * Fotos stehen in LIZENZEN.md.
+ *
+ * Ohne Foto zeigt die Fläche Warmgrau mit einem kurzen, gedämpften Text zur
+ * Bildidee (Regieanweisung aus dem Konzept). Kein Stockbild, kein Icon als
+ * Ersatz.
  *
  * Parameter:
  *   verhaeltnis  '3:2' (Standard) oder '4:3'
- *   idee         Bildidee als Text für die Platzhalterfläche
- *   src, alt     Bilddatei und Alternativtext, sobald vorhanden
+ *   bild         Basisname der WebP-Dateien unter public/bilder/
+ *   alt          Alternativtext zum Foto
+ *   sizes        sizes-Attribut für das srcset (Standard volle Breite)
  *   prioritaet   true für das Hero-Bild: kein Lazy Loading, hohe Priorität
+ *   abTablet     true: unter 768 px weder angezeigt noch geladen
+ *   idee         Bildidee als Text für die Platzhalterfläche (ohne Foto)
  *   class        zusätzliche Klassen
  */
 interface Props {
   verhaeltnis?: '3:2' | '4:3';
-  idee: string;
-  src?: string;
+  bild?: string;
   alt?: string;
+  sizes?: string;
   prioritaet?: boolean;
+  abTablet?: boolean;
+  idee?: string;
   class?: string;
 }
 
-const { verhaeltnis = '3:2', idee, src, alt = '', prioritaet = false, class: klasse } = Astro.props;
+const {
+  verhaeltnis = '3:2',
+  bild,
+  alt = '',
+  sizes = '100vw',
+  prioritaet = false,
+  abTablet = false,
+  idee = '',
+  class: klasse,
+} = Astro.props;
 const [b, h] = verhaeltnis.split(':');
+
+// Breiten der WebP-Dateien; die Vorlagen aus dem Design-Canvas sind 1200 px breit.
+const breiten = [480, 800, 1200];
+const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join(', ') : '';
+
+// Leeres 1×1-GIF: unter 768 px wählt der Browser diese Quelle und lädt das Foto nicht.
+const leer = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 ---
 
-<figure class:list={['bild', klasse]} style={`--verhaeltnis: ${b} / ${h}`}>
+<figure class:list={['bild', { 'bild--ab-tablet': abTablet }, klasse]} style={`--verhaeltnis: ${b} / ${h}`}>
   {
-    src ? (
-      <img
-        src={src}
-        alt={alt}
-        loading={prioritaet ? 'eager' : 'lazy'}
-        fetchpriority={prioritaet ? 'high' : 'auto'}
-        decoding={prioritaet ? 'sync' : 'async'}
-      />
+    bild ? (
+      <picture>
+        {abTablet && <source media="(max-width: 767px)" srcset={leer} />}
+        <img
+          src={`/bilder/${bild}-800.webp`}
+          srcset={srcset}
+          sizes={sizes}
+          alt={alt}
+          width="1200"
+          height={Math.round((1200 * Number(h)) / Number(b))}
+          loading={prioritaet ? 'eager' : 'lazy'}
+          fetchpriority={prioritaet ? 'high' : 'auto'}
+          decoding={prioritaet ? 'sync' : 'async'}
+        />
+      </picture>
     ) : (
       <figcaption class="bild-idee text-small" data-loading={prioritaet ? 'eager' : 'lazy'}>
         {idee}
@@ -55,6 +88,10 @@ const [b, h] = verhaeltnis.split(':');
     overflow: hidden;
   }
 
+  .bild picture {
+    display: contents;
+  }
+
   .bild img {
     display: block;
     width: 100%;
@@ -66,5 +103,16 @@ const [b, h] = verhaeltnis.split(':');
     margin: 0;
     padding: var(--space-2);
     color: var(--color-text-gedaempft);
+  }
+
+  /* Unter 768 px weder angezeigt noch geladen (Quelle oben ist dort leer). */
+  .bild--ab-tablet {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .bild--ab-tablet {
+      display: flex;
+    }
   }
 </style>
