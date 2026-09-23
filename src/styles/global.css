@@ -282,9 +282,58 @@ input[type='radio']:checked {
   background-color: var(--color-tiefblau);
 }
 
+/* Checkboxen (Kästchen): dieselbe Rahmenbehandlung wie die Radio-Buttons,
+   aber eckig (Claude Design, D02_Lohnrechner_Kurs_Test): 24 px, Rahmen 1 px
+   text-gedaempft, ohne Rundung; angekreuzt Fläche und Rahmen Tiefblau mit
+   weissem Häkchen (Icon «check», Strich 2,5 wie im Board). Markup:
+   <span class="kaestchen"><input type="checkbox" /><Icon name="check" /></span>
+   in einem <label>; das Kästchen steht auf der Höhe der ersten Textzeile.
+   Fokus 2 px Tiefblau über :focus-visible. */
+.kaestchen {
+  position: relative;
+  flex: none;
+  width: var(--space-3);
+  height: var(--space-3);
+  margin-top: calc((1lh - var(--space-3)) / 2);
+}
+
+.kaestchen input {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  border: 1px solid var(--color-text-gedaempft);
+  border-radius: 0;
+  background-color: var(--color-weiss);
+  cursor: pointer;
+}
+
+.kaestchen input:checked {
+  border-color: var(--color-tiefblau);
+  background-color: var(--color-tiefblau);
+}
+
+.kaestchen .icon {
+  position: absolute;
+  inset: 0;
+  color: var(--color-auf-tiefblau);
+  stroke-width: 2.5;
+  pointer-events: none;
+}
+
+.kaestchen input:not(:checked) + .icon {
+  display: none;
+}
+
+/* Im Kontrastmodus des Betriebssystems bleiben Radio-Button und Checkbox
+   des Browsers. */
 @media (forced-colors: active) {
-  input[type='radio'] {
+  input[type='radio'],
+  .kaestchen input {
     appearance: auto;
+  }
+
+  .kaestchen .icon {
+    display: none;
   }
 }
 

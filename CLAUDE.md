@@ -64,8 +64,14 @@ solange sie nicht ausdrücklich geändert werden.
   **22'680** (Jahreslohn), an einer einzigen Stelle konfiguriert: im Block
   `KONFIG` von `src/scripts/lohnrechner.js` (`SATZ_KURS`, `SATZ_EINSTIEG`,
   `TAGE_MONAT`, `TAGE_JAHR`, `BVG_SCHWELLE`). Monat
-  gerundet auf CHF 10, Jahr auf CHF 100. Das Ergebnis zeigt immer den Lohn
-  mit Kurs; die Pensionskasse steht nur ab der BVG-Schwelle (ab 2 Stunden). Die Zahlen 30,4 und 365 sowie
+  gerundet auf CHF 10, Jahr auf CHF 100. Das Ergebnis zeigt den Lohn mit
+  Kurs. Unter den Stundenfeldern steht das Kästchen «Ich habe den
+  Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer);
+  angekreuzt zeigt der Rechner Monat und Jahr mit `SATZ_EINSTIEG` und direkt
+  unter der Zahl «Nach dem Kurs, den wir bezahlen: …» mit `SATZ_KURS`
+  (Auftrag GL 23.09.2026, Boards D02/M02_Lohnrechner_Kurs_Test). Die
+  Pensionskasse steht nur ab der BVG-Schwelle, gemessen am Jahreslohn mit
+  dem gezeigten Satz (leer ab 2 Stunden, angekreuzt ab 2½ Stunden). Die Zahlen 30,4 und 365 sowie
   CHF 2'310.–, 27'700.–, 2'060.–, 1'150.–, 3'460.– und 39.90 sind überholt
   und dürfen nicht vorkommen – im Rechner, in der Fallback-Tabelle, in
   Lohnbeispielen und in allen Texten (Pfadkoordinaten in den Logo-SVG sind
@@ -83,7 +89,8 @@ solange sie nicht ausdrücklich geändert werden.
 
 - **Formular**: acht Felder, vier davon Pflicht (Anliegen, Name, Telefon,
   Postleitzahl und Ort); Feld 2 (Pflegehelferkurs) nur bei «Anstellung als
-  pflegender Angehöriger», per CSS `:has()`; Spam-Schutz mit Honeypot und
+  pflegender Angehöriger», per CSS `:has()`; ist im Rechner das Kästchen
+  angekreuzt, wählt die Übergabe in Feld 2 «Nein, noch nicht» vor; Spam-Schutz mit Honeypot und
   Zeitprüfung, kein Captcha; keine Speicherung der Anfragen beim Hoster;
   keine Gesundheitsangaben als Pflichtfeld; Rechnerwerte als versteckte
   Felder (`stunden`, `ergebnis`); Zugangsdaten nur über
@@ -191,8 +198,12 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 - Radio-Buttons sind kreisförmig (24 px, Rahmen text-gedaempft, ausgewählt
   Rahmen und Punkt Tiefblau) – die einzige Rundung ausser 4 px bei Buttons
   und Feldern und dem Ring; damit sie von Checkboxen unterscheidbar sind.
-  Kommt eine Checkbox dazu: eckig, 4 px Radius, Rahmen text-gedaempft,
-  ausgewählt Tiefblau.
+- **Checkboxen** mit derselben Rahmenbehandlung wie Radio-Buttons, aber
+  eckig: 24 px, Rahmen 1 px text-gedaempft, ohne Rundung; angekreuzt Fläche
+  und Rahmen Tiefblau mit weissem Häkchen; Fokus 2 px Tiefblau
+  (`:focus-visible`); die ganze Zeile mit der Beschriftung ist antippbar,
+  mindestens 44 px hoch. Umsetzung mit der Klasse `.kaestchen` in
+  `global.css` (Board D02_Lohnrechner_Kurs_Test).
 - **Kein Rot.** Fehlerhinweise in Formularen als Tiefblau-Fläche mit weisser
   Schrift.
 - Ruhige, sachliche Gestaltung ohne Effekte. Keine Karussells, keine
@@ -244,8 +255,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   (Fassung A): `.text-button` (17/22 px Bold, Auswahlfelder des Rechners),
   `.text-h3-verdichtet` und `.text-body-verdichtet` (unter 768 px 18/28 bzw.
   16/24 px, darüber wie `.text-h3` bzw. `.text-body`). Dazu `.button--sekundaer`,
-  `.etikette` (Übertitel in Tiefblau), `.textspalte` (680 px) und
-  `.visually-hidden`.
+  `.etikette` (Übertitel in Tiefblau), `.textspalte` (680 px),
+  `.kaestchen` (Checkbox, siehe Gestaltung) und `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
   `global.css`: `--breite-inhalt` (1200 px), `--breite-kopfzeile` (1440 px),
   `--breite-text` (680 px), `--breite-hero-text` (560 px),
@@ -289,7 +300,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (immer Lohn mit Kurs), Zusatzhinweis bei «mehr als 3 Stunden», Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1 sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
@@ -344,6 +355,9 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 - Hauptbegriff **«pflegende Angehörige»**.
 - **«nicht gewinnorientiert»**, niemals «gemeinnützig» oder «Non-Profit».
 - Lohn: **CHF 37.95 mit Kurs immer zuerst**, CHF 33.95 danach, **nie «ab»**.
+  Einzige Ausnahme: Im Lohnrechner ist nach aktivem Ankreuzen von «Ich habe
+  den Pflegehelferkurs noch nicht abgeschlossen.» der Lohn mit CHF 33.95 die
+  Hauptzahl; der Lohn nach dem Kurs (CHF 37.95) steht direkt darunter.
 - **Kein Lohndatum** auf der Webseite (kein Auszahlungstag).
 - **Krankentaggeldversicherung** überall nennen, wo Versicherungen stehen;
   **Pensionskasse nur mit Bedingung** (ab BVG-Schwelle).
@@ -374,7 +388,8 @@ src/pages/           Seiten, eine Datei pro Seite; bausteine.astro ist die
 src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
                      (Sätze, Stufen, Postleitzahlen), unter 10 KB
 test/                npm test (node:test ohne Zusatzpakete):
-                     lohnrechner.test.mjs prüft die Ergebniswerte aus D1,
+                     lohnrechner.test.mjs prüft die Ergebniswerte aus D1
+                     und beide Zustände des Kurs-Kästchens,
                      breakpoints.test.mjs die Media Queries,
                      menue.test.mjs die Grösse des Menü-Skripts,
                      ocker.test.mjs, dass Ocker nie als Schrift

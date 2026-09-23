@@ -1,7 +1,9 @@
 ---
 /**
  * Baustein F – Lohnrechner (Konzept C1 Abschnitt 2, D1; Claude Design
- * Fassung A: D02_Lohnrechner_A, M02_Lohnrechner_A).
+ * Fassung A: D02_Lohnrechner_A, M02_Lohnrechner_A; Kurs-Kästchen:
+ * D02_Lohnrechner_Kurs_Test, M02_Lohnrechner_Kurs_Test, je mit
+ * «_angekreuzt»).
  *
  * Warmgrau-Fläche mit Übertitel, H2 und Einleitung, darunter der Rechner auf
  * weisser Fläche: eine Frage (Stunden pro Tag) als Radio-Gruppe mit sechs
@@ -13,6 +15,17 @@
  * untereinander. Das Ergebnis ändert sich sofort, ohne Berechnen-Button.
  * Zeile 2 nennt die Pensionskasse nur ab der BVG-Schwelle. Bei «mehr als 3
  * Stunden» steht «über» statt «rund» und der Zusatzhinweis erscheint.
+ *
+ * Unter den Auswahlfeldern das Kästchen «Ich habe den Pflegehelferkurs noch
+ * nicht abgeschlossen.» (standardmässig leer, ganze Zeile antippbar, .kaestchen
+ * in global.css), darunter der Zusatzhinweis. Leer zeigt der Rechner den Lohn
+ * mit Kurs. Angekreuzt ist der Lohn bis zum Kurs (Einstiegssatz) die
+ * Hauptzahl mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter
+ * «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs; Jahreslohn und
+ * Pensionskasse richten sich nach dem gezeigten Satz. Die Übergabe an das
+ * Formular nennt dann «bis zum Pflegehelferkurs» und wählt in Feld 2 «Nein,
+ * noch nicht» vor. Das Kästchen gehört zur Oberfläche mit JavaScript; ohne
+ * JavaScript bleibt die Fallback-Tabelle unverändert.
  *
  * Ohne JavaScript zeigt die Seite die Fallback-Tabelle (Auswahl · Monat, mit
  * Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg) mit den Buttons.
@@ -38,6 +51,7 @@
  *                 Formularversand) statt «Alle Details zum Lohn».
  */
 import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
+import Icon from './Icon.astro';
 
 interface Props {
   anker?: string;
@@ -46,7 +60,7 @@ interface Props {
 
 const { anker = 'lohnrechner', vollstaendig = false } = Astro.props;
 
-// Vorbelegung gemäss D1: 2 Stunden.
+// Vorbelegung gemäss D1: 2 Stunden, Kästchen leer (Lohn mit Kurs).
 const vorbelegung = '2';
 const start = ergebnis(stufeFuer(vorbelegung));
 
@@ -168,13 +182,22 @@ const fussnote =
                 ))
               }
             </div>
-            <p class="mehr-hinweis text-small" data-mehr hidden>
-              Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um die
-              Uhr. Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im Gespräch
-              zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
-              Hilflosenentschädigung, Ergänzungsleistungen.
-            </p>
           </fieldset>
+
+          <label class="kurs-zeile">
+            <span class="kaestchen">
+              <input type="checkbox" data-ohne-kurs />
+              <Icon name="check" />
+            </span>
+            <span>Ich habe den Pflegehelferkurs noch nicht abgeschlossen.</span>
+          </label>
+
+          <p class="mehr-hinweis text-small" data-mehr hidden>
+            Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um die
+            Uhr. Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im Gespräch
+            zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
+            Hilflosenentschädigung, Ergänzungsleistungen.
+          </p>
 
           {
             vollstaendig && (
@@ -200,19 +223,23 @@ const fussnote =
         <div class="ergebnis" aria-live="polite">
           <div class="ergebnis-zahl">
             <p class="text-label etikette">IHRE SCHÄTZUNG</p>
-            <p class="ergebnis-titel">Ihr Lohn mit Pflegehelferkurs</p>
+            <p class="ergebnis-titel" data-titel-mit>Ihr Lohn mit Pflegehelferkurs</p>
+            <p class="ergebnis-titel" data-titel-ohne hidden>Ihr Lohn bis zum Pflegehelferkurs</p>
             <p class="text-result zahl" aria-hidden="true">
               <span class="text-result-einheit" data-praefix>rund</span>{' '}
               <span class="text-result-einheit">CHF</span>{' '}
-              <span data-monat>{ziffern(start.monatMitKurs)}</span><span class="text-result-einheit">.–</span>
+              <span data-monat>{ziffern(start.monat)}</span><span class="text-result-einheit">.–</span>
             </p>
-            <p class="visually-hidden" data-vorlesen>{chf(start.monatMitKurs, start.mehr)} brutto pro Monat</p>
-            <p aria-hidden="true">brutto pro Monat</p>
+            <p class="visually-hidden" data-vorlesen>{chf(start.monat, start.mehr)} brutto pro Monat</p>
+            <p class="brutto" aria-hidden="true">brutto pro Monat</p>
+            <p class="nach-kurs" data-nach-kurs hidden>
+              Nach dem Kurs, den wir bezahlen: <strong data-monat-kurs>{chf(start.monatMitKurs, start.mehr)}</strong> pro Monat.
+            </p>
           </div>
 
           <div class="ergebnis-rest">
             <p class="zeile-2">
-              Das sind <span data-jahr>{chf(start.jahrMitKurs, start.mehr)}</span> pro Jahr – versichert mit
+              Das sind <span data-jahr>{chf(start.jahr, start.mehr)}</span> pro Jahr – versichert mit
               AHV, Unfall- und Krankentaggeldversicherung<span data-bvg hidden={!start.pensionskasse}>{' und Pensionskasse'}</span>.
             </p>
 
@@ -425,6 +452,19 @@ const fussnote =
     outline-offset: 2px;
   }
 
+  /* Kästchen unter den Auswahlfeldern: Lato Regular, linksbündig, ohne
+     Fläche und Rahmen um die Zeile; die ganze Zeile ist antippbar
+     (mindestens 44 px hoch). */
+  .kurs-zeile {
+    display: flex;
+    align-items: flex-start;
+    gap: calc(var(--space-1) * 1.5);
+    min-height: var(--tippflaeche);
+    margin-top: var(--space-1);
+    padding: var(--space-1) 0;
+    cursor: pointer;
+  }
+
   .mehr-hinweis {
     max-width: var(--breite-text);
     margin: var(--space-2) 0 0;
@@ -457,8 +497,19 @@ const fussnote =
     white-space: nowrap;
   }
 
-  .ergebnis-zahl p:last-child {
+  .brutto {
     margin: 0;
+  }
+
+  /* Angekreuzt: Lohn nach dem Kurs, kleiner als die Hauptzahl, Betrag fett
+     und ohne Umbruch. */
+  .nach-kurs {
+    margin: var(--space-2) 0 0;
+  }
+
+  .nach-kurs strong {
+    font-weight: 700;
+    white-space: nowrap;
   }
 
   /* Mobil: Ocker-Linie zwischen Zahl und Jahreslohn (Grafik, keine Schrift). */
