@@ -3,7 +3,10 @@
  * (zur Kontrolle der Umsetzung)» aus dem Konzept, Teil D1 (26 Tage pro
  * Monat, 312 Tage pro Jahr; Entscheid GL 22.09.2026, Art. 20 ArG):
  * sechs Stufen × Monat mit Kurs, Jahr mit Kurs, Monat Einstieg, Jahr Einstieg.
- * Dazu Pensionskasse ab BVG-Schwelle, Übergabezeile, Rundung, Anzeigeformat,
+ * Dazu beide Zustände des Kästchens «Ich habe den Pflegehelferkurs noch nicht
+ * abgeschlossen.» (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs,
+ * darunter der Lohn nach dem Kurs), Pensionskasse ab BVG-Schwelle mit dem
+ * gezeigten Satz, Übergabe an das Formular, Rundung, Anzeigeformat,
  * Skriptgrösse und Postleitzahl-Liste.
  */
 import { test } from 'node:test';
@@ -18,7 +21,7 @@ import {
   jahreslohn,
   stufeFuer,
   plzImKantonZug,
-  uebergabeText,
+  uebergabe,
 } from '../src/scripts/lohnrechner.js';
 
 // Kontrollwerte wörtlich aus Konzept D1.
@@ -55,22 +58,98 @@ for (const [text, monatKurs, jahrKurs, monatEinstieg, jahrEinstieg] of tabelle) 
   });
 }
 
-test('Pensionskasse erst ab BVG-Schwelle (ab 2 Stunden)', () => {
-  const mit = KONFIG.stufen.filter((s) => ergebnis(s).pensionskasse).map((s) => s.text);
-  assert.deepEqual(mit, ['2 Stunden', '2½ Stunden', '3 Stunden', 'mehr als 3 Stunden']);
-  assert.equal(ergebnis(stufeFuer('1')).pensionskasse, false);
-  assert.equal(ergebnis(stufeFuer('1.5')).pensionskasse, false);
+// Gezeigte Werte in beiden Zuständen des Kästchens (Auftrag GL 23.09.2026,
+// Boards D02/M02_Lohnrechner_Kurs_Test): Monat und Jahr als Hauptzahl bzw.
+// in Zeile 2, «Nach dem Kurs …» (nur angekreuzt, immer mit Kurs) und
+// Pensionskasse mit dem gezeigten Satz.
+const zustaende = {
+  leer: [
+    ['1 Stunde', 'rund CHF 990.–', "rund CHF 11'800.–", false],
+    ['1½ Stunden', "rund CHF 1'480.–", "rund CHF 17'800.–", false],
+    ['2 Stunden', "rund CHF 1'970.–", "rund CHF 23'700.–", true],
+    ['2½ Stunden', "rund CHF 2'470.–", "rund CHF 29'600.–", true],
+    ['3 Stunden', "rund CHF 2'960.–", "rund CHF 35'500.–", true],
+    ['mehr als 3 Stunden', "über CHF 2'960.–", "über CHF 35'500.–", true],
+  ],
+  angekreuzt: [
+    ['1 Stunde', 'rund CHF 880.–', "rund CHF 10'600.–", false, 'rund CHF 990.–'],
+    ['1½ Stunden', "rund CHF 1'320.–", "rund CHF 15'900.–", false, "rund CHF 1'480.–"],
+    ['2 Stunden', "rund CHF 1'770.–", "rund CHF 21'200.–", false, "rund CHF 1'970.–"],
+    ['2½ Stunden', "rund CHF 2'210.–", "rund CHF 26'500.–", true, "rund CHF 2'470.–"],
+    ['3 Stunden', "rund CHF 2'650.–", "rund CHF 31'800.–", true, "rund CHF 2'960.–"],
+    ['mehr als 3 Stunden', "über CHF 2'650.–", "über CHF 31'800.–", true, "über CHF 2'960.–"],
+  ],
+};
+
+for (const [zustand, zeilen] of Object.entries(zustaende)) {
+  const ohneKurs = zustand === 'angekreuzt';
+  for (const [text, monat, jahr, pensionskasse, nachKurs] of zeilen) {
+    test(`Kästchen ${zustand}: «${text}»`, () => {
+      const w = ergebnis(KONFIG.stufen.find((s) => s.text === text), ohneKurs);
+      assert.equal(chf(w.monat, w.mehr), monat, 'Monat (Hauptzahl)');
+      assert.equal(chf(w.jahr, w.mehr), jahr, 'Jahr (Zeile 2)');
+      assert.equal(w.pensionskasse, pensionskasse, 'Pensionskasse');
+      if (ohneKurs) assert.equal(chf(w.monatMitKurs, w.mehr), nachKurs, 'Nach dem Kurs');
+    });
+  }
+}
+
+test('Kästchen leer entspricht dem bisherigen Ergebnis mit Kurs', () => {
+  for (const s of KONFIG.stufen) {
+    assert.deepEqual(ergebnis(s, false), ergebnis(s));
+    assert.equal(ergebnis(s).monat, ergebnis(s).monatMitKurs);
+    assert.equal(ergebnis(s).jahr, ergebnis(s).jahrMitKurs);
+  }
 });
 
-test('Übergabezeile über dem Formular', () => {
-  assert.equal(
-    uebergabeText(stufeFuer('2')),
-    "Ihre Schätzung aus dem Rechner: rund CHF 1'970.– pro Monat bei 2 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
-  );
-  assert.equal(
-    uebergabeText(stufeFuer('mehr')),
-    "Ihre Schätzung aus dem Rechner: über CHF 2'960.– pro Monat bei mehr als 3 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
-  );
+test('Kästchen angekreuzt: Einstiegssatz, Tabellenwerte unverändert', () => {
+  for (const s of KONFIG.stufen) {
+    const w = ergebnis(s, true);
+    assert.equal(w.monat, w.monatEinstieg);
+    assert.equal(w.jahr, w.jahrEinstieg);
+    // Die Fallback-Tabelle (fünf Spalten) bleibt in beiden Zuständen gleich.
+    for (const feld of ['monatMitKurs', 'jahrMitKurs', 'monatEinstieg', 'jahrEinstieg']) {
+      assert.equal(w[feld], ergebnis(s)[feld], feld);
+    }
+  }
+});
+
+test('Pensionskasse erst ab BVG-Schwelle (leer ab 2 Stunden, angekreuzt ab 2½ Stunden)', () => {
+  const mit = (ohneKurs) =>
+    KONFIG.stufen.filter((s) => ergebnis(s, ohneKurs).pensionskasse).map((s) => s.text);
+  assert.deepEqual(mit(false), ['2 Stunden', '2½ Stunden', '3 Stunden', 'mehr als 3 Stunden']);
+  assert.deepEqual(mit(true), ['2½ Stunden', '3 Stunden', 'mehr als 3 Stunden']);
+  assert.equal(ergebnis(stufeFuer('1')).pensionskasse, false);
+  assert.equal(ergebnis(stufeFuer('1.5')).pensionskasse, false);
+  // 2 Stunden bis zum Kurs: 2 × 312 × 33.95 = 21'184.80, unter der Schwelle.
+  assert.equal(ergebnis(stufeFuer('2'), true).pensionskasse, false);
+});
+
+// In der Zeile über dem Formular steht der Betrag ohne Umbruch (\u00a0).
+test('Übergabe an das Formular, Kästchen leer', () => {
+  assert.deepEqual(uebergabe(stufeFuer('2')), {
+    zeile:
+      "Ihre Schätzung aus dem Rechner: rund\u00a0CHF\u00a01'970.– pro Monat bei 2 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+    ergebnis: "rund CHF 1'970.– pro Monat mit Pflegehelferkurs",
+  });
+  assert.deepEqual(uebergabe(stufeFuer('mehr'), false), {
+    zeile:
+      "Ihre Schätzung aus dem Rechner: über\u00a0CHF\u00a02'960.– pro Monat bei mehr als 3 Stunden pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+    ergebnis: "über CHF 2'960.– pro Monat mit Pflegehelferkurs",
+  });
+});
+
+test('Übergabe an das Formular, Kästchen angekreuzt', () => {
+  assert.deepEqual(uebergabe(stufeFuer('2'), true), {
+    zeile:
+      "Ihre Schätzung aus dem Rechner: rund\u00a0CHF\u00a01'770.– pro Monat bei 2 Stunden pro Tag bis zum Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+    ergebnis: "rund CHF 1'770.– pro Monat bis zum Pflegehelferkurs",
+  });
+  assert.deepEqual(uebergabe(stufeFuer('mehr'), true), {
+    zeile:
+      "Ihre Schätzung aus dem Rechner: über\u00a0CHF\u00a02'650.– pro Monat bei mehr als 3 Stunden pro Tag bis zum Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.",
+    ergebnis: "über CHF 2'650.– pro Monat bis zum Pflegehelferkurs",
+  });
 });
 
 test('Rundung kaufmännisch auf CHF 10.– bzw. CHF 100.–', () => {

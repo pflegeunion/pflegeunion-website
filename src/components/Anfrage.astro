@@ -29,8 +29,11 @@
  * Übergabe aus dem Lohnrechner (D1): Die Zeile `[data-rechner-uebergabe]`
  * über den Feldern ist versteckt; das Rechner-Skript füllt sie beim Klick auf
  * «Erstgespräch vereinbaren», belegt das Anliegen vor und füllt die
- * versteckten Felder stunden und ergebnis. Die Schaltfläche «Entfernen»
- * blendet die Zeile aus und leert die versteckten Werte.
+ * versteckten Felder stunden und ergebnis. Ist im Rechner «Ich habe den
+ * Pflegehelferkurs noch nicht abgeschlossen.» angekreuzt, nennt die Zeile
+ * den Lohn «bis zum Pflegehelferkurs» und in Feld 2 ist «Nein, noch nicht»
+ * vorgewählt (Claude Design M12_Anfrage_Kurs_Test). Die Schaltfläche
+ * «Entfernen» blendet die Zeile aus und leert die versteckten Werte.
  *
  * Parameter:
  *   titel       H2 (Standard «Reden wir über Ihre Situation.»)
@@ -99,8 +102,10 @@ const zeitstempel = new Date().toISOString();
     <form class="formular" method="post" aria-label="Anfrageformular" data-versand="offen">
       <!-- Zeile mit der Schätzung aus dem Lohnrechner; wird vom Rechner-Skript gefüllt. -->
       <div class="uebergabe" data-rechner-uebergabe hidden>
-        <p data-uebergabe-text></p>
-        <button type="button" class="uebergabe-entfernen">Entfernen</button>
+        <p class="text-small">
+          <span data-uebergabe-text></span>{' '}
+          <button type="button" class="uebergabe-entfernen tippflaeche-zeile">Entfernen</button>
+        </p>
       </div>
 
       <div class="feld">
@@ -318,34 +323,32 @@ const zeitstempel = new Date().toISOString();
     padding: var(--space-3);
   }
 
+  /* Zeile mit der Schätzung (Claude Design M12_Anfrage_Kurs_Test):
+     Tiefblau-hell, Text 15/22 px, «Entfernen» im Satz. */
   .uebergabe {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-1) var(--space-2);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2);
     background-color: var(--color-tiefblau-hell);
   }
 
-  .uebergabe[hidden] {
-    display: none;
-  }
-
   .uebergabe p {
-    flex: 1 1 20ch;
     margin: 0;
   }
 
-  /* «Entfernen»: Textschaltfläche, Tippfläche 44 px, ohne Fläche. */
+  /* «Entfernen»: Textschaltfläche im Satz, ohne Fläche und Rahmen, fett und
+     unterstrichen; Tippfläche 44 px über .tippflaeche-zeile. */
   .uebergabe-entfernen {
-    flex: none;
-    min-height: var(--tippflaeche);
-    padding: 0 var(--space-1);
+    min-height: 0;
+    padding-inline: 0;
     border: 0;
+    border-radius: 0;
     background: none;
     color: var(--color-tiefblau);
+    font-size: inherit;
+    line-height: inherit;
     font-weight: 700;
     text-decoration: underline;
+    text-underline-offset: 0.17em;
+    white-space: nowrap;
   }
 
   .feld {

@@ -1,14 +1,12 @@
 /*
- * Lohnrechner (Baustein F, Konzept Teil D1; Claude Design Fassung A:
- * D02_Lohnrechner_A, M02_Lohnrechner_A).
- * Eigenständig, ohne Framework, ohne Abhängigkeiten, unter 10 KB.
- * Speichert nichts: keine Cookies, kein localStorage.
- *
- * Die Rechenfunktionen werden auch von Lohnrechner.astro (Fallback-Tabelle)
- * und vom Test (npm test) importiert; die Oberfläche startet nur im Browser.
+ * Lohnrechner (Baustein F, Konzept D1; Claude Design: D02/M02_Lohnrechner_A,
+ * Kurs-Kästchen D02/M02_Lohnrechner_Kurs_Test). Eigenständig, ohne Framework
+ * und Abhängigkeiten, unter 10 KB; speichert nichts (keine Cookies, kein
+ * localStorage). Die Rechenfunktionen nutzen auch Lohnrechner.astro
+ * (Fallback-Tabelle) und npm test; die Oberfläche startet nur im Browser.
  */
 
-/* ---------- Konfiguration: Sätze, Tage, Stufen und Listen nur hier ändern ---------- */
+/* Konfiguration: Sätze, Tage, Stufen und Listen nur hier ändern */
 export const KONFIG = {
   // Stundensätze brutto: mit Pflegehelferkurs und Einstieg (bis zum Kurs).
   SATZ_KURS: 37.95,
@@ -29,10 +27,9 @@ export const KONFIG = {
     { wert: '3', text: '3 Stunden', stunden: 3 },
     { wert: 'mehr', text: 'mehr als 3 Stunden', stunden: 3, mehr: true },
   ],
-  // Postleitzahlen der elf Gemeinden des Kantons Zug inklusive Ortsteile
-  // (nur vollständige Fassung, Frage «Postleitzahl»).
-  // VORLÄUFIGE LISTE, von der Geschäftsstelle zu prüfen (Konzept Teil F,
-  // Punkt 5). 6344 Meierskappel (LU) ist bewusst nicht enthalten.
+  // Postleitzahlen der elf Zuger Gemeinden inkl. Ortsteile (nur vollständige
+  // Fassung). VORLÄUFIGE LISTE, von der Geschäftsstelle zu prüfen (Konzept
+  // Teil F, Punkt 5); 6344 Meierskappel (LU) bewusst nicht enthalten.
   plzZug: [
     6300, 6301, 6302, 6303, 6304, // Zug
     6312, // Steinhausen
@@ -50,11 +47,11 @@ export const KONFIG = {
     6343, // Rotkreuz, Risch, Buonas, Holzhäusern
     6345, // Neuheim
   ],
-  // Dauer des Hochzählens der Rechner-Zahl.
+  // Hochzählen der Rechner-Zahl.
   dauerMs: 300,
 };
 
-/* ---------- Rechenlogik (D1) ---------- */
+/* Rechenlogik (D1) */
 function rundeAuf(betrag, schritt) {
   return Math.round(betrag / schritt) * schritt;
 }
@@ -79,15 +76,19 @@ export function chf(betrag, mehr) {
   return (mehr ? 'über' : 'rund') + ' CHF ' + ziffern(betrag) + '.–';
 }
 
-/** Alle Ergebniswerte einer Stufe. */
-export function ergebnis(stufe) {
+/** Ergebniswerte einer Stufe; monat, jahr: gezeigter Lohn (ohneKurs: bis zum Kurs). */
+export function ergebnis(stufe, ohneKurs) {
+  var h = stufe.stunden, kurs = KONFIG.SATZ_KURS, einstieg = KONFIG.SATZ_EINSTIEG;
+  var satz = ohneKurs ? einstieg : kurs;
   return {
-    monatMitKurs: monatslohn(stufe.stunden, KONFIG.SATZ_KURS),
-    jahrMitKurs: jahreslohn(stufe.stunden, KONFIG.SATZ_KURS),
-    monatEinstieg: monatslohn(stufe.stunden, KONFIG.SATZ_EINSTIEG),
-    jahrEinstieg: jahreslohn(stufe.stunden, KONFIG.SATZ_EINSTIEG),
-    // Pensionskasse nur ab der BVG-Schwelle (Jahreslohn mit Kurs).
-    pensionskasse: stufe.stunden * KONFIG.TAGE_JAHR * KONFIG.SATZ_KURS >= KONFIG.BVG_SCHWELLE,
+    monatMitKurs: monatslohn(h, kurs),
+    jahrMitKurs: jahreslohn(h, kurs),
+    monatEinstieg: monatslohn(h, einstieg),
+    jahrEinstieg: jahreslohn(h, einstieg),
+    monat: monatslohn(h, satz),
+    jahr: jahreslohn(h, satz),
+    // Pensionskasse nur ab der BVG-Schwelle (Jahreslohn mit dem gezeigten Satz).
+    pensionskasse: h * KONFIG.TAGE_JAHR * satz >= KONFIG.BVG_SCHWELLE,
     mehr: !!stufe.mehr,
   };
 }
@@ -100,19 +101,24 @@ export function plzImKantonZug(plz) {
   return KONFIG.plzZug.indexOf(Number(plz)) !== -1;
 }
 
-/** Zeile über dem Formular nach «Erstgespräch vereinbaren». */
-export function uebergabeText(stufe) {
-  var w = ergebnis(stufe);
-  return 'Ihre Schätzung aus dem Rechner: ' + chf(w.monatMitKurs, w.mehr) + ' pro Monat bei ' +
-    stufe.text + ' pro Tag mit Pflegehelferkurs. Wir nehmen sie ins Gespräch mit.';
+/** Übergabe an das Formular: Zeile (Betrag ohne Umbruch) und Feld ergebnis. */
+export function uebergabe(stufe, ohneKurs) {
+  var w = ergebnis(stufe, ohneKurs);
+  var betrag = chf(w.monat, w.mehr);
+  var kurs = (ohneKurs ? 'bis zum' : 'mit') + ' Pflegehelferkurs';
+  return {
+    zeile: 'Ihre Schätzung aus dem Rechner: ' + betrag.replace(/ /g, '\u00a0') + ' pro Monat bei ' +
+      stufe.text + ' pro Tag ' + kurs + '. Wir nehmen sie ins Gespräch mit.',
+    ergebnis: betrag + ' pro Monat ' + kurs,
+  };
 }
 
-/* ---------- Messung: leerer Hook, kein Tracking-Skript ---------- */
+/* Messung: leerer Hook, kein Tracking-Skript */
 function melde(name, daten) {
   if (typeof window.pflegeunionTrack === 'function') window.pflegeunionTrack(name, daten || {});
 }
 
-/* ---------- Oberfläche ---------- */
+/* Oberfläche */
 function starte(wurzel) {
   var q = function (sel) { return wurzel.querySelector(sel); };
   var fallback = q('[data-rechner-fallback]');
@@ -122,6 +128,7 @@ function starte(wurzel) {
   ui.hidden = false;
 
   var zahl = q('[data-monat]');
+  var kurs = q('[data-ohne-kurs]');
   var reduziert = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var angezeigt = 0;
   var animation = 0;
@@ -152,23 +159,27 @@ function starte(wurzel) {
     return feld ? feld.value : '';
   }
 
-  var stufe, werte;
+  var stufe, werte, ohne;
 
+  // Angekreuzt: Hauptzahl bis zum Kurs, darunter der Lohn nach dem Kurs.
   function aktualisiere() {
+    ohne = kurs.checked;
     stufe = stufeFuer(auswahl(wurzel.dataset.stunden));
-    werte = ergebnis(stufe);
-    var wort = werte.mehr ? 'über' : 'rund';
-
-    q('[data-praefix]').textContent = wort;
-    zeigeZahl(werte.monatMitKurs);
-    q('[data-vorlesen]').textContent = chf(werte.monatMitKurs, werte.mehr) + ' brutto pro Monat';
-    q('[data-jahr]').textContent = chf(werte.jahrMitKurs, werte.mehr);
+    werte = ergebnis(stufe, ohne);
+    q('[data-praefix]').textContent = werte.mehr ? 'über' : 'rund';
+    zeigeZahl(werte.monat);
+    q('[data-vorlesen]').textContent = chf(werte.monat, werte.mehr) + ' brutto pro Monat';
+    q('[data-jahr]').textContent = chf(werte.jahr, werte.mehr);
+    q('[data-monat-kurs]').textContent = chf(werte.monatMitKurs, werte.mehr);
+    q('[data-titel-mit]').hidden = ohne;
+    q('[data-titel-ohne]').hidden = q('[data-nach-kurs]').hidden = !ohne;
     q('[data-bvg]').hidden = !werte.pensionskasse;
     q('[data-mehr]').hidden = !werte.mehr;
   }
 
   wurzel.addEventListener('change', function (ereignis) {
     var ziel = ereignis.target;
+    if (ziel === kurs) return aktualisiere();
     if (ziel.type !== 'radio') return;
     aktualisiere();
     melde('rechner_antwort', { frage: 'stunden', wert: ziel.value });
@@ -195,12 +206,15 @@ function starte(wurzel) {
   }
 
   // Übergabe an das Formular (D1): «Erstgespräch vereinbaren» springt zu
-  // #kontakt, belegt das Anliegen vor, setzt die Zeile mit der Schätzung
-  // über dem Formular und füllt die versteckten Felder stunden und ergebnis.
+  // #kontakt, belegt Anliegen und Feld 2 vor, setzt die Zeile über dem
+  // Formular und füllt die versteckten Felder stunden und ergebnis.
   var erstgespraech = q('[data-erstgespraech]');
   var formular = document.querySelector('form.formular');
   if (erstgespraech && formular) {
     var zeile = formular.querySelector('[data-rechner-uebergabe]');
+    // Angekreuzt «Nein, noch nicht» vorwählen, leer nur die eigene Vorwahl zurücknehmen.
+    var nein = formular.querySelector('input[value="Nein, noch nicht"]');
+    var vorgewaehlt = false;
     var setze = function (name, wert) {
       var feld = formular.querySelector('input[name="' + name + '"]');
       if (feld) feld.value = wert;
@@ -208,10 +222,12 @@ function starte(wurzel) {
     erstgespraech.addEventListener('click', function () {
       var anliegen = formular.querySelector('select[name="anliegen"]');
       if (anliegen) anliegen.value = 'Anstellung als pflegender Angehöriger';
+      var u = uebergabe(stufe, ohne);
       setze('stunden', stufe.text);
-      setze('ergebnis', chf(werte.monatMitKurs, werte.mehr) + ' pro Monat mit Pflegehelferkurs');
+      setze('ergebnis', u.ergebnis);
+      if (nein && (ohne || vorgewaehlt)) vorgewaehlt = nein.checked = ohne;
       if (zeile) {
-        zeile.querySelector('[data-uebergabe-text]').textContent = uebergabeText(stufe);
+        zeile.querySelector('[data-uebergabe-text]').textContent = u.zeile;
         zeile.hidden = false;
       }
       melde('rechner_erstgespraech', { stunden: stufe.wert });
@@ -227,8 +243,7 @@ function starte(wurzel) {
     }
   }
 
-  // «Ergebnis per E-Mail erhalten» (nur vollständige Fassung): vorerst nur
-  // Messung, der Versand folgt mit dem Formularversand.
+  // «Ergebnis per E-Mail erhalten»: vorerst nur Messung, Versand folgt.
   var email = q('[data-email]');
   if (email) {
     email.addEventListener('click', function () { melde('rechner_email'); });
