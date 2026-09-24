@@ -3,10 +3,11 @@
  * Bildfläche: eckig, festes Seitenverhältnis, ohne Schatten.
  *
  * Mit Foto: `bild` ist der Basisname der WebP-Dateien unter public/bilder/
- * (je 480, 800 und 1200 px breit, z. B. «hero-sohn-vater» für
- * /bilder/hero-sohn-vater-800.webp); die Fläche rendert ein <img> mit
- * srcset und Lazy Loading (Hero: `prioritaet`). Herkunft und Lizenz der
- * Fotos stehen in LIZENZEN.md.
+ * (je 480, 800 und 1200 px breit, z. B. «passt-familie-tisch» für
+ * /bilder/passt-familie-tisch-800.webp); die Fläche rendert ein <img> mit
+ * srcset und Lazy Loading (Bild im ersten Bildschirm: `prioritaet`).
+ * Herkunft und Lizenz der Fotos stehen in LIZENZEN.md. Das Hero-Foto setzt
+ * Hero.astro selbst (randabfallend, ohne festes Seitenverhältnis).
  *
  * Ohne Foto zeigt die Fläche Warmgrau mit einem kurzen, gedämpften Text zur
  * Bildidee (Regieanweisung aus dem Konzept). Kein Stockbild, kein Icon als
@@ -17,7 +18,7 @@
  *   bild         Basisname der WebP-Dateien unter public/bilder/
  *   alt          Alternativtext zum Foto
  *   sizes        sizes-Attribut für das srcset (Standard volle Breite)
- *   prioritaet   true für das Hero-Bild: kein Lazy Loading, hohe Priorität
+ *   prioritaet   true für ein Bild im ersten Bildschirm: kein Lazy Loading, hohe Priorität
  *   abTablet     true: unter 768 px weder angezeigt noch geladen
  *   idee         Bildidee als Text für die Platzhalterfläche (ohne Foto)
  *   class        zusätzliche Klassen
