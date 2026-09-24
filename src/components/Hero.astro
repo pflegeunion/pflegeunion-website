@@ -1,15 +1,16 @@
 ---
 /**
- * Hero (Konzept C1, Abschnitt 1; Claude Design Fassung A: D01_Hero_A,
- * M01_Hero_A). Unterseiten analog.
+ * Hero (Konzept C1, Abschnitt 1; Claude Design, Seite «Test Hero warm»:
+ * H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026). Unterseiten analog.
  *
- * Weisse Fläche. Links Übertitel, H1 in Playfair (.text-h1: 56 px, unter
- * 768 px 40 px), Text (max. 560 px), Primär- und Sekundär-Button, darunter
- * die Telefonzeile und die WhatsApp-Zeile. Rechts eine eckige Bildfläche
- * 3:2 (Desktop 5 von 12 Spalten); dahinter einmal der Ring aus dem Logo,
- * gross, angeschnitten, einfarbig tiefblau-hell. Unter 1024 px steht das
- * Bild unter dem Text und der Ring beginnt erst unter dem Textblock, damit
- * er weder Text noch Telefonzeile noch Buttons überdeckt. Mobil: Buttons in
+ * Weisse Fläche. Übertitel, H1 in Playfair (.text-h1: 56 px, unter 768 px
+ * 40 px), Text (max. 560 px), Primär- und Sekundär-Button, darunter die
+ * Telefonzeile und die WhatsApp-Zeile. Ab 1024 px steht der Text in 7 von
+ * 12 Rasterspalten; das Foto liegt rechts ab Rasterspalte 8 randabfallend
+ * über die volle Höhe des Abschnitts (bei 1440 px von x = 834 bis zum
+ * rechten Rand). Unter 1024 px steht das Foto nach dem Text, randabfallend
+ * über die volle Breite, quadratisch und direkt am Abschnittsende. Das Foto
+ * ist eckig und füllt die Fläche (object-fit: cover). Mobil: Buttons in
  * voller Breite untereinander.
  *
  * Parameter:
@@ -20,12 +21,12 @@
  *   sekundaer  { text, ziel } Sekundär-Button (optional)
  *   telefon    Telefonzeile anzeigen (Standard true)
  *   whatsapp   WhatsApp-Zeile «Lieber schreiben? Auf WhatsApp» anzeigen (Standard true)
- *   bild       Basisname der WebP-Dateien unter public/bilder/ (siehe Bildflaeche)
+ *   bild       Basisname der WebP-Dateien unter public/bilder/ (je 480, 800
+ *              und 1200 px breit, Hochformat 1200 × 1513 px); kein Lazy
+ *              Loading, fetchpriority="high"
  *   bildAlt    Alternativtext zum Bild
  *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt
- *   ring       Ring hinter dem Bild (Standard true; nur einmal pro Seite)
  */
-import Bildflaeche from './Bildflaeche.astro';
 import Icon from './Icon.astro';
 
 interface Knopf {
@@ -44,7 +45,6 @@ interface Props {
   bild?: string;
   bildAlt?: string;
   bildIdee?: string;
-  ring?: boolean;
 }
 
 const {
@@ -56,13 +56,16 @@ const {
   telefon = true,
   whatsapp = true,
   bild,
-  bildAlt,
-  bildIdee,
-  ring = true,
+  bildAlt = '',
+  bildIdee = '',
 } = Astro.props;
 
 const titelTeile = Array.isArray(titel) ? titel : [titel];
 const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
+
+// Breiten der WebP-Dateien; die Vorlage aus dem Design-Canvas ist 1212 × 1528 px.
+const breiten = [480, 800, 1200];
+const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join(', ') : '';
 ---
 
 <section class="hero" aria-label="Einstieg">
@@ -96,27 +99,27 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
         )
       }
     </div>
-
-    <div class="hero-bild">
-      {
-        ring && (
-          <svg class="ring" viewBox="10 10 80 80" aria-hidden="true" focusable="false">
-            <path d="M24.29 19.36A40 40 0 0 1 80.64 75.71L72.21 68.64A29 29 0 0 0 31.36 27.79Z" />
-            <path d="M75.71 80.64A40 40 0 0 1 19.36 24.29L27.79 31.36A29 29 0 0 0 68.64 72.21Z" />
-          </svg>
-        )
-      }
-      <Bildflaeche
-        verhaeltnis="3:2"
-        bild={bild}
-        alt={bildAlt}
-        idee={bildIdee}
-        sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 32px)"
-        prioritaet
-        class="bildflaeche"
-      />
-    </div>
   </div>
+
+  <figure class="hero-bild">
+    {
+      bild ? (
+        <img
+          src={`/bilder/${bild}-800.webp`}
+          srcset={srcset}
+          sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
+          alt={bildAlt}
+          width="1200"
+          height="1513"
+          loading="eager"
+          fetchpriority="high"
+          decoding="sync"
+        />
+      ) : (
+        <figcaption class="bild-idee text-small">{bildIdee}</figcaption>
+      )
+    }
+  </figure>
 </section>
 
 <style>
@@ -127,17 +130,9 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
   }
 
   .hero-inhalt {
-    position: relative;
     max-width: calc(var(--breite-inhalt) + 2 * var(--seitenrand));
     margin: 0 auto;
-    padding: calc(var(--space-4) + var(--space-1)) var(--seitenrand) var(--space-8);
-    display: grid;
-    gap: var(--space-6);
-  }
-
-  .hero-text {
-    position: relative;
-    z-index: 1;
+    padding: calc(var(--space-4) + var(--space-1)) var(--seitenrand) var(--space-6);
   }
 
   .hero-text h1 {
@@ -184,26 +179,30 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
     margin-block: calc(-1 * var(--space-1));
   }
 
-  /* Bild mit Ring dahinter. Unter 1024 px liegt der Ring hinter dem Bild und
-     beginnt 48 px über dem Bild, also unter dem Textblock (Board M01_Hero_A). */
+  /* Foto unter 1024 px: nach dem Text, volle Breite, quadratisch, direkt am
+     Abschnittsende (Board H1b_Mobil). Die Vorlage ist ein Hochformat; unten
+     ausgerichtet zeigt das Quadrat beide Personen vollständig. */
   .hero-bild {
-    position: relative;
+    margin: 0;
+    aspect-ratio: 1 / 1;
+    background-color: var(--color-warmgrau);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
   }
 
-  .ring {
-    position: absolute;
-    z-index: 0;
-    left: 32%;
-    top: calc(-1 * var(--space-6));
-    width: 112%;
-    height: auto;
-    fill: var(--color-tiefblau-hell);
-    pointer-events: none;
+  .hero-bild img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 100%;
   }
 
-  .hero-bild :global(.bildflaeche) {
-    position: relative;
-    z-index: 1;
+  .bild-idee {
+    margin: 0;
+    padding: var(--space-2);
+    color: var(--color-text-gedaempft);
   }
 
   @media (min-width: 480px) {
@@ -220,14 +219,30 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
     }
   }
 
-  /* Desktop: 12-Spalten-Raster, Text 7 Spalten, Bild 5 Spalten. Der Ring
-     (720 px bei 1440 px Breite) steht rechts oben im Abschnitt, rechts vom
-     Textblock, und wird vom Abschnitt angeschnitten (Board D01_Hero_A). */
+  /* Desktop: 12-Spalten-Raster, Text 7 Spalten. Das Foto beginnt an der
+     Rasterspalte 8 (Mitte des Abschnitts plus ein Zwölftel von Innenbreite
+     und sieben Spaltenabständen; bei 1440 px x = 834) und reicht bis zum
+     rechten Rand, über die volle Höhe des Abschnitts (Board H1b_Desktop).
+     In der Vorlage (1212 × 1528 px) stehen die beiden Personen mittig und
+     reichen von 38 bis 98 % der Höhe. Unten ausgerichtet bleiben sie
+     vollständig sichtbar, solange die Fläche höchstens 1,23-mal so breit wie
+     hoch ist; auf sehr breiten Bildschirmen (ab etwa 2070 px) wächst der
+     Abschnitt deshalb mit der Bildbreite mit (Mindesthöhe 0,81 × Bildbreite). */
   @media (min-width: 1024px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(
+        (50vw - (min(100vw - 2 * var(--seitenrand), var(--breite-inhalt)) + 7 * var(--space-3)) / 12) * 0.81
+      );
+    }
+
     .hero-inhalt {
+      width: 100%;
+      display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--space-3);
-      align-items: center;
       padding-block: var(--abstand-abschnitt);
     }
 
@@ -248,17 +263,12 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
     }
 
     .hero-bild {
-      grid-column: 8 / span 5;
-      position: static;
-    }
-
-    /* Bezogen auf die Innenbreite plus Seitenränder (1248 px bei 1440 px):
-       Ring 720 px breit, 940 px vom linken Rand, 100 px über dem Abschnitt. */
-    .ring {
-      left: 67.6%;
+      position: absolute;
       top: 0;
-      margin-top: -8%;
-      width: 57.7%;
+      right: 0;
+      bottom: 0;
+      left: calc(50% + (min(100% - 2 * var(--seitenrand), var(--breite-inhalt)) + 7 * var(--space-3)) / 12);
+      aspect-ratio: auto;
     }
   }
 </style>

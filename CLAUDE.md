@@ -288,8 +288,8 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
-| `Hero.astro` | Hero (C1 Abschnitt 1): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile, Bildfläche 3:2 mit dem Ring aus dem Logo dahinter; der Ring überdeckt auf keiner Breite Text, Telefonzeile oder Buttons (unter 1024 px beginnt er unter dem Textblock) | Erster Abschnitt jeder Seite; der Ring nur einmal pro Seite |
-| `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Hero: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht; keine Stockbilder, keine Icons als Ersatz |
+| `Hero.astro` | Hero (C1 Abschnitt 1; Claude Design H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile; Foto eckig mit `object-fit: cover`, ab 1024 px randabfallend rechts ab Rasterspalte 8 über die volle Höhe des Abschnitts (Text sieben von zwölf Spalten), unter 1024 px nach dem Text randabfallend über die volle Breite, quadratisch, direkt am Abschnittsende; Bildmitte so, dass beide Personen auf jeder Breite vollständig sichtbar bleiben; ohne Ring, ohne Ocker-Linie; Foto ohne Lazy Loading, `fetchpriority="high"` | Erster Abschnitt jeder Seite |
+| `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Bild im ersten Bildschirm: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht, ausser im Hero; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar) | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
 | `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
 | `Header.astro` | Kopfzeile (B2): sticky; ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
@@ -315,6 +315,11 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   `Bildflaeche.astro` bindet sie über `bild` ein; ohne Foto zeigt sie die
   Bildidee aus der Regieanweisung. Neue Fotos: WebP, maximal 1600 px breit,
   Lizenz in `LIZENZEN.md` dokumentiert.
+- **Bildregel**: Fotos zeigen echte Situationen zuhause. Daneben sind
+  Naturbilder erlaubt (Garten, Spaziergang, Seeufer); ein Naturbild darf den
+  Einstieg (Hero) tragen, ohne Pflege zu zeigen. Helle Bilder bevorzugt.
+  Nie: Stethoskop, weisser Kittel, Händchenhalten in Nahaufnahme, Filter.
+  (Entscheid GL 24.09.2026, Hero mit Naturbild kcCMWn0G9Zo.)
 - Die Lohnrechner-Seite `/lohnrechner/` (Konzept C2) besteht noch nicht.
   Der Lohnrechner erhält dort `anker="rechner"`, damit der Header-Button
   (`#rechner`) ihn erreicht. Beim Bau der Seite werden diese Inhalte aus der
