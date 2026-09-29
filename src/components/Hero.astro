@@ -26,6 +26,11 @@
  *              Loading, fetchpriority="high"
  *   bildAlt    Alternativtext zum Bild
  *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt
+ *   bewegung   Bewegung beim Scrollen (nur Startseite, global.css «Bewegung»):
+ *              das Foto zoomt beim Laden von 108 % auf 100 %, die Ebene
+ *              darum (.hero-ebene) beim Scrollen bis 105 %; der Rahmen
+ *              (.hero-bild) bleibt fest. Text, Buttons, Telefon und
+ *              WhatsApp bewegen sich nie. Standard false.
  */
 import Icon from './Icon.astro';
 
@@ -45,6 +50,7 @@ interface Props {
   bild?: string;
   bildAlt?: string;
   bildIdee?: string;
+  bewegung?: boolean;
 }
 
 const {
@@ -58,6 +64,7 @@ const {
   bild,
   bildAlt = '',
   bildIdee = '',
+  bewegung = false,
 } = Astro.props;
 
 const titelTeile = Array.isArray(titel) ? titel : [titel];
@@ -104,17 +111,20 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
   <figure class="hero-bild">
     {
       bild ? (
-        <img
-          src={`/bilder/${bild}-800.webp`}
-          srcset={srcset}
-          sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
-          alt={bildAlt}
-          width="1200"
-          height="1513"
-          loading="eager"
-          fetchpriority="high"
-          decoding="sync"
-        />
+        <div class="hero-ebene">
+          <img
+            src={`/bilder/${bild}-800.webp`}
+            srcset={srcset}
+            sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
+            alt={bildAlt}
+            width="1200"
+            height="1513"
+            loading="eager"
+            fetchpriority="high"
+            decoding="sync"
+            data-bewegung={bewegung ? 'hero' : undefined}
+          />
+        </div>
       ) : (
         <figcaption class="bild-idee text-small">{bildIdee}</figcaption>
       )
@@ -189,6 +199,24 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
     display: flex;
     align-items: flex-end;
     overflow: hidden;
+  }
+
+  /* Wo die Zeitleiste der Bewegung beim Scrollen wirkt (global.css
+     «Bewegung»), schneiden Abschnitt und Rahmen mit overflow: clip statt
+     hidden ab: gleich sichtbar, aber kein Scroll-Container, der die
+     Zeitleiste an sich binden würde. Ältere Browser behalten hidden. */
+  @supports (animation-timeline: view()) {
+    .hero,
+    .hero-bild {
+      overflow: clip;
+    }
+  }
+
+  /* Ebene zwischen Rahmen und Foto: füllt den Rahmen; trägt den Zoom beim
+     Scrollen, das Foto den Zoom beim Laden. */
+  .hero-ebene {
+    width: 100%;
+    height: 100%;
   }
 
   .hero-bild img {

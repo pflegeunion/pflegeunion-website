@@ -46,6 +46,18 @@ solange sie nicht ausdrücklich geändert werden.
     Burger ein und ergänzt nur `aria-expanded`, Schliessen per Escape-Taste
     und Schliessen beim Antippen eines Menüpunkts. `npm test` prüft die
     Grösse.
+  - Zusätzlich erlaubt ist das **Bewegungs-Skript** `src/scripts/bewegung.js`
+    (nur Startseite; drittes Kleinskript neben Menü und Akkordeons): unter
+    1 KB, ohne Framework, getrennt vom Lohnrechner. `Basis.astro` setzt es
+    mit dem Parameter `bewegung` inline in den `<head>`, ohne `defer`, damit
+    die Startklasse vor dem ersten Zeichnen steht (kein Aufblitzen, das
+    Hero-Bild springt nicht) und Klasse und Beobachtung immer zusammen
+    ankommen. Es setzt die Startklasse `.bewegung` auf `<html>` nur, wenn
+    `prefers-reduced-motion` nicht aktiv ist und IntersectionObserver
+    vorhanden ist, und beendet die Beobachtung pro Element nach dem Start.
+    Ohne JavaScript, bei einem Fehler, mit «Bewegung reduzieren» und beim
+    Drucken ist alles sofort da und steht still. `npm test`
+    (`test/bewegung.test.mjs`) prüft Grösse und Verhalten.
   - Ebenfalls erlaubt: **weiche Akkordeons** (FAQ mit `details`/`summary`,
     das Öffnen nur per CSS).
   - **Mobil-Verdichtung** unter 768 px mit `details`/`summary` (Klasse
@@ -207,9 +219,27 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
 - **Kein Rot.** Fehlerhinweise in Formularen als Tiefblau-Fläche mit weisser
   Schrift.
 - Ruhige, sachliche Gestaltung ohne Effekte. Keine Karussells, keine
-  Parallax-Effekte, kein Hover-Anheben. Erlaubt gemäss Konzept B5: das
+  Slider, keine Parallax-Effekte, kein Hover-Anheben, kein Festhalten von
+  Abschnitten, kein Eingriff ins Scrollen. Erlaubt gemäss Konzept B5: das
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
   beides mit `prefers-reduced-motion`.
+- **Sanftes Einblenden beim Scrollen** ist auf der Startseite erlaubt
+  (Auftrag «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B
+  aus Claude Design): einmal pro Element, sobald es zu etwa 15 % sichtbar
+  ist, 40 px von unten und von transparent auf voll in 700 ms ease-out;
+  im Abschnitt gestaffelt (Übertitel, H2, Text je 80 ms; Kacheln, Schritte,
+  FAQ-Fragen und Personen je 120 ms). Die Bilder «Passt es?» und Betreuung
+  blenden ein und zoomen im festen Rahmen von 108 % auf 100 % (900 ms), das
+  Hero-Bild beim Laden bzw. sobald es ins Bild kommt von 108 % auf 100 %
+  (1,4 s) und beim Scrollen durch den Hero bis höchstens 105 %
+  (`animation-timeline: view()`, eigene Ebene `.hero-ebene`). Nur
+  `transform` und `opacity`, keine Layoutverschiebung. Nie bewegt: Kopf-,
+  Utility- und Fusszeile, Hero-Text, Telefonnummern, WhatsApp- und
+  E-Mail-Links, Buttons, Rechner-Eingaben, Kästchen, Ergebnisstreifen,
+  Formular und Fehlermeldungen; enthält ein Element einen Link oder Button,
+  bleibt es still. Markiert wird mit `data-bewegung` (`text`, `kachel`,
+  `bild`, `hero`). Ein Vorfahre mit `overflow: hidden` verhindert die
+  Zeitleiste; dort `overflow: clip` verwenden.
 - Alle interaktiven Elemente mit sichtbarem Fokusring 2 px Tiefblau
   (`:focus-visible` in `global.css`). **Alle Links und Tippflächen
   mindestens 44 px** (`--tippflaeche`; Links im Fliesstext mit
@@ -267,6 +297,14 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `--abstand-abschnitt` (64 px, ab 1024 px 96 px), `--seitenrand` (16 px,
   ab 768 px 24 px), `--hoehe-sticky` (Höhe der sticky Kopfzeile für
   Sprungziele), `--schritt-zahl-spalte` (Spalte der Schrittzahlen).
+- Die Werte der Bewegung beim Scrollen sind ebenfalls keine Design-Tokens
+  und stehen nur im Abschnitt «Bewegung» von `global.css`, je eine Zeile:
+  `--bewegung-weg` (40 px), `--bewegung-dauer` (700 ms), `--bewegung-kurve`,
+  `--bewegung-staffel` (80 ms), `--bewegung-staffel-kachel` (120 ms),
+  `--bewegung-zoom` und `--bewegung-zoom-dauer` (108 %, 900 ms),
+  `--bewegung-hero-zoom`, `--bewegung-hero-dauer` und
+  `--bewegung-hero-scroll` (108 %, 1,4 s, 105 %). Die Schwelle von 15 %
+  steht in `bewegung.js`.
 - **Breakpoints** stehen an einer einzigen Stelle, im Abschnitt «Breakpoints
   der Webseite» in `global.css`: **360, 480, 640, 768, 1024 und 1360 px**. Da
   CSS-Variablen in Media Queries nicht wirken, tragen die Komponenten die
@@ -288,7 +326,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
-| `Hero.astro` | Hero (C1 Abschnitt 1; Claude Design H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile; Foto eckig mit `object-fit: cover`, ab 1024 px randabfallend rechts ab Rasterspalte 8 über die volle Höhe des Abschnitts (Text sieben von zwölf Spalten), unter 1024 px nach dem Text randabfallend über die volle Breite, quadratisch, direkt am Abschnittsende; Bildmitte so, dass beide Personen auf jeder Breite vollständig sichtbar bleiben; ohne Ring, ohne Ocker-Linie; Foto ohne Lazy Loading, `fetchpriority="high"` | Erster Abschnitt jeder Seite |
+| `Hero.astro` | Hero (C1 Abschnitt 1; Claude Design H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile; Foto eckig mit `object-fit: cover`, ab 1024 px randabfallend rechts ab Rasterspalte 8 über die volle Höhe des Abschnitts (Text sieben von zwölf Spalten), unter 1024 px nach dem Text randabfallend über die volle Breite, quadratisch, direkt am Abschnittsende; Bildmitte so, dass beide Personen auf jeder Breite vollständig sichtbar bleiben; ohne Ring, ohne Ocker-Linie; Foto ohne Lazy Loading, `fetchpriority="high"`; zwischen Rahmen (`.hero-bild`) und Foto die Ebene `.hero-ebene` für den Zoom beim Scrollen; Abschnitt und Rahmen schneiden mit `overflow: hidden`, wo die Zeitleiste wirkt mit `overflow: clip` | Erster Abschnitt jeder Seite |
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Bild im ersten Bildschirm: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht, ausser im Hero; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar) | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
 | `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
@@ -305,6 +343,10 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
 - Die Parameter jeder Komponente sind im Kommentarkopf der Datei beschrieben.
+- Der Parameter `bewegung` (Hero, Abschnitt, Lohnrechner, TrustLeiste,
+  Karten, Schritte, Bildflaeche, Hinweiskasten, FAQ, Anfrage, dazu
+  `Basis.astro` für das Skript) markiert die bewegten Elemente mit
+  `data-bewegung`; nur die Startseite setzt ihn (siehe Gestaltung).
 - Die Startseite `src/pages/index.astro` setzt die zwölf Abschnitte aus
   Konzept C1 in dieser Reihenfolge um: Hero · Lohnrechner · Trust-Leiste ·
   Was Sie erhalten · So funktioniert es (`#ablauf`) · Passt es? · Ehrlich
@@ -391,17 +433,21 @@ src/layouts/         Layouts, z. B. Basis.astro (Kopf- und Fusszeile)
 src/pages/           Seiten, eine Datei pro Seite; bausteine.astro ist die
                      interne Musterseite
 src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
-                     (Sätze, Stufen, Postleitzahlen), unter 10 KB
+                     (Sätze, Stufen, Postleitzahlen), unter 10 KB;
+                     bewegung.js: Bewegung beim Scrollen (Startseite),
+                     unter 1 KB, inline im Kopf
 test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1
                      und beide Zustände des Kurs-Kästchens,
                      breakpoints.test.mjs die Media Queries,
                      menue.test.mjs die Grösse des Menü-Skripts,
+                     bewegung.test.mjs Grösse und Verhalten des
+                     Bewegungs-Skripts und die Regeln in global.css,
                      ocker.test.mjs, dass Ocker nie als Schrift
                      (color) gesetzt wird
 src/styles/          tokens.css (erzeugt, nicht bearbeiten) und global.css
-                     mit Schrifteinbindung, Web-Anpassungen, Breakpoints und
-                     Grundlayout
+                     mit Schrifteinbindung, Web-Anpassungen, Breakpoints,
+                     Grundlayout und Bewegung
 astro.config.mjs     Astro-Konfiguration
 netlify.toml         Build- und Deploy-Einstellungen für Netlify
 ```

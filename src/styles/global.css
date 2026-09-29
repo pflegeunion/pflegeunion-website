@@ -640,3 +640,132 @@ a {
 main {
   flex: 1;
 }
+
+/*
+ * =====================================================================
+ * Bewegung beim Scrollen (nur Startseite; Auftrag «Startseite: sanfte
+ * Bewegung beim Scrollen», Vorlage Variante B aus Claude Design).
+ *
+ * Elemente mit dem Attribut data-bewegung starten einmal, sobald etwa
+ * 15 % von ihnen sichtbar sind; beim Zurückscrollen passiert nichts mehr.
+ *   text, kachel  blenden von transparent auf voll und kommen 40 px von
+ *                 unten herein; im selben Abschnitt nacheinander, «text»
+ *                 (Übertitel, H2, Text) im Abstand von 80 ms, «kachel»
+ *                 (Kacheln, Schritte, FAQ-Fragen, Personen) von 120 ms
+ *   bild          die Bildfläche blendet ein, das Foto zoomt dabei im
+ *                 festen Rahmen von 108 % auf 100 %
+ *   hero          das Hero-Bild zoomt beim Laden bzw. sobald es ins Bild
+ *                 kommt (unter 1024 px) von 108 % auf 100 %; unabhängig
+ *                 davon wächst die Ebene darum (.hero-ebene) beim Scrollen
+ *                 durch den Hero bis 105 % (animation-timeline: view())
+ *
+ * src/scripts/bewegung.js (inline im Kopf der Startseite) setzt die
+ * Startklasse .bewegung auf <html> nur, wenn «Bewegung reduzieren» nicht
+ * aktiv ist und der Browser IntersectionObserver kennt; gestartete
+ * Elemente erhalten .bewegt. Ohne JavaScript, bei einem Fehler, mit
+ * «Bewegung reduzieren» und beim Drucken ist alles sofort da und steht
+ * still: Die Regeln unten wirken nur mit .bewegung, nur am Bildschirm und
+ * nur ohne «Bewegung reduzieren». Animiert werden nur transform und
+ * opacity, das Layout verschiebt sich nie. Nie bewegt: Kopf- und
+ * Fusszeile, Hero-Text, Telefon, WhatsApp, E-Mail, Buttons, Rechner-
+ * Eingaben und -Ergebnis, Formular. Enthält ein Element einen Link oder
+ * Button, bleibt es still.
+ *
+ * Nachjustieren nur hier, im folgenden Block (je eine Zeile pro Wert).
+ * Die Schwelle von 15 % steht in bewegung.js.
+ * =====================================================================
+ */
+:root {
+  /* Weg von unten beim Einblenden: 40 px. */
+  --bewegung-weg: calc(var(--space-4) + var(--space-1));
+  /* Dauer und Kurve des Einblendens (ease-out). */
+  --bewegung-dauer: 700ms;
+  --bewegung-kurve: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* Staffelung im Abschnitt: Übertitel, H2, Text … */
+  --bewegung-staffel: 80ms;
+  /* … sowie Kacheln, Schritte, FAQ-Fragen und Personen. */
+  --bewegung-staffel-kachel: 120ms;
+  /* Bilder «Passt es?» und Betreuung: Startgrösse (108 %) und Dauer. */
+  --bewegung-zoom: 1.08;
+  --bewegung-zoom-dauer: 900ms;
+  /* Hero-Bild: Startgrösse (108 %) und Dauer beim Laden, dazu die
+     grösste Grösse beim Scrollen durch den Hero (105 %). */
+  --bewegung-hero-zoom: 1.08;
+  --bewegung-hero-dauer: 1400ms;
+  --bewegung-hero-scroll: 1.05;
+}
+
+/* Abstand zum vorherigen Start im selben Abschnitt; bewegung.js liest ihn. */
+[data-bewegung] {
+  --bewegung-versatz: var(--bewegung-staffel);
+}
+
+[data-bewegung='kachel'] {
+  --bewegung-versatz: var(--bewegung-staffel-kachel);
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+  /* Die Verzögerung aus der Staffelung setzt bewegung.js je Element
+     (transition-delay). */
+  .bewegung :is([data-bewegung='text'], [data-bewegung='kachel']) {
+    transition:
+      opacity var(--bewegung-dauer) var(--bewegung-kurve),
+      transform var(--bewegung-dauer) var(--bewegung-kurve);
+  }
+
+  .bewegung :is([data-bewegung='text'], [data-bewegung='kachel']):not(.bewegt) {
+    opacity: 0;
+    transform: translateY(var(--bewegung-weg));
+  }
+
+  /* Bild: die Fläche blendet ein, das Foto zoomt im festen Rahmen (die
+     Bildfläche schneidet ab). */
+  .bewegung [data-bewegung='bild'] {
+    transition: opacity var(--bewegung-zoom-dauer) var(--bewegung-kurve);
+  }
+
+  .bewegung [data-bewegung='bild'] img {
+    transition: transform var(--bewegung-zoom-dauer) var(--bewegung-kurve);
+    transition-delay: inherit;
+  }
+
+  .bewegung [data-bewegung='bild']:not(.bewegt) {
+    opacity: 0;
+  }
+
+  .bewegung [data-bewegung='bild']:not(.bewegt) img {
+    transform: scale(var(--bewegung-zoom));
+  }
+
+  /* Hero-Bild beim Laden: nur Zoom, ohne Einblenden. */
+  .bewegung [data-bewegung='hero'] {
+    transition: transform var(--bewegung-hero-dauer) var(--bewegung-kurve);
+  }
+
+  .bewegung [data-bewegung='hero']:not(.bewegt) {
+    transform: scale(var(--bewegung-hero-zoom));
+  }
+
+  /* Hero-Bild beim Scrollen: eigene Ebene um das Bild, damit sich die
+     beiden Zooms nicht stören. Kein Vorfahre darf overflow: hidden haben
+     (verhindert die Zeitleiste); Hero.astro schneidet mit overflow: clip. */
+  @supports (animation-timeline: view()) {
+    .bewegung .hero-ebene {
+      animation-name: bewegung-hero-scroll;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: view();
+      animation-range: contain 0% exit 100%;
+    }
+  }
+}
+
+@keyframes bewegung-hero-scroll {
+  from {
+    transform: none;
+  }
+
+  to {
+    transform: scale(var(--bewegung-hero-scroll));
+  }
+}

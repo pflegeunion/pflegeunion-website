@@ -20,6 +20,8 @@
  *   seitlich      Titel ab 1024 px links neben dem Inhalt (Standard false)
  *   inhaltSpalte  erste Rasterspalte des Inhalts bei `seitlich` (Standard 5)
  *   class         zusätzliche Klassen
+ *   bewegung      Etikette und H2 blenden beim Scrollen ein (nur
+ *                 Startseite, global.css «Bewegung»; Standard false)
  */
 interface Props {
   flaeche?: 'weiss' | 'warmgrau';
@@ -31,6 +33,7 @@ interface Props {
   seitlich?: boolean;
   inhaltSpalte?: number;
   class?: string;
+  bewegung?: boolean;
 }
 
 const {
@@ -43,7 +46,10 @@ const {
   seitlich = false,
   inhaltSpalte = 5,
   class: klasse,
+  bewegung = false,
 } = Astro.props;
+
+const bw = bewegung ? 'text' : undefined;
 ---
 
 <section
@@ -56,8 +62,8 @@ const {
     {
       (etikette || titel) && (
         <div class="abschnitt-kopf">
-          {etikette && <p class="text-label etikette">{etikette}</p>}
-          {titel && <h2 class="text-h2">{titel}</h2>}
+          {etikette && <p class="text-label etikette" data-bewegung={bw}>{etikette}</p>}
+          {titel && <h2 class="text-h2" data-bewegung={bw}>{titel}</h2>}
         </div>
       )
     }

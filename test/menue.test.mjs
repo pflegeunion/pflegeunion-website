@@ -1,6 +1,6 @@
 /**
  * Prüft das Menü-Skript der Kopfzeile (Inline-Skript in Header.astro):
- * neben dem Lohnrechner die einzige zweite Ausnahme, unter 1 KB.
+ * neben Lohnrechner und Bewegung (bewegung.test.mjs) erlaubt, unter 1 KB.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

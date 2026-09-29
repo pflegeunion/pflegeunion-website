@@ -16,6 +16,8 @@
  * Parameter:
  *   name      Name des Ablaufs für HowTo (in der Regel die H2 des Abschnitts)
  *   schritte  Liste { titel, text }
+ *   bewegung  die Schritte blenden beim Scrollen einzeln ein (nur
+ *             Startseite, global.css «Bewegung»; Standard false)
  */
 import Icon from './Icon.astro';
 
@@ -27,9 +29,10 @@ interface Schritt {
 interface Props {
   name: string;
   schritte: Schritt[];
+  bewegung?: boolean;
 }
 
-const { name, schritte } = Astro.props;
+const { name, schritte, bewegung = false } = Astro.props;
 
 const howTo = {
   '@context': 'https://schema.org',
@@ -47,7 +50,7 @@ const howTo = {
 <ol class="schritte liste-blank">
   {
     schritte.map((s, i) => (
-      <li class="schritt">
+      <li class="schritt" data-bewegung={bewegung ? 'kachel' : undefined}>
         <details class="klappe">
           <summary>
             <span class="zeile-kopf">

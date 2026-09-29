@@ -4,6 +4,10 @@
  * Claude Design, Fassung A (Boards Main und Desktop_A_2 mit D01–D13,
  * Mobil_A_1 bis Mobil_A_3 mit M01–M13). Alle Texte wörtlich aus den
  * Boards, von der Geschäftsleitung freigegeben.
+ *
+ * Bewegung beim Scrollen (global.css «Bewegung», Vorlage Variante B):
+ * Elemente mit data-bewegung blenden einmal ein. Elemente mit Link oder
+ * Button (Telefon, WhatsApp, Buttons) und der Rechner bleiben still.
  */
 import Basis from '../layouts/Basis.astro';
 import Hero from '../components/Hero.astro';
@@ -130,6 +134,7 @@ const fragen = [
 ---
 
 <Basis
+  bewegung
   titel="Pflegende Angehörige anstellen – Lohn, Schulung, Begleitung | Pflegeunion Schweiz, Spitex im Kanton Zug"
   beschreibung="Sie pflegen einen nahestehenden Menschen? Die Pflegeunion stellt Sie an: CHF 37.95 pro Stunde mit Pflegehelferkurs – den Kurs bezahlen wir –, dazu eine Pflegefachperson an Ihrer Seite. Nicht gewinnorientiert, kantonal bewilligt. Lohn in 60 Sekunden berechnen."
 >
@@ -142,17 +147,18 @@ const fragen = [
     sekundaer={{ text: 'Erstgespräch vereinbaren', ziel: '#kontakt' }}
     bild="hero-seeufer"
     bildAlt="Eine Frau legt am Seeufer den Arm um einen Mann im Rollstuhl; beide blicken auf den See und den Herbstwald im Morgenlicht."
+    bewegung
   />
 
   <!-- 2 Lohnrechner (Baustein F, nur die Stundenfrage) -->
-  <Lohnrechner anker="lohnrechner" />
+  <Lohnrechner anker="lohnrechner" bewegung />
 
   <!-- 3 Trust-Leiste -->
-  <TrustLeiste />
+  <TrustLeiste bewegung />
 
   <!-- 4 Was Sie erhalten -->
-  <Abschnitt label="Was Sie erhalten" etikette="IHRE ANSTELLUNG BEI DER PFLEGEUNION" titel="Mehr als ein Lohn.">
-    <Karten karten={karten} />
+  <Abschnitt label="Was Sie erhalten" etikette="IHRE ANSTELLUNG BEI DER PFLEGEUNION" titel="Mehr als ein Lohn." bewegung>
+    <Karten karten={karten} bewegung />
   </Abschnitt>
 
   <!-- 5 So funktioniert es -->
@@ -164,8 +170,9 @@ const fragen = [
     titel="Vom ersten Anruf bis zum ersten Lohn."
     seitlich
     inhaltSpalte={6}
+    bewegung
   >
-    <Schritte name="Vom ersten Anruf bis zum ersten Lohn." schritte={schritte} />
+    <Schritte name="Vom ersten Anruf bis zum ersten Lohn." schritte={schritte} bewegung />
     <p class="knopfzeile ablauf-knopf">
       <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
     </p>
@@ -180,11 +187,12 @@ const fragen = [
         sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 48px)"
         abTablet
         class="passt-bild"
+        bewegung
       />
       <div class="passt-text">
-        <p class="text-label etikette">PASST ES?</p>
-        <h2 class="text-h2">Das sind die Voraussetzungen.</h2>
-        <ul class="haken liste-blank">
+        <p class="text-label etikette" data-bewegung="text">PASST ES?</p>
+        <h2 class="text-h2" data-bewegung="text">Das sind die Voraussetzungen.</h2>
+        <ul class="haken liste-blank" data-bewegung="text">
           {
             voraussetzungen.map((v) => (
               <li>
@@ -196,7 +204,7 @@ const fragen = [
             ))
           }
         </ul>
-        <p class="abschluss">
+        <p class="abschluss" data-bewegung="text">
           Unsicher, ob es bei Ihnen passt? Rufen Sie an oder schreiben Sie uns auf WhatsApp. Wir sagen es
           Ihnen ehrlich – auch wenn die Antwort «nein» ist.
         </p>
@@ -215,32 +223,32 @@ const fragen = [
 
   <!-- 7 Ehrlich gesagt -->
   <Abschnitt flaeche="warmgrau" label="Ehrlich gesagt">
-    <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht." ebene={2} seitlich>
+    <Hinweiskasten etikette="EHRLICH GESAGT" titel="Was bezahlt wird – und was nicht." ebene={2} seitlich bewegung>
       <div class="ehrlich-absaetze">
-        <p>
+        <p data-bewegung="text">
           <strong>Vergütet wird die Grundpflege:</strong> Hilfe bei Körperpflege, Anziehen, Essen und
           Trinken, Bewegen, Toilettengang. Je nach Situation sind das etwa ein bis drei Stunden pro Tag.
           Wie viele es bei Ihnen sind, zeigt die Abklärung.
         </p>
-        <p>
+        <p data-bewegung="text">
           <strong>Nicht über die Krankenversicherung vergütet</strong> werden Gesellschaft und
           Beaufsichtigung, Nachtpräsenz, Haushalt und Administratives. Das ist gesetzlich geregelt und bei
           allen Anbietern in der Schweiz gleich. Wenn Sie diese Unterstützung brauchen, bieten wir sie als
           Betreuung und Hauswirtschaft an – zu einem festen Stundentarif, den Sie vorher kennen.
         </p>
-        <p>
+        <p data-bewegung="text">
           <strong>Medizinische Pflege</strong> wie Medikamente richten, Wundversorgung oder Injektionen
           bieten wir zurzeit noch nicht an. Braucht die gepflegte Person solche Leistungen, klären wir im
           Erstgespräch mit Ihnen, wer sie übernimmt.
         </p>
-        <p>
+        <p data-bewegung="text">
           <strong>Für die gepflegte Person</strong> ändert sich finanziell wenig: Sie bezahlt den
           gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen
           Spitex-Organisation. Ansprüche wie die Hilflosenentschädigung bleiben bestehen.
         </p>
       </div>
       <hr class="ehrlich-linie" />
-      <p class="text-h3 ehrlich-schluss">
+      <p class="text-h3 ehrlich-schluss" data-bewegung="text">
         Wir versprechen Ihnen nichts, was wir nicht halten können. Dafür halten wir, was wir
         versprechen.
       </p>
@@ -251,15 +259,15 @@ const fragen = [
   <Abschnitt label="Betreuung und Hauswirtschaft">
     <div class="zweispaltig betreuung">
       <div class="betreuung-text">
-        <p class="text-label etikette">BETREUUNG & HAUSWIRTSCHAFT</p>
-        <h2 class="text-h2">Und wenn es mehr braucht als Pflege?</h2>
-        <p class="einstieg">
+        <p class="text-label etikette" data-bewegung="text">BETREUUNG & HAUSWIRTSCHAFT</p>
+        <h2 class="text-h2" data-bewegung="text">Und wenn es mehr braucht als Pflege?</h2>
+        <p class="einstieg" data-bewegung="text">
           Ein Einkauf, der zu schwer geworden ist. Ein Mittagessen, das allein nicht schmeckt. Ein
           Arzttermin, zu dem niemand begleiten kann. Ein Nachmittag, an dem Sie selbst einmal durchatmen
           möchten. Unsere Betreuungspersonen kommen ins Haus – als Ergänzung zu Ihrer Pflege oder für
           Haushalte im Kanton Zug, die einfach jemanden brauchen, der regelmässig da ist.
         </p>
-        <ul class="haken haken--eng liste-blank">
+        <ul class="haken haken--eng liste-blank" data-bewegung="text">
           {
             betreuungLeistungen.map((l) => (
               <li>
@@ -271,7 +279,7 @@ const fragen = [
             ))
           }
         </ul>
-        <p class="tarif">
+        <p class="tarif" data-bewegung="text">
           Private Leistung zu einem festen Stundentarif von CHF [XX.–], ohne Zuschläge.
           Ergänzungsleistungen und Zusatzversicherungen können sich beteiligen – wir prüfen das mit
           Ihnen.
@@ -286,6 +294,7 @@ const fragen = [
         sizes="(min-width: 1248px) 486px, (min-width: 1024px) calc((100vw - 48px) * 0.4), calc(100vw - 48px)"
         abTablet
         class="betreuung-bild"
+        bewegung
       />
     </div>
   </Abschnitt>
@@ -294,9 +303,9 @@ const fragen = [
   <Abschnitt flaeche="warmgrau" label="Wer dahintersteht">
     <div class="team">
       <div class="team-text">
-        <p class="text-label etikette">ÜBER DIE PFLEGEUNION</p>
-        <h2 class="text-h2">Ein Verein, drei Gesichter, ein Versprechen.</h2>
-        <p class="einstieg">
+        <p class="text-label etikette" data-bewegung="text">ÜBER DIE PFLEGEUNION</p>
+        <h2 class="text-h2" data-bewegung="text">Ein Verein, drei Gesichter, ein Versprechen.</h2>
+        <p class="einstieg" data-bewegung="text">
           Die Pflegeunion Schweiz ist ein nicht gewinnorientierter Verein mit Sitz in Rotkreuz, gegründet
           2026 von Menschen aus der Spitex, die zwei Dinge zu oft gesehen haben: Angehörige, die längst
           pflegen, aber weder Anleitung noch Anerkennung erhalten – und Pflegefachpersonen, die Formulare
@@ -307,7 +316,7 @@ const fragen = [
       <ul class="personen liste-blank">
         {
           personen.map((p) => (
-            <li class="person">
+            <li class="person" data-bewegung="kachel">
               <p class="text-h3-verdichtet person-name">{p.name}</p>
               <p class="text-body-verdichtet person-funktion">{p.funktion}</p>
             </li>
@@ -321,16 +330,16 @@ const fragen = [
   </Abschnitt>
 
   <!-- 10 Demnächst -->
-  <Abschnitt label="Demnächst" etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt." abstand="eng">
-    <p class="demnaechst-einleitung">
+  <Abschnitt label="Demnächst" etikette="WIR BAUEN AUS" titel="Was demnächst dazukommt." abstand="eng" bewegung>
+    <p class="demnaechst-einleitung" data-bewegung="text">
       Wir starten mit dem, was wir heute verlässlich leisten können: der Anstellung und Begleitung
       pflegender Angehöriger sowie Betreuung und Hauswirtschaft. Schritt für Schritt bauen wir unser
       Angebot aus. Diese Leistungen sind in Vorbereitung:
     </p>
-    <div class="demnaechst-modul">
+    <div class="demnaechst-modul" data-bewegung="text">
       <Demnaechst />
     </div>
-    <p class="demnaechst-nachsatz">
+    <p class="demnaechst-nachsatz" data-bewegung="text">
       Sie brauchen eine dieser Leistungen schon heute? Rufen Sie uns trotzdem an – wir sagen Ihnen, ab
       wann wir sie anbieten, und nennen Ihnen bis dahin eine Anlaufstelle.
     </p>
@@ -345,12 +354,13 @@ const fragen = [
     titel="Kurz beantwortet."
     abstand="mittel"
     seitlich
+    bewegung
   >
-    <FAQ fragen={fragen} />
+    <FAQ fragen={fragen} bewegung />
   </Abschnitt>
 
   <!-- 12 Anfrage -->
-  <Anfrage titel="Reden wir über Ihre Situation." />
+  <Anfrage titel="Reden wir über Ihre Situation." bewegung />
 </Basis>
 
 <style>
