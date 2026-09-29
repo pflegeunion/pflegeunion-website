@@ -12,6 +12,8 @@
  * Parameter:
  *   fragen      Liste { frage, antwort }; die Antwort ist Text ohne HTML
  *   ersteOffen  erste Frage geöffnet (Standard true)
+ *   bewegung    die Fragen blenden beim Scrollen einzeln ein (nur
+ *               Startseite, global.css «Bewegung»; Standard false)
  */
 import Icon from './Icon.astro';
 
@@ -23,9 +25,10 @@ interface Frage {
 interface Props {
   fragen: Frage[];
   ersteOffen?: boolean;
+  bewegung?: boolean;
 }
 
-const { fragen, ersteOffen = true } = Astro.props;
+const { fragen, ersteOffen = true, bewegung = false } = Astro.props;
 
 const faqPage = {
   '@context': 'https://schema.org',
@@ -41,7 +44,7 @@ const faqPage = {
 <div class="faq">
   {
     fragen.map((f, i) => (
-      <details class="eintrag" open={ersteOffen && i === 0}>
+      <details class="eintrag" open={ersteOffen && i === 0} data-bewegung={bewegung ? 'kachel' : undefined}>
         <summary class="frage">
           <h3 class="text-faq frage-text">{f.frage}</h3>
           <span class="frage-icon">

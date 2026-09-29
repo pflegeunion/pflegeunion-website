@@ -49,6 +49,10 @@
  *                 Meldungen aus D1 und der Sekundär-Button «Ergebnis per
  *                 E-Mail erhalten» (vorerst ohne Funktion, folgt mit dem
  *                 Formularversand) statt «Alle Details zum Lohn».
+ *   bewegung      Übertitel, H2, Einleitung und Fussnote blenden beim
+ *                 Scrollen ein (nur Startseite, global.css «Bewegung»;
+ *                 Standard false). Rechner, Kästchen, Ergebnis und Buttons
+ *                 bewegen sich nie.
  */
 import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
 import Icon from './Icon.astro';
@@ -56,9 +60,11 @@ import Icon from './Icon.astro';
 interface Props {
   anker?: string;
   vollstaendig?: boolean;
+  bewegung?: boolean;
 }
 
-const { anker = 'lohnrechner', vollstaendig = false } = Astro.props;
+const { anker = 'lohnrechner', vollstaendig = false, bewegung = false } = Astro.props;
+const bw = bewegung ? 'text' : undefined;
 
 // Vorbelegung gemäss D1: 2 Stunden, Kästchen leer (Lohn mit Kurs).
 const vorbelegung = '2';
@@ -119,9 +125,9 @@ const fussnote =
 
 <section id={anker} class="rechner-abschnitt" aria-label="Lohnrechner">
   <div class="rechner-inhalt">
-    <p class="text-label etikette">IHR LOHN · IN 60 SEKUNDEN</p>
-    <h2 class="text-h2">Was würde ich verdienen?</h2>
-    <p class="einleitung">
+    <p class="text-label etikette" data-bewegung={bw}>IHR LOHN · IN 60 SEKUNDEN</p>
+    <h2 class="text-h2" data-bewegung={bw}>Was würde ich verdienen?</h2>
+    <p class="einleitung" data-bewegung={bw}>
       Eine Angabe genügt. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
       kostenlosen Abklärung bei Ihnen zu Hause.
     </p>
@@ -277,7 +283,7 @@ const fussnote =
       </div>
     </div>
 
-    <p class="fussnote text-small">{fussnote}</p>
+    <p class="fussnote text-small" data-bewegung={bw}>{fussnote}</p>
   </div>
 </section>
 

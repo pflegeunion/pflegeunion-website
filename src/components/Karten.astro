@@ -14,7 +14,9 @@
  * immer nur einer.
  *
  * Parameter:
- *   karten  Liste { icon, titel, text }
+ *   karten    Liste { icon, titel, text }
+ *   bewegung  die Karten blenden beim Scrollen einzeln ein (nur Startseite,
+ *             global.css «Bewegung»; Standard false)
  */
 import Icon, { type IconName } from './Icon.astro';
 
@@ -26,15 +28,16 @@ interface Karte {
 
 interface Props {
   karten: Karte[];
+  bewegung?: boolean;
 }
 
-const { karten } = Astro.props;
+const { karten, bewegung = false } = Astro.props;
 ---
 
 <ul class="karten liste-blank">
   {
     karten.map((k) => (
-      <li class="karte">
+      <li class="karte" data-bewegung={bewegung ? 'kachel' : undefined}>
         <details class="klappe">
           <summary>
             <span class="zeile-kopf">

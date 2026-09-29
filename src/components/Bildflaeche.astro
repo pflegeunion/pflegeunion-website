@@ -22,6 +22,9 @@
  *   abTablet     true: unter 768 px weder angezeigt noch geladen
  *   idee         Bildidee als Text für die Platzhalterfläche (ohne Foto)
  *   class        zusätzliche Klassen
+ *   bewegung     die Fläche blendet beim Scrollen ein, das Foto zoomt dabei
+ *                im festen Rahmen von 108 % auf 100 % (nur Startseite,
+ *                global.css «Bewegung»; Standard false)
  */
 interface Props {
   verhaeltnis?: '3:2' | '4:3';
@@ -32,6 +35,7 @@ interface Props {
   abTablet?: boolean;
   idee?: string;
   class?: string;
+  bewegung?: boolean;
 }
 
 const {
@@ -43,6 +47,7 @@ const {
   abTablet = false,
   idee = '',
   class: klasse,
+  bewegung = false,
 } = Astro.props;
 const [b, h] = verhaeltnis.split(':');
 
@@ -54,7 +59,11 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 const leer = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 ---
 
-<figure class:list={['bild', { 'bild--ab-tablet': abTablet }, klasse]} style={`--verhaeltnis: ${b} / ${h}`}>
+<figure
+  class:list={['bild', { 'bild--ab-tablet': abTablet }, klasse]}
+  style={`--verhaeltnis: ${b} / ${h}`}
+  data-bewegung={bewegung ? 'bild' : undefined}
+>
   {
     bild ? (
       <picture>

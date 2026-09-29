@@ -17,21 +17,25 @@
  *             Abschnitt) oder 2 (der Kasten ist selbst der Abschnitt, z. B.
  *             «Ehrlich gesagt» auf der Startseite)
  *   seitlich  Titel ab 1024 px links neben dem Inhalt (Standard false)
+ *   bewegung  Etikette und Titel blenden beim Scrollen ein (nur Startseite,
+ *             global.css «Bewegung»; Standard false)
  */
 interface Props {
   etikette?: string;
   titel: string;
   ebene?: 2 | 3;
   seitlich?: boolean;
+  bewegung?: boolean;
 }
 
-const { etikette = 'GUT ZU WISSEN', titel, ebene = 3, seitlich = false } = Astro.props;
+const { etikette = 'GUT ZU WISSEN', titel, ebene = 3, seitlich = false, bewegung = false } = Astro.props;
+const bw = bewegung ? 'text' : undefined;
 ---
 
 <div class:list={['kasten', { 'kasten--seitlich': seitlich }]}>
   <div class="kasten-kopf">
-    <p class="text-label etikette">{etikette}</p>
-    {ebene === 2 ? <h2 class="text-h2">{titel}</h2> : <h3 class="text-h3">{titel}</h3>}
+    <p class="text-label etikette" data-bewegung={bw}>{etikette}</p>
+    {ebene === 2 ? <h2 class="text-h2" data-bewegung={bw}>{titel}</h2> : <h3 class="text-h3" data-bewegung={bw}>{titel}</h3>}
   </div>
   <div class="kasten-inhalt">
     <slot />

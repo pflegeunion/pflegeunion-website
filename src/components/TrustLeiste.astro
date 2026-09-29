@@ -12,7 +12,9 @@
  * jeder Unterseite.
  *
  * Parameter:
- *   belege  Liste { icon, text }; Standard sind die fünf Belege aus B4
+ *   belege    Liste { icon, text }; Standard sind die fünf Belege aus B4
+ *   bewegung  die Liste blendet beim Scrollen als Ganzes ein (nur
+ *             Startseite, global.css «Bewegung»; Standard false)
  */
 import Icon, { type IconName } from './Icon.astro';
 
@@ -23,6 +25,7 @@ interface Beleg {
 
 interface Props {
   belege?: Beleg[];
+  bewegung?: boolean;
 }
 
 const standard: Beleg[] = [
@@ -33,12 +36,12 @@ const standard: Beleg[] = [
   { icon: 'clock', text: 'Antwort innert 24 Stunden an Werktagen' },
 ];
 
-const { belege = standard } = Astro.props;
+const { belege = standard, bewegung = false } = Astro.props;
 ---
 
 <section class="trust" aria-label="Belege">
   <div class="trust-inhalt">
-    <ul class="trust-liste text-trust">
+    <ul class="trust-liste text-trust" data-bewegung={bewegung ? 'text' : undefined}>
       {
         belege.map((b) => (
           <li class="beleg">

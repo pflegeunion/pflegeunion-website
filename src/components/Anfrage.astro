@@ -39,11 +39,15 @@
  *   titel       H2 (Standard «Reden wir über Ihre Situation.»)
  *   anker       id des Abschnitts (Standard 'kontakt')
  *   quellseite  Wert des versteckten Felds «quellseite» (Standard: aktueller Pfad)
+ *   bewegung    Übertitel, H2 und Text blenden beim Scrollen ein (nur
+ *               Startseite, global.css «Bewegung»; Standard false). Telefon,
+ *               E-Mail, WhatsApp und das Formular bewegen sich nie.
  */
 interface Props {
   titel?: string;
   anker?: string;
   quellseite?: string;
+  bewegung?: boolean;
 }
 
 import Icon from './Icon.astro';
@@ -52,7 +56,10 @@ const {
   titel = 'Reden wir über Ihre Situation.',
   anker = 'kontakt',
   quellseite = Astro.url.pathname,
+  bewegung = false,
 } = Astro.props;
+
+const bw = bewegung ? 'text' : undefined;
 
 const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 const email = 'info@pflegeunion.ch';
@@ -77,11 +84,11 @@ const zeitstempel = new Date().toISOString();
 <section id={anker} class="anfrage" aria-label="Anfrage">
   <div class="anfrage-inhalt">
     <div class="anfrage-text flaeche-tiefblau">
-      <p class="text-label etikette etikette--weiss">
+      <p class="text-label etikette etikette--weiss" data-bewegung={bw}>
         ERSTGESPRÄCH KOSTENLOS · ANTWORT INNERT 24 STUNDEN
       </p>
-      <h2 class="text-h2">{titel}</h2>
-      <p class="anfrage-absatz">
+      <h2 class="text-h2" data-bewegung={bw}>{titel}</h2>
+      <p class="anfrage-absatz" data-bewegung={bw}>
         Rufen Sie uns an oder schreiben Sie uns. Wir melden uns innert 24 Stunden an Werktagen. Ein
         Erstgespräch kostet nichts und verpflichtet Sie zu nichts.
       </p>
