@@ -24,6 +24,10 @@ solange sie nicht ausdrücklich geändert werden.
 
 - Statische Website mit **Astro** (aktuell Version 7), Ausgabe nach `dist`.
 - Deploy über **Netlify**: Build-Befehl `npm run build`, Publish-Verzeichnis `dist`.
+- Einzige Serverfunktion: die **Netlify Function** `netlify/functions/anfrage/`
+  (Node, ES-Module, Netlify Functions v2, Pfad `/api/anfrage`) für den Versand
+  des Anfrageformulars über Microsoft Graph (siehe Formular). Nur `node:crypto`
+  und `fetch`, keine Abhängigkeiten; `netlify.toml` nennt das Verzeichnis.
 - **Keine Cookies**, **kein Cookie-Banner** und keine vergleichbare Speicherung
   im Browser (kein localStorage, kein sessionStorage).
 - **Kein Tracking**, keine Tracking-Pixel, keine Analytics. Statistik
@@ -44,8 +48,12 @@ solange sie nicht ausdrücklich geändert werden.
     externe Datei. Das Menü ist ohne JavaScript bedienbar (die Navigation
     bleibt sichtbar, der Burger bleibt verborgen); das Skript blendet den
     Burger ein und ergänzt nur `aria-expanded`, Schliessen per Escape-Taste
-    und Schliessen beim Antippen eines Menüpunkts. `npm test` prüft die
-    Grösse.
+    und Schliessen beim Antippen eines Menüpunkts. Dazu die eine Zeile der
+    **Zeitprüfung** des Formulars: Beim Absenden trägt sie
+    `performance.now()` (Millisekunden seit dem Laden) in das versteckte
+    Feld `dauer` ein; sie hört am `document`, weil das Formular erst nach
+    der Kopfzeile folgt. Kein eigenes Skript für den Versand. `npm test`
+    prüft Grösse (Stand: 1'012 von 1'023 Bytes) und Verhalten.
   - Zusätzlich erlaubt ist das **Bewegungs-Skript** `src/scripts/bewegung.js`
     (nur Startseite; drittes Kleinskript neben Menü und Akkordeons): unter
     1 KB, ohne Framework, getrennt vom Lohnrechner. `Basis.astro` setzt es
@@ -106,10 +114,60 @@ solange sie nicht ausdrücklich geändert werden.
   Zeitprüfung, kein Captcha; keine Speicherung der Anfragen beim Hoster;
   keine Gesundheitsangaben als Pflichtfeld; Rechnerwerte als versteckte
   Felder (`stunden`, `ergebnis`); Zugangsdaten nur über
-  Umgebungsvariablen. Stand: Das Formular hat noch kein Versandziel;
-  Versand, Eingangsbestätigung und Zeitprüfung folgen in einem eigenen Pull
-  Request. Damit kommt auch die Funktion des Buttons «Ergebnis per E-Mail
-  erhalten» im Lohnrechner.
+  Umgebungsvariablen. Die Funktion des Buttons «Ergebnis per E-Mail
+  erhalten» im Lohnrechner folgt in einem eigenen Pull Request.
+  - **Versand** über die Netlify Function `netlify/functions/anfrage/`
+    (Pull Request «Formular: Versand über Microsoft 365»). Das Formular
+    sendet ohne JavaScript ganz normal (POST an `/api/anfrage`); die
+    Funktion prüft, verschickt und antwortet mit 303 zurück auf die Seite,
+    von der die Anfrage kam, mit `#anfrage-gesendet` (Bestätigungstext aus
+    D2) oder `#anfrage-fehler`. Beide Rückmeldungen stehen oben im Formular,
+    erscheinen nur per `:target` und tragen `tabindex="-1"` (Fokus beim
+    Sprung); der Fehler als Tiefblau-Fläche mit weisser Schrift und weissen
+    Links (Telefon, WhatsApp). Rücksprung nur auf eigene Pfade (beginnt mit
+    «/», kein «//», kein Protokoll, kein Backslash).
+  - Prüfung auf dem Server: Pflichtfelder 1, 3, 4, 6; Feld 1, 2 und 7 nur
+    mit den erlaubten Werten; E-Mail-Format wie im Browser; Höchstlängen
+    (Name 120, Telefon 40, E-Mail 254, Postleitzahl und Ort 80, Nachricht
+    3000 Zeichen, auch als `maxlength` im Formular). Ungültig → Fehler-Anker.
+    Auswahlwerte, Bezeichnungen und Längen stehen an einer Stelle,
+    `netlify/functions/anfrage/felder.mjs`; `Anfrage.astro` bezieht die
+    Auswahlwerte und Längen von dort.
+  - Spam-Schutz: Honeypot `webseite` (unsichtbar, nicht per Tab erreichbar,
+    `aria-hidden`, `autocomplete="off"`) und Zeitprüfung (Feld `dauer` aus
+    dem Menü-Skript, unter 3 Sekunden = Spam; ohne JavaScript leer, dann
+    entfällt nur die Zeitprüfung). Spam erhält die Antwort wie bei Erfolg,
+    verschickt wird nichts.
+  - Mails über Microsoft Graph (`POST /v1.0/users/{MAIL_FROM}/sendMail`),
+    reiner Text, UTF-8: die Anfrage an `MAIL_TO` (alle acht Felder mit
+    Bezeichnung aus D2, leere mit «–», Rechnerwerte, Seite, Datum und Uhrzeit
+    Europe/Zurich; `replyTo` die E-Mail der anfragenden Person;
+    `saveToSentItems: true`) und, nur wenn Feld 5 ausgefüllt ist, die
+    Eingangsbestätigung (von `MAIL_FROM`, `replyTo` `MAIL_TO`, nur das
+    Anliegen, keine weiteren Angaben). Schlägt nur die Bestätigung fehl,
+    gilt die Anfrage als gesendet; schlägt die Mail an `MAIL_TO` fehl,
+    Fehler-Anker.
+  - Anmeldung: App-Registrierung mit Zertifikat, Client-Credentials mit
+    eigener Client Assertion (JWT, PS256, `x5t#S256`) über `node:crypto`,
+    kein Client Secret, keine MSAL-Abhängigkeit. Das Token wird nur im
+    Speicher der laufenden Funktion zwischengespeichert. Senden ist nur aus
+    dem Postfach `MAIL_FROM` erlaubt (Exchange RBAC for Applications).
+  - **Umgebungsvariablen** (nur bei Netlify gesetzt, für Production, Deploy
+    Previews und Branch deploys; nie Werte ins Repository, in Tests, Logs
+    oder Pull Requests): `MS_TENANT_ID`, `MS_CLIENT_ID`,
+    `MS_CERT_THUMBPRINT_SHA256` (SHA-256-Fingerabdruck, Hex),
+    `MS_CERT_PRIVATE_KEY_BASE64` (geheim: privater Schlüssel als PEM, Base64
+    in einer Zeile), `MAIL_FROM`, `MAIL_TO`. Fehlt oder ist eine ungültig,
+    bricht die Funktion ab (Fehler-Anker) und nennt im Log nur den Namen.
+  - **Logging**: nie Formularinhalte, nie Werte der Umgebung, nie
+    Fehlermeldungen von Microsoft (sie können Adressen enthalten). Erlaubt
+    sind nur Status, Feldname bei ungültigen Angaben, Spam-Grund, Schritt,
+    HTTP-Status, Graph- bzw. AADSTS-Fehlercode und Request-ID, als eine
+    JSON-Zeile. `npm test` (`test/anfrage.test.mjs`) prüft das nach jedem
+    Aufruf.
+  - Nichts wird gespeichert: keine Netlify Forms (kein `data-netlify`),
+    keine Drittdienste. In jeder Netlify-Vorschau gehen echte Mails an
+    `MAIL_TO`.
 
 ## Schrift
 
@@ -334,7 +392,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
 | `TrustLeiste.astro` | Baustein A: fünf Belege mit Linien-Icon in Ocker | Unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt jeder Unterseite |
-| `Anfrage.astro` | Baustein B: Anfrage-Abschnitt mit Kontaktangaben (Telefon, E-Mail, WhatsApp) und Formular (D2, acht Felder), Anker `#kontakt`; mobil E-Mail, Erreichbarkeit und Nachricht unter «Weitere Angaben (freiwillig)» | Am Ende jeder Seite; H2 je Seite per Parameter `titel` |
+| `Anfrage.astro` | Baustein B: Anfrage-Abschnitt mit Kontaktangaben (Telefon, E-Mail, WhatsApp) und Formular (D2, acht Felder), Anker `#kontakt`; mobil E-Mail, Erreichbarkeit und Nachricht unter «Weitere Angaben (freiwillig)»; Versand an `/api/anfrage` (Netlify Function, siehe Formular), Rückmeldungen `#anfrage-gesendet` und `#anfrage-fehler` oben im Formular per `:target`; Honeypot und Feld `dauer` für die Zeitprüfung | Am Ende jeder Seite; H2 je Seite per Parameter `titel` |
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
@@ -440,7 +498,10 @@ test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1
                      und beide Zustände des Kurs-Kästchens,
                      breakpoints.test.mjs die Media Queries,
-                     menue.test.mjs die Grösse des Menü-Skripts,
+                     menue.test.mjs Grösse des Menü-Skripts und die
+                     Zeile der Zeitprüfung,
+                     anfrage.test.mjs den Formularversand mit
+                     gemocktem Graph und das Log,
                      bewegung.test.mjs Grösse und Verhalten des
                      Bewegungs-Skripts und die Regeln in global.css,
                      ocker.test.mjs, dass Ocker nie als Schrift
@@ -450,6 +511,10 @@ src/styles/          tokens.css (erzeugt, nicht bearbeiten) und global.css
                      Grundlayout und Bewegung
 astro.config.mjs     Astro-Konfiguration
 netlify.toml         Build- und Deploy-Einstellungen für Netlify
+netlify/functions/   anfrage/: Netlify Function für den Formularversand
+                     (anfrage.mjs Einstieg, felder.mjs Felder und
+                     Prüfung, mail.mjs Mailtexte, graph.mjs Anmeldung
+                     und sendMail)
 ```
 
 ## Arbeitsweise
