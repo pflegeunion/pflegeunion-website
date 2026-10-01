@@ -16,15 +16,28 @@
  * Nachricht hinter der Zeile «Weitere Angaben (freiwillig)» (Mobil-
  * Verdichtung, .klappe in global.css); ab 768 px sind sie immer offen.
  *
- * Versand: Das Formular hat noch kein Versandziel; der Versand (Adresse,
- * Eingangsbestätigung, Zeitprüfung) folgt in einem eigenen Pull Request.
- * Honeypot und Zeitstempel sind als Markup vorbereitet; der
- * Bestätigungstext aus D2 liegt als versteckter Block bereit.
+ * Versand: Das Formular sendet ohne JavaScript an die Netlify Function
+ * /api/anfrage (netlify/functions/anfrage/), die per Microsoft Graph an
+ * info@pflegeunion.ch schickt und mit 303 auf diese Seite zurückspringt:
+ * #anfrage-gesendet (Bestätigungstext aus D2) oder #anfrage-fehler. Beide
+ * Rückmeldungen stehen oben im Formular und erscheinen nur per :target;
+ * tabindex="-1", damit der Browser beim Sprung den Fokus auf sie setzt.
+ * Auswahlwerte, Höchstlängen (maxlength) und Formatregeln (pattern) kommen
+ * aus felder.mjs, derselben Quelle, mit der die Funktion prüft.
+ *
+ * Spam-Schutz ohne Captcha (D2): Honeypot «webseite» (unsichtbar, nicht per
+ * Tab erreichbar, aria-hidden, autocomplete off) und Zeitprüfung: Das
+ * Menü-Skript (Header.astro) trägt beim Absenden die Zeit seit dem Laden in
+ * das versteckte Feld «dauer» ein. Ohne JavaScript bleibt es leer; dann
+ * entfällt nur die Zeitprüfung.
  *
  * Fehlerhinweise: Die Pflichtfelder nutzen die HTML-Validierung. Die eigenen
  * deutschen Texte erscheinen ohne JavaScript über :user-invalid, sobald ein
  * Feld verlassen oder das Formular abgeschickt wurde. Fehler als Tiefblau-
- * Fläche mit weisser Schrift, kein Rot.
+ * Fläche mit weisser Schrift, kein Rot. Telefon hat zwei Texte: leer
+ * (.fehler--leer) und ausgefüllt mit weniger als 9 Ziffern (.fehler--format);
+ * unterschieden per :placeholder-shown, dafür trägt das Feld placeholder=" ".
+ * E-Mail: ein Text für jedes ungültige Format.
  *
  * Übergabe aus dem Lohnrechner (D1): Die Zeile `[data-rechner-uebergabe]`
  * über den Feldern ist versteckt; das Rechner-Skript füllt sie beim Klick auf
@@ -38,7 +51,8 @@
  * Parameter:
  *   titel       H2 (Standard «Reden wir über Ihre Situation.»)
  *   anker       id des Abschnitts (Standard 'kontakt')
- *   quellseite  Wert des versteckten Felds «quellseite» (Standard: aktueller Pfad)
+ *   quellseite  Wert des versteckten Felds «quellseite», Ziel des Rücksprungs
+ *               nach dem Absenden (Standard: aktueller Pfad)
  *   bewegung    Übertitel, H2 und Text blenden beim Scrollen ein (nur
  *               Startseite, global.css «Bewegung»; Standard false). Telefon,
  *               E-Mail, WhatsApp und das Formular bewegen sich nie.
@@ -51,6 +65,7 @@ interface Props {
 }
 
 import Icon from './Icon.astro';
+import { ANLIEGEN, KURS, ERREICHBAR, LAENGE, MUSTER } from '../../netlify/functions/anfrage/felder.mjs';
 
 const {
   titel = 'Reden wir über Ihre Situation.',
@@ -65,20 +80,10 @@ const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 const email = 'info@pflegeunion.ch';
 const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
 
-const anstellung = 'Anstellung als pflegender Angehöriger';
-const anliegen = [
-  anstellung,
-  'Betreuung und Hauswirtschaft',
-  'Ich bin Fachperson (Arzt, Spital, Beratungsstelle)',
-  'Etwas anderes',
-];
-
-const kurs = ['Ja', 'Nein, noch nicht'];
-const erreichbar = ['Vormittag', 'Nachmittag', 'Abend'];
-
-// Zeitstempel des Builds. Die Zeitprüfung (Mindestdauer zwischen Aufruf und
-// Absenden) wird beim Versand serverseitig festgelegt.
-const zeitstempel = new Date().toISOString();
+// Auswahlwerte aus D2, gemeinsam mit der Prüfung in der Netlify Function.
+const anliegen = ANLIEGEN;
+const kurs = KURS;
+const erreichbar = ERREICHBAR;
 ---
 
 <section id={anker} class="anfrage" aria-label="Anfrage">
@@ -106,7 +111,24 @@ const zeitstempel = new Date().toISOString();
       </p>
     </div>
 
-    <form class="formular" method="post" aria-label="Anfrageformular" data-versand="offen">
+    <form class="formular" method="post" action="/api/anfrage" aria-label="Anfrageformular">
+      <!-- Rückmeldungen nach dem Absenden (D2), sichtbar nur per :target. -->
+      <div class="rueckmeldung rueckmeldung--gesendet" id="anfrage-gesendet" tabindex="-1">
+        <p>
+          Vielen Dank. Ihre Anfrage ist bei uns eingegangen. Eine Fachperson meldet sich innert 24
+          Stunden an Werktagen bei Ihnen. Wenn es dringend ist:{' '}
+          <a class="tippflaeche-zeile" href={telefon.href}>{telefon.text}</a>.
+        </p>
+      </div>
+      <div class="rueckmeldung rueckmeldung--fehler flaeche-tiefblau" id="anfrage-fehler" tabindex="-1">
+        <p>
+          Ihre Anfrage konnte gerade nicht gesendet werden. Bitte rufen Sie uns an:{' '}
+          <a class="tippflaeche-zeile" href={telefon.href}>{telefon.text}</a>, schreiben Sie uns{' '}
+          <a class="tippflaeche-zeile rueckmeldung-whatsapp" href={whatsapp}><Icon name="message-circle" groesse={20} />auf WhatsApp</a>{' '}
+          oder versuchen Sie es in ein paar Minuten nochmals.
+        </p>
+      </div>
+
       <!-- Zeile mit der Schätzung aus dem Lohnrechner; wird vom Rechner-Skript gefüllt. -->
       <div class="uebergabe" data-rechner-uebergabe hidden>
         <p class="text-small">
@@ -146,6 +168,7 @@ const zeitstempel = new Date().toISOString();
           id="anfrage-name"
           name="name"
           autocomplete="name"
+          maxlength={LAENGE.name}
           required
           aria-describedby="anfrage-name-fehler"
         />
@@ -164,11 +187,17 @@ const zeitstempel = new Date().toISOString();
           id="anfrage-telefon"
           name="telefon"
           autocomplete="tel"
+          maxlength={LAENGE.telefon}
+          pattern={MUSTER.telefon}
+          placeholder=" "
           required
-          aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler"
+          aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler anfrage-telefon-format"
         />
-        <p class="fehler" id="anfrage-telefon-fehler">
+        <p class="fehler fehler--leer" id="anfrage-telefon-fehler">
           Damit wir Sie erreichen können, brauchen wir noch Ihre Telefonnummer.
+        </p>
+        <p class="fehler fehler--format" id="anfrage-telefon-format">
+          Bitte geben Sie Ihre Telefonnummer mit Vorwahl an, damit wir Sie erreichen können.
         </p>
       </div>
 
@@ -179,6 +208,7 @@ const zeitstempel = new Date().toISOString();
           id="anfrage-ort"
           name="ort"
           autocomplete="postal-code"
+          maxlength={LAENGE.ort}
           required
           aria-describedby="anfrage-ort-fehler"
         />
@@ -201,9 +231,13 @@ const zeitstempel = new Date().toISOString();
               id="anfrage-email"
               name="email"
               autocomplete="email"
+              maxlength={LAENGE.email}
+              pattern={MUSTER.email}
               aria-describedby="anfrage-email-fehler"
             />
-            <p class="fehler" id="anfrage-email-fehler">Bitte prüfen Sie die E-Mail-Adresse.</p>
+            <p class="fehler" id="anfrage-email-fehler">
+              Bitte prüfen Sie Ihre E-Mail-Adresse – oder lassen Sie das Feld leer.
+            </p>
           </div>
 
           <fieldset class="feld feld--gruppe">
@@ -222,16 +256,17 @@ const zeitstempel = new Date().toISOString();
 
           <div class="feld">
             <label for="anfrage-nachricht">Ihre Nachricht (freiwillig)</label>
-            <textarea id="anfrage-nachricht" name="nachricht" rows="4"></textarea>
+            <textarea id="anfrage-nachricht" name="nachricht" rows="4" maxlength={LAENGE.nachricht}></textarea>
           </div>
         </div>
       </details>
 
-      <!-- Versteckte Felder: Übergabe aus dem Lohnrechner, Quellseite, Zeitstempel. -->
+      <!-- Versteckte Felder: Übergabe aus dem Lohnrechner, Quellseite (Rücksprung) und
+           Dauer seit dem Laden in ms (Zeitprüfung, füllt das Menü-Skript beim Absenden). -->
       <input type="hidden" name="stunden" value="" />
       <input type="hidden" name="ergebnis" value="" />
       <input type="hidden" name="quellseite" value={quellseite} />
-      <input type="hidden" name="zeitstempel" value={zeitstempel} />
+      <input type="hidden" name="dauer" value="" />
 
       <!-- Honeypot: für Menschen unsichtbar (ausserhalb des sichtbaren Bereichs), für Programme ein normales Feld. -->
       <div class="honeypot" aria-hidden="true">
@@ -247,14 +282,6 @@ const zeitstempel = new Date().toISOString();
 
       <div>
         <button type="submit" class="button">Anfrage senden</button>
-      </div>
-
-      <div class="bestaetigung" hidden>
-        <p>
-          Vielen Dank. Ihre Anfrage ist bei uns eingegangen. Eine Fachperson meldet sich innert 24
-          Stunden an Werktagen bei Ihnen. Wenn es dringend ist:{' '}
-          <a href={telefon.href}>{telefon.text}</a>.
-        </p>
       </div>
     </form>
   </div>
@@ -408,6 +435,12 @@ const zeitstempel = new Date().toISOString();
     display: block;
   }
 
+  /* Telefon: leer der Pflichttext, ausgefüllt der Text zum Format. */
+  .feld:has(:user-invalid:placeholder-shown) .fehler--format,
+  .feld:has(:user-invalid:not(:placeholder-shown)) .fehler--leer {
+    display: none;
+  }
+
   .feld:has(:user-invalid) :is(input, select) {
     border-color: var(--color-tiefblau);
     outline: 2px solid var(--color-tiefblau);
@@ -466,9 +499,39 @@ const zeitstempel = new Date().toISOString();
     color: var(--color-link);
   }
 
-  .bestaetigung {
+  /* Rückmeldungen nach dem Absenden (D2): nur sichtbar, wenn die Adresse
+     auf sie zeigt (:target, ohne JavaScript). Erfolg auf Tiefblau-hell,
+     Fehler als Tiefblau-Fläche mit weisser Schrift, kein Rot (wie .fehler);
+     Links in Weiss, Fokusrahmen über .flaeche-tiefblau. */
+  .rueckmeldung {
     padding: var(--space-2) var(--space-3);
     background-color: var(--color-tiefblau-hell);
+    scroll-margin-top: var(--space-2);
+  }
+
+  .rueckmeldung:not(:target) {
+    display: none;
+  }
+
+  .rueckmeldung a {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .rueckmeldung--fehler {
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .rueckmeldung--fehler a {
+    color: var(--color-auf-tiefblau);
+  }
+
+  /* WhatsApp im Satz: Sprechblasen-Icon vor «auf WhatsApp», Abstand ohne
+     unterstrichenes Leerzeichen. */
+  .rueckmeldung-whatsapp :global(.icon) {
+    vertical-align: text-bottom;
+    margin-inline-end: var(--space-1);
   }
 
   @media (min-width: 768px) {
