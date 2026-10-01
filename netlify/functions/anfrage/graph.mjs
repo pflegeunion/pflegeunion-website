@@ -195,7 +195,8 @@ export async function sendeMail(konfig, mail, { fetch, jetzt, schritt, zeitToken
       'client-request-id': clientRequestId,
       'return-client-request-id': 'true',
     },
-    body: JSON.stringify({ message: nachricht, saveToSentItems: mail.speichern }),
+    // Keine Kopie in «Gesendete Elemente» von MAIL_FROM: Die Anfrage liegt in MAIL_TO.
+    body: JSON.stringify({ message: nachricht, saveToSentItems: false }),
     signal: AbortSignal.timeout(zeitMs),
   });
   if (antwort.ok) return;

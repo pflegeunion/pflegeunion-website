@@ -1,9 +1,9 @@
 /*
  * Felder des Anfrageformulars (Konzept D2) und ihre Prüfung auf dem Server.
  *
- * Eine Quelle für Anfrage.astro (Auswahlwerte, maxlength) und die Netlify
- * Function (Prüfung, Bezeichnungen in der Mail). Bezeichnungen und Werte
- * wörtlich aus D2; sie ändern sich nur zusammen mit dem Konzept.
+ * Eine Quelle für Anfrage.astro (Auswahlwerte, maxlength, pattern) und die
+ * Netlify Function (Prüfung, Bezeichnungen in der Mail). Bezeichnungen und
+ * Werte wörtlich aus D2; sie ändern sich nur zusammen mit dem Konzept.
  * Reihenfolge und Nummern wie in D2: Pflicht sind Feld 1, 3, 4 und 6.
  */
 
@@ -15,6 +15,25 @@ export const ANLIEGEN = [
 ];
 export const KURS = ['Ja', 'Nein, noch nicht'];
 export const ERREICHBAR = ['Vormittag', 'Nachmittag', 'Abend'];
+
+/**
+ * Formatregeln, im Browser als pattern (Anfrage.astro) und auf dem Server
+ * dieselben. Der Browser setzt sie als ^(?:…)$ mit dem Flag v um, der
+ * Server mit u (gleiches Ergebnis, auch auf älterem Node).
+ *   telefon  mindestens 9 Ziffern; Leerzeichen, +, /, -, Klammern und
+ *            Punkte zählen nicht mit; andere Zeichen nicht erlaubt
+ *            (ausländische Nummern bleiben erlaubt)
+ *   email    zusätzlich zur Regel von type="email": nach dem letzten Punkt
+ *            der Domain mindestens zwei Buchstaben («michel@g» abgewiesen)
+ */
+export const MUSTER = {
+  telefon: String.raw`[\s+\/\-\(\)\.]*(?:[0-9][\s+\/\-\(\)\.]*){9,}`,
+  email: String.raw`.+\.[A-Za-z]{2,}`,
+};
+
+const REGEL = Object.fromEntries(
+  Object.entries(MUSTER).map(([name, muster]) => [name, new RegExp(`^(?:${muster})$`, 'u')]),
+);
 
 /** Höchstlängen in Zeichen; Anfrage.astro setzt sie als maxlength. */
 export const LAENGE = {
@@ -32,8 +51,8 @@ export const FELDER = [
   { nr: 1, name: 'anliegen', bezeichnung: 'Ich interessiere mich für:', pflicht: true, werte: ANLIEGEN },
   { nr: 2, name: 'kurs', bezeichnung: 'Haben Sie einen Pflegehelferkurs abgeschlossen?', werte: KURS },
   { nr: 3, name: 'name', bezeichnung: 'Vorname und Name', pflicht: true },
-  { nr: 4, name: 'telefon', bezeichnung: 'Telefon', pflicht: true },
-  { nr: 5, name: 'email', bezeichnung: 'E-Mail (freiwillig)', email: true },
+  { nr: 4, name: 'telefon', bezeichnung: 'Telefon', pflicht: true, muster: 'telefon' },
+  { nr: 5, name: 'email', bezeichnung: 'E-Mail (freiwillig)', email: true, muster: 'email' },
   { nr: 6, name: 'ort', bezeichnung: 'Postleitzahl und Ort der gepflegten Person', pflicht: true },
   { nr: 7, name: 'erreichbar', bezeichnung: 'Wann erreichen wir Sie am besten? (freiwillig)', werte: ERREICHBAR },
   { nr: 8, name: 'nachricht', bezeichnung: 'Ihre Nachricht (freiwillig)', mehrzeilig: true },
@@ -72,7 +91,8 @@ export function pruefe(formular) {
     } else if (
       (feld.werte && !feld.werte.includes(wert)) ||
       (LAENGE[feld.name] && wert.length > LAENGE[feld.name]) ||
-      (feld.email && !EMAIL.test(wert))
+      (feld.email && !EMAIL.test(wert)) ||
+      (feld.muster && !REGEL[feld.muster].test(wert))
     ) {
       return { fehler: feld.name };
     }

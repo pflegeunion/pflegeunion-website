@@ -22,8 +22,8 @@
  * #anfrage-gesendet (Bestätigungstext aus D2) oder #anfrage-fehler. Beide
  * Rückmeldungen stehen oben im Formular und erscheinen nur per :target;
  * tabindex="-1", damit der Browser beim Sprung den Fokus auf sie setzt.
- * Auswahlwerte und Höchstlängen (maxlength) kommen aus felder.mjs, derselben
- * Quelle, mit der die Funktion prüft.
+ * Auswahlwerte, Höchstlängen (maxlength) und Formatregeln (pattern) kommen
+ * aus felder.mjs, derselben Quelle, mit der die Funktion prüft.
  *
  * Spam-Schutz ohne Captcha (D2): Honeypot «webseite» (unsichtbar, nicht per
  * Tab erreichbar, aria-hidden, autocomplete off) und Zeitprüfung: Das
@@ -34,7 +34,10 @@
  * Fehlerhinweise: Die Pflichtfelder nutzen die HTML-Validierung. Die eigenen
  * deutschen Texte erscheinen ohne JavaScript über :user-invalid, sobald ein
  * Feld verlassen oder das Formular abgeschickt wurde. Fehler als Tiefblau-
- * Fläche mit weisser Schrift, kein Rot.
+ * Fläche mit weisser Schrift, kein Rot. Telefon hat zwei Texte: leer
+ * (.fehler--leer) und ausgefüllt mit weniger als 9 Ziffern (.fehler--format);
+ * unterschieden per :placeholder-shown, dafür trägt das Feld placeholder=" ".
+ * E-Mail: ein Text für jedes ungültige Format.
  *
  * Übergabe aus dem Lohnrechner (D1): Die Zeile `[data-rechner-uebergabe]`
  * über den Feldern ist versteckt; das Rechner-Skript füllt sie beim Klick auf
@@ -62,7 +65,7 @@ interface Props {
 }
 
 import Icon from './Icon.astro';
-import { ANLIEGEN, KURS, ERREICHBAR, LAENGE } from '../../netlify/functions/anfrage/felder.mjs';
+import { ANLIEGEN, KURS, ERREICHBAR, LAENGE, MUSTER } from '../../netlify/functions/anfrage/felder.mjs';
 
 const {
   titel = 'Reden wir über Ihre Situation.',
@@ -185,11 +188,16 @@ const erreichbar = ERREICHBAR;
           name="telefon"
           autocomplete="tel"
           maxlength={LAENGE.telefon}
+          pattern={MUSTER.telefon}
+          placeholder=" "
           required
-          aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler"
+          aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler anfrage-telefon-format"
         />
-        <p class="fehler" id="anfrage-telefon-fehler">
+        <p class="fehler fehler--leer" id="anfrage-telefon-fehler">
           Damit wir Sie erreichen können, brauchen wir noch Ihre Telefonnummer.
+        </p>
+        <p class="fehler fehler--format" id="anfrage-telefon-format">
+          Bitte geben Sie Ihre Telefonnummer mit Vorwahl an, damit wir Sie erreichen können.
         </p>
       </div>
 
@@ -224,9 +232,12 @@ const erreichbar = ERREICHBAR;
               name="email"
               autocomplete="email"
               maxlength={LAENGE.email}
+              pattern={MUSTER.email}
               aria-describedby="anfrage-email-fehler"
             />
-            <p class="fehler" id="anfrage-email-fehler">Bitte prüfen Sie die E-Mail-Adresse.</p>
+            <p class="fehler" id="anfrage-email-fehler">
+              Bitte prüfen Sie Ihre E-Mail-Adresse – oder lassen Sie das Feld leer.
+            </p>
           </div>
 
           <fieldset class="feld feld--gruppe">
@@ -422,6 +433,12 @@ const erreichbar = ERREICHBAR;
 
   .feld:has(:user-invalid) .fehler {
     display: block;
+  }
+
+  /* Telefon: leer der Pflichttext, ausgefüllt der Text zum Format. */
+  .feld:has(:user-invalid:placeholder-shown) .fehler--format,
+  .feld:has(:user-invalid:not(:placeholder-shown)) .fehler--leer {
+    display: none;
   }
 
   .feld:has(:user-invalid) :is(input, select) {

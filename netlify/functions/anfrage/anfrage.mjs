@@ -13,6 +13,11 @@
  * Erfolg, es wird nichts verschickt. Schlägt nur die Bestätigung fehl, gilt
  * die Anfrage als gesendet; schlägt die Mail an MAIL_TO fehl, Fehler.
  *
+ * Rate Limit (Netlify, config.rateLimit): höchstens 5 Aufrufe pro Minute je
+ * IP und Domain. Darüber leitet Netlify die Anfrage intern auf
+ * /api/anfrage-gebremst um (netlify/functions/anfrage-gebremst.mjs), die mit
+ * dem Fehler-Anker antwortet; diese Funktion läuft dann nicht.
+ *
  * Datenschutz: Nichts wird gespeichert (keine Netlify Forms, keine
  * Drittdienste). Das Log enthält nie Formularinhalte oder Werte der
  * Umgebung, nur Status, Feldnamen, Graph-Fehlercode und Request-ID.
@@ -21,7 +26,18 @@ import { pruefe, sichererPfad, spamGrund } from './felder.mjs';
 import { mailAnfrage, mailBestaetigung } from './mail.mjs';
 import { GraphFehler, KonfigFehler, leseUmgebung, sendeMail } from './graph.mjs';
 
-export const config = { path: '/api/anfrage' };
+// Netlify liest config statisch aus dem Quelltext: nur Literale verwenden.
+// aggregateBy muss eine Liste sein, sonst zählt Netlify nur je Domain.
+export const config = {
+  path: '/api/anfrage',
+  rateLimit: {
+    windowLimit: 5,
+    windowSize: 60,
+    aggregateBy: ['ip', 'domain'],
+    action: 'rewrite',
+    to: '/api/anfrage-gebremst',
+  },
+};
 
 export const GESENDET = 'anfrage-gesendet';
 export const FEHLER = 'anfrage-fehler';
@@ -33,7 +49,7 @@ const MAX_BYTES = 64 * 1024;
 const ZEIT = { token: 3000, anfrage: 3500, bestaetigung: 2000 };
 
 /** 303 zurück auf die Seite, mit Anker. */
-function zurueck(pfad, anker) {
+export function zurueck(pfad, anker) {
   return new Response(null, {
     status: 303,
     headers: { location: `${pfad}#${anker}`, 'cache-control': 'no-store' },
@@ -41,7 +57,7 @@ function zurueck(pfad, anker) {
 }
 
 /** Eine Zeile ins Log, nur mit festen Angaben (nie Formularinhalte). */
-function protokoll(log, art, { status, ...angaben }) {
+export function protokoll(log, art, { status, ...angaben }) {
   log[art](JSON.stringify({ anfrage: status, ...angaben }));
 }
 
@@ -61,7 +77,8 @@ function fehlerEintrag(fehler, schritt) {
   };
 }
 
-async function leseFormular(req) {
+/** Formularinhalt (urlencoded, höchstens MAX_BYTES) oder null. */
+export async function leseFormular(req) {
   const typ = (req.headers.get('content-type') ?? '').toLowerCase();
   if (!typ.startsWith('application/x-www-form-urlencoded')) return null;
   if (Number(req.headers.get('content-length') ?? 0) > MAX_BYTES) return null;
@@ -120,7 +137,7 @@ export async function bearbeite(req, { env = process.env, fetch = globalThis.fet
     schritt = 'anfrage';
     await sendeMail(
       konfig,
-      { ...mailAnfrage(werte, { seite, zeit }), an: konfig.mailTo, antwortAn: werte.email, speichern: true },
+      { ...mailAnfrage(werte, { seite, zeit }), an: konfig.mailTo, antwortAn: werte.email },
       { ...optionen, schritt, zeitMs: ZEIT.anfrage },
     );
 
@@ -130,7 +147,7 @@ export async function bearbeite(req, { env = process.env, fetch = globalThis.fet
       try {
         await sendeMail(
           konfig,
-          { ...mailBestaetigung(werte), an: werte.email, antwortAn: konfig.mailTo, speichern: false },
+          { ...mailBestaetigung(werte), an: werte.email, antwortAn: konfig.mailTo },
           { ...optionen, schritt, zeitMs: ZEIT.bestaetigung },
         );
         bestaetigung = 'gesendet';

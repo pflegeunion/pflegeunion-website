@@ -10,7 +10,8 @@ import assert from 'node:assert/strict';
 import { constants, createHash, generateKeyPairSync, verify } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { bearbeite, config } from '../netlify/functions/anfrage/anfrage.mjs';
-import { FELDER, LAENGE, sichererPfad } from '../netlify/functions/anfrage/felder.mjs';
+import { bearbeite as bearbeiteGebremst, config as configGebremst } from '../netlify/functions/anfrage-gebremst.mjs';
+import { FELDER, LAENGE, MUSTER, pruefe, sichererPfad } from '../netlify/functions/anfrage/felder.mjs';
 import { VARIABLEN, leereTokenSpeicher } from '../netlify/functions/anfrage/graph.mjs';
 
 const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -148,8 +149,18 @@ const logEintraege = (zeilen) => zeilen.map((z) => JSON.parse(z));
 
 beforeEach(() => leereTokenSpeicher());
 
-test('Funktion liegt unter /api/anfrage', () => {
+test('Funktion liegt unter /api/anfrage, Rate Limit 5 pro Minute je IP mit Umleitung', () => {
   assert.equal(config.path, '/api/anfrage');
+  assert.deepEqual(config.rateLimit, {
+    windowLimit: 5,
+    windowSize: 60,
+    // Als Liste: Netlify zählt sonst nur je Domain.
+    aggregateBy: ['ip', 'domain'],
+    action: 'rewrite',
+    to: '/api/anfrage-gebremst',
+  });
+  assert.equal(configGebremst.path, config.rateLimit.to);
+  assert.equal(configGebremst.rateLimit, undefined);
 });
 
 test('Erfolg ohne E-Mail: nur Mail an MAIL_TO, 303 auf #anfrage-gesendet', async () => {
@@ -173,7 +184,7 @@ test('Erfolg ohne E-Mail: nur Mail an MAIL_TO, 303 auf #anfrage-gesendet', async
   assert.equal(aufruf.init.headers.authorization, 'Bearer test-token-geheim');
 
   const [mail] = mails;
-  assert.equal(mail.saveToSentItems, true);
+  assert.equal(mail.saveToSentItems, false, 'keine Kopie in webformular@');
   assert.equal(mail.message.subject, 'Anfrage Webseite: Anstellung als pflegender Angehöriger – Anna Beispielname');
   assert.equal(mail.message.body.contentType, 'Text');
   assert.deepEqual(mail.message.toRecipients, [{ emailAddress: { address: ENV.MAIL_TO } }]);
@@ -215,6 +226,7 @@ test('Erfolg mit E-Mail: Anfrage mit replyTo, Bestätigung an die Person', async
   assert.equal(g.tokenAufrufe().length, 1, 'ein Token für beide Mails');
 
   const [anfrage, bestaetigung] = mails;
+  assert.deepEqual(mails.map((m) => m.saveToSentItems), [false, false]);
   assert.deepEqual(anfrage.message.replyTo, [{ emailAddress: { address: email } }]);
   assert.ok(anfrage.message.body.content.includes(`E-Mail (freiwillig): ${email}`));
   assert.ok(anfrage.message.body.content.includes('Seite: https://pflegeunion.ch/lohnrechner/'));
@@ -265,14 +277,31 @@ test('Pflichtfeld fehlt: Fehler-Anker, nichts gesendet', async () => {
   }
 });
 
-test('Ungültige Werte (Feld 1, 2, 7, E-Mail, Längen): Fehler-Anker, nichts gesendet', async () => {
+// Telefon: mindestens 9 Ziffern, Leerzeichen + / - ( ) . zählen nicht mit.
+const TELEFON_GUELTIG = [
+  '079 555 12 34',
+  '0795551234',
+  '+41 79 555 12 34',
+  '0041 (0)79 555 12 34',
+  '079/555.12.34',
+  '079-555-12-34',
+  '+49 30 1234567',
+  '+1 (212) 555-0100',
+  '041 784 26 55',
+];
+const TELEFON_UNGUELTIG = ['123', '079 12 34', '07955512', '+41 79 555 1', '079 555 12 3x', '079 555 12 34 abends', '+++ ///'];
+// E-Mail: Domain mit Punkt, danach mindestens zwei Buchstaben.
+const EMAIL_GUELTIG = ['michel@pflegeunion.ch', 'anna.beispiel@sub.beispiel.test', 'a@b.ch', 'x+y@beispiel.info'];
+const EMAIL_UNGUELTIG = ['michel@g', 'michel@pflegeunion', 'a@b.c', 'a@b.c1', 'a@b.ch1', 'a@localhost', 'michel@g.'];
+
+test('Ungültige Werte (Feld 1, 2, 4, 5, 7, Längen): Fehler-Anker, nichts gesendet', async () => {
   const faelle = {
     anliegen: ['Werbung', 'Etwas anderes '.repeat(2)],
     kurs: ['Vielleicht'],
     erreichbar: ['Nachts'],
-    email: ['keine-adresse', 'a@b@c', 'anna beispiel@beispiel.test'],
+    email: ['keine-adresse', 'a@b@c', 'anna beispiel@beispiel.test', ...EMAIL_UNGUELTIG],
     name: ['x'.repeat(LAENGE.name + 1)],
-    telefon: ['1'.repeat(LAENGE.telefon + 1)],
+    telefon: ['1'.repeat(LAENGE.telefon + 1), ...TELEFON_UNGUELTIG],
     ort: ['x'.repeat(LAENGE.ort + 1)],
     nachricht: ['x'.repeat(LAENGE.nachricht + 1)],
     stunden: ['x'.repeat(LAENGE.stunden + 1)],
@@ -284,6 +313,38 @@ test('Ungültige Werte (Feld 1, 2, 7, E-Mail, Längen): Fehler-Anker, nichts ges
       assert.equal(ort, FEHLER, `${name}=${wert.slice(0, 30)}`);
       assert.equal(g.aufrufe.length, 0);
       assert.deepEqual(logEintraege(zeilen), [{ anfrage: 'ungueltig', feld: name }]);
+    }
+  }
+});
+
+test('Gültige Telefonnummern (auch ausländische) und E-Mail-Adressen werden gesendet', async () => {
+  for (const telefon of TELEFON_GUELTIG) {
+    const { ort, mails } = await sende({ telefon });
+    assert.equal(ort, GESENDET, telefon);
+    assert.ok(mails[0].message.body.content.includes(`Telefon: ${telefon}`), telefon);
+  }
+  for (const email of EMAIL_GUELTIG) {
+    const { ort, mails } = await sende({ email });
+    assert.equal(ort, GESENDET, email);
+    assert.equal(mails.length, 2, email);
+  }
+});
+
+test('Browser und Server prüfen Telefon und E-Mail gleich (pattern mit Flag v)', () => {
+  // So setzt der Browser das Attribut pattern um (HTML-Standard).
+  const browser = (name, wert) => new RegExp(`^(?:${MUSTER[name]})$`, 'v').test(wert);
+  const basis = { anliegen: 'Etwas anderes', name: 'A', telefon: '079 555 12 34', ort: 'Zug' };
+  const server = (name, wert) => pruefe(new URLSearchParams({ ...basis, [name]: wert })).fehler !== name;
+  const faelle = [
+    ['telefon', TELEFON_GUELTIG, true],
+    ['telefon', TELEFON_UNGUELTIG, false],
+    ['email', EMAIL_GUELTIG, true],
+    ['email', EMAIL_UNGUELTIG, false],
+  ];
+  for (const [name, werte, erwartet] of faelle) {
+    for (const wert of werte) {
+      assert.equal(browser(name, wert), erwartet, `Browser ${name}=${wert}`);
+      assert.equal(server(name, wert), erwartet, `Server ${name}=${wert}`);
     }
   }
 });
@@ -493,6 +554,39 @@ test('Nur POST mit Formularinhalt: GET 405, anderer Typ oder zu gross Fehler-Ank
   assert.equal(gross.g.aufrufe.length, 0);
 });
 
+/** Ruft die Antwort bei überschrittenem Rate Limit auf (wie nach der Umleitung durch Netlify). */
+async function gebremst({ quellseite, referer, methode = 'POST' } = {}) {
+  const koerper = new URLSearchParams({ ...FORMULAR, quellseite: quellseite ?? '' }).toString();
+  const headers = { 'content-type': 'application/x-www-form-urlencoded' };
+  if (referer) headers.referer = referer;
+  const req = new Request('https://pflegeunion.ch/api/anfrage-gebremst', {
+    method: methode,
+    headers,
+    body: methode === 'POST' ? koerper : undefined,
+  });
+  const zeilen = [];
+  const log = { info: (z) => zeilen.push(z), error: (z) => zeilen.push(z) };
+  const antwort = await bearbeiteGebremst(req, { log });
+  for (const zeile of zeilen) {
+    for (const wert of geheim(FORMULAR, ENV)) assert.ok(!zeile.includes(wert), zeile);
+  }
+  alleLogZeilen.push(...zeilen);
+  return { antwort, ort: antwort.headers.get('location'), zeilen };
+}
+
+test('Rate Limit überschritten: Fehler-Anker auf der eigenen Seite, nichts gesendet', async () => {
+  const { antwort, ort, zeilen } = await gebremst({ quellseite: '/lohnrechner/' });
+  assert.equal(antwort.status, 303);
+  assert.equal(ort, '/lohnrechner/#anfrage-fehler');
+  assert.equal(antwort.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(logEintraege(zeilen), [{ anfrage: 'gebremst' }]);
+  // Ohne Formularinhalt der Pfad aus dem Referer, sonst «/»; nie nach aussen.
+  assert.equal((await gebremst({ methode: 'GET', referer: 'https://pflegeunion.ch/bausteine/' })).ort, '/bausteine/#anfrage-fehler');
+  assert.equal((await gebremst({ quellseite: '//boese.beispiel.test/' })).ort, FEHLER);
+  assert.equal((await gebremst({ quellseite: 'https://boese.beispiel.test/', referer: 'https://boese.beispiel.test//x' })).ort, FEHLER);
+  assert.equal((await gebremst({ methode: 'GET' })).ort, FEHLER);
+});
+
 test('Log: nur feste Angaben als JSON, keine Formularinhalte', () => {
   assert.ok(alleLogZeilen.length > 50, `nur ${alleLogZeilen.length} Logzeilen`);
   const erlaubt = new Set(['anfrage', 'bestaetigung', 'feld', 'grund', 'schritt', 'httpStatus', 'code', 'requestId', 'clientRequestId', 'meldung', 'fehler']);
@@ -516,6 +610,26 @@ test('Formular: Versandziel, Honeypot, Feld dauer und Rückmeldungen aus D2', ()
   for (const name of ['name', 'telefon', 'email', 'ort', 'nachricht']) {
     assert.ok(quelle.includes(`maxlength={LAENGE.${name}}`), name);
   }
+  // Formatregeln aus felder.mjs, Meldungen auf dieselbe Art wie die Pflichtfelder.
+  for (const name of ['telefon', 'email']) assert.ok(quelle.includes(`pattern={MUSTER.${name}}`), name);
+  const ohneUmbruch = quelle.replace(/\s+/g, ' ');
+  assert.ok(
+    ohneUmbruch.includes(
+      '<p class="fehler" id="anfrage-email-fehler"> Bitte prüfen Sie Ihre E-Mail-Adresse – oder lassen Sie das Feld leer. </p>',
+    ),
+  );
+  assert.ok(
+    ohneUmbruch.includes(
+      '<p class="fehler fehler--format" id="anfrage-telefon-format"> Bitte geben Sie Ihre Telefonnummer mit Vorwahl an, damit wir Sie erreichen können. </p>',
+    ),
+  );
+  assert.ok(
+    ohneUmbruch.includes(
+      '<p class="fehler fehler--leer" id="anfrage-telefon-fehler"> Damit wir Sie erreichen können, brauchen wir noch Ihre Telefonnummer. </p>',
+    ),
+  );
+  assert.match(quelle, /placeholder=" "\s+required\s+aria-describedby="anfrage-telefon-hinweis anfrage-telefon-fehler anfrage-telefon-format"/);
+  assert.match(quelle, /\.feld:has\(:user-invalid:placeholder-shown\) \.fehler--format,\s*\.feld:has\(:user-invalid:not\(:placeholder-shown\)\) \.fehler--leer \{\s*display: none;/);
   assert.match(
     quelle,
     /<div class="honeypot" aria-hidden="true">\s*<label[^>]*>[^<]*<\/label>\s*<input type="text" id="anfrage-webseite" name="webseite" tabindex="-1" autocomplete="off" \/>/,
