@@ -4,3 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Anfrageformular: Netlify Function unter /api/anfrage (Versand über
+# Microsoft Graph). Nur node:crypto und fetch, keine Abhängigkeiten.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

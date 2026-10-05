@@ -28,7 +28,13 @@
  * JavaScript bleibt die Navigation sichtbar (unter der Kopfzeile
  * umbrechend) und der Burger verborgen. Das Skript blendet den Burger ein,
  * hält aria-expanded aktuell und schliesst das Menü per Escape-Taste und
- * beim Antippen eines Menüpunkts. `npm test` prüft die Grösse.
+ * beim Antippen eines Menüpunkts. Die erste Zeile gehört zur Zeitprüfung
+ * des Anfrageformulars (D2, Anfrage.astro): Beim Absenden trägt sie die
+ * Zeit seit dem Laden der Seite (performance.now(), ms) in das versteckte
+ * Feld «dauer» ein; die Netlify Function wertet Anfragen unter 3 Sekunden
+ * als Spam. Sie steht hier, weil das Menü-Skript auf jeder Seite läuft, und
+ * hört am document, weil das Formular erst nach der Kopfzeile folgt.
+ * `npm test` prüft Grösse und Verhalten.
  *
  * Parameter:
  *   buttonText  Beschriftung des Primär-Buttons (Standard je Seite, siehe oben)
@@ -121,6 +127,7 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
 
 <script is:inline>
   (function () {
+    document.addEventListener('submit', function (e) { var d = e.target.dauer; if (d) d.value = performance.now(); });
     var kopfzeile = document.getElementById('kopfzeile');
     var knopf = kopfzeile && kopfzeile.querySelector('.burger');
     var navigation = document.getElementById('navigation');

@@ -16,7 +16,10 @@ npm run preview  # gebaute Site lokal ansehen
 ## Deploy
 
 Netlify baut mit `npm run build` und liefert den Ordner `dist` aus, siehe
-`netlify.toml`.
+`netlify.toml`. Das Anfrageformular sendet an die Netlify Function
+`netlify/functions/anfrage/` (Versand über Microsoft Graph); die nötigen
+Umgebungsvariablen stehen mit Namen in [CLAUDE.md](CLAUDE.md), ihre Werte
+nur bei Netlify.
 
 ## Regeln
 
