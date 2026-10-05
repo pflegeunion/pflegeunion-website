@@ -451,6 +451,14 @@ input[type='radio']:checked {
   }
 }
 
+/* Unter 1024 px ohne JavaScript (Kopfzeile ohne data-js) scrollt die
+   Kopfzeile mit der Seite weg (Header.astro); oben bleibt nichts frei. */
+@media (max-width: 1023px) {
+  :root:has(.kopfzeile:not([data-js])) {
+    --hoehe-sticky: 0px;
+  }
+}
+
 *,
 *::before,
 *::after {

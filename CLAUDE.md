@@ -49,7 +49,9 @@ solange sie nicht ausdrücklich geändert werden.
   - Zusätzlich erlaubt ist das **Menü-Skript** in
     `src/components/Header.astro`: inline, unter 1 KB, ohne Framework, keine
     externe Datei. Das Menü ist ohne JavaScript bedienbar (die Navigation
-    bleibt sichtbar, der Burger bleibt verborgen); das Skript blendet den
+    bleibt sichtbar, der Burger bleibt verborgen; unter 1024 px ist die
+    Kopfzeile dann nicht sticky und scrollt mit der Seite weg, reines CSS
+    über das fehlende `data-js` des Skripts); das Skript blendet den
     Burger ein und ergänzt nur `aria-expanded`, Schliessen per Escape-Taste
     und Schliessen beim Antippen eines Menüpunkts. Dazu die eine Zeile der
     **Zeitprüfung** des Formulars: Beim Absenden trägt sie
@@ -380,7 +382,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `--hoehe-menuezeile` (50 px, Menüzeile 1024–1359 px),
   `--abstand-abschnitt` (64 px, ab 1024 px 96 px), `--seitenrand` (16 px,
   ab 768 px 24 px), `--hoehe-sticky` (Höhe der sticky Kopfzeile für
-  Sprungziele), `--schritt-zahl-spalte` (Spalte der Schrittzahlen).
+  Sprungziele; 0, wenn sie ohne JavaScript unter 1024 px wegscrollt),
+  `--schritt-zahl-spalte` (Spalte der Schrittzahlen).
 - Die Werte der Bewegung beim Scrollen sind ebenfalls keine Design-Tokens
   und stehen nur im Abschnitt «Bewegung» von `global.css`, je eine Zeile:
   `--bewegung-weg` (40 px), `--bewegung-dauer` (700 ms), `--bewegung-kurve`,
@@ -414,7 +417,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Bild im ersten Bildschirm: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht, ausser im Hero; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar) | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
 | `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
-| `Header.astro` | Kopfzeile (B2): sticky; ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
+| `Header.astro` | Kopfzeile (B2): sticky; ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig); ohne JavaScript unter 1024 px nicht sticky (Navigation offen, die Kopfzeile scrollt weg) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
 | `TrustLeiste.astro` | Baustein A: fünf Belege mit Linien-Icon in Ocker | Unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt jeder Unterseite |
@@ -524,8 +527,9 @@ test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1
                      und beide Zustände des Kurs-Kästchens,
                      breakpoints.test.mjs die Media Queries,
-                     menue.test.mjs Grösse des Menü-Skripts und die
-                     Zeile der Zeitprüfung,
+                     menue.test.mjs Grösse des Menü-Skripts, die
+                     Zeile der Zeitprüfung und die Kopfzeile ohne
+                     JavaScript unter 1024 px (nicht sticky),
                      anfrage.test.mjs den Formularversand mit
                      gemocktem Graph, Formatregeln, Rate Limit und
                      das Log,

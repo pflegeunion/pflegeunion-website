@@ -35,3 +35,34 @@ test('Zeitprüfung: beim Absenden steht die Zeit seit dem Laden im Feld dauer', 
   // Formulare ohne Feld dauer bleiben unberührt.
   assert.doesNotThrow(() => ereignisse.submit({ target: {} }));
 });
+
+/** Inhalt aller Blöcke, die mit `kopf` beginnen (z. B. eine Media Query). */
+function bloecke(text, kopf) {
+  const inhalte = [];
+  for (let beginn = text.indexOf(kopf); beginn >= 0; beginn = text.indexOf(kopf, beginn + 1)) {
+    let tiefe = 0;
+    let ende = text.indexOf('{', beginn);
+    for (; ende < text.length; ende += 1) {
+      if (text[ende] === '{') tiefe += 1;
+      if (text[ende] === '}' && --tiefe === 0) break;
+    }
+    inhalte.push(text.slice(text.indexOf('{', beginn) + 1, ende));
+  }
+  return inhalte.join('\n');
+}
+
+test('Ohne Menü-Skript scrollt die Kopfzeile unter 1024 px mit, sonst bleibt sie sticky', () => {
+  const globalCss = readFileSync(new URL('../src/styles/global.css', import.meta.url), 'utf8');
+  const stil = header.split('<style>')[1];
+  // Grundregel unverändert sticky (mit JavaScript auf allen Breiten, ohne ab 1024 px).
+  assert.match(stil, /\n {2}\.kopfzeile \{[^}]*position: sticky;/);
+  // Nur unter 1024 px und nur ohne data-js (das Menü-Skript setzt es) nicht sticky.
+  assert.match(bloecke(stil, '@media (max-width: 1023px)'), /\.kopfzeile:not\(\[data-js\]\) \{\s*position: static;/);
+  assert.equal(stil.match(/:not\(\[data-js\]\) \{\s*position:/g).length, 1);
+  // Dann hält auch der Seitenkopf keinen Platz für Sprungziele frei.
+  assert.match(
+    bloecke(globalCss, '@media (max-width: 1023px)'),
+    /:root:has\(\.kopfzeile:not\(\[data-js\]\)\) \{\s*--hoehe-sticky: 0px;/,
+  );
+  assert.match(skripte[0], /kopfzeile\.setAttribute\('data-js', ''\)/);
+});
