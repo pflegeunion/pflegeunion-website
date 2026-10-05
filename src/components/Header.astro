@@ -16,7 +16,10 @@
  * (Nummer ab 768 px ausgeschrieben), Primär-Button und Burger rechts,
  * Tippflächen 44 × 44 px, keine Utility-Zeile. Unter 360 px stehen die
  * Elemente ohne Zwischenräume und der Button hat 16 px Innenabstand
- * (Board Kopfzeile_Mobil bzw. Trust_320).
+ * (Board Kopfzeile_Mobil bzw. Trust_320). Ohne JavaScript steht dort die
+ * ganze Navigation offen in der Kopfzeile; sie ist dann nicht sticky und
+ * scrollt mit der Seite weg (reines CSS: Das Menü-Skript setzt data-js,
+ * ohne Skript fehlt es).
  *
  * Primär-Button je Seite (B2): auf der Lohnrechner-Seite «Lohn berechnen» →
  * #rechner (dort erhält der Lohnrechner anker="rechner"), auf Betreuung &
@@ -307,6 +310,13 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
   /* Unter 1024 px: Navigation ohne JavaScript unter der Kopfzeile, mit
      JavaScript hinter dem Burger. */
   @media (max-width: 1023px) {
+    /* Ohne JavaScript (kein data-js) ist die Kopfzeile mit der offenen
+       Navigation zu hoch zum Festhalten: Sie scrollt mit der Seite weg,
+       statt Sprungziele zu verdecken (--hoehe-sticky dann 0, global.css). */
+    .kopfzeile:not([data-js]) {
+      position: static;
+    }
+
     .navigation {
       order: 10;
       flex-basis: 100%;
