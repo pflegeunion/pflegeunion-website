@@ -21,7 +21,9 @@
  * 480 px Fensterhöhe klebt der Streifen mit Etikette, «Ihr Lohn …», Zahl und
  * «brutto pro Monat» unten am Bildschirm, solange die Rechnerfläche im Bild
  * ist, bis er an seinem Platz unter dem Kästchen einrastet (B, position:
- * sticky). Fokussierte Felder hält der Browser über dem Streifen frei
+ * sticky). Er klebt erst, nachdem im Rechner zum ersten Mal etwas angetippt
+ * wurde (data-aktiv aus lohnrechner.js); «Nach dem Kurs …» klebt nicht mit.
+ * Fokussierte Felder hält der Browser über dem Streifen frei
  * (scroll-padding-bottom). Ab 768 px unverändert.
  *
  * Unter den Auswahlfeldern das Kästchen «Ich habe den Pflegehelferkurs noch
@@ -236,16 +238,18 @@ const fussnote =
 
         <div class="ergebnis" aria-live="polite">
           <div class="ergebnis-zahl">
-            <p class="text-label etikette">IHRE SCHÄTZUNG</p>
-            <p class="ergebnis-titel" data-titel-mit>Ihr Lohn mit Pflegehelferkurs</p>
-            <p class="ergebnis-titel" data-titel-ohne hidden>Ihr Lohn bis zum Pflegehelferkurs</p>
-            <p class="text-result zahl" aria-hidden="true">
-              <span class="text-result-einheit" data-praefix>rund</span>{' '}
-              <span class="text-result-einheit">CHF</span>{' '}
-              <span data-monat>{ziffern(start.monat)}</span><span class="text-result-einheit">.–</span>
-            </p>
-            <p class="visually-hidden" data-vorlesen>{chf(start.monat, start.mehr)} brutto pro Monat</p>
-            <p class="brutto" aria-hidden="true">brutto pro Monat</p>
+            <div class="ergebnis-streifen">
+              <p class="text-label etikette">IHRE SCHÄTZUNG</p>
+              <p class="ergebnis-titel" data-titel-mit>Ihr Lohn mit Pflegehelferkurs</p>
+              <p class="ergebnis-titel" data-titel-ohne hidden>Ihr Lohn bis zum Pflegehelferkurs</p>
+              <p class="text-result zahl" aria-hidden="true">
+                <span class="text-result-einheit" data-praefix>rund</span>{' '}
+                <span class="text-result-einheit">CHF</span>{' '}
+                <span data-monat>{ziffern(start.monat)}</span><span class="text-result-einheit">.–</span>
+              </p>
+              <p class="visually-hidden" data-vorlesen>{chf(start.monat, start.mehr)} brutto pro Monat</p>
+              <p class="brutto" aria-hidden="true">brutto pro Monat</p>
+            </div>
             <p class="nach-kurs" data-nach-kurs hidden>
               Nach dem Kurs, den wir bezahlen: <strong data-monat-kurs>{chf(start.monatMitKurs, start.mehr)}</strong> pro Monat.
             </p>
@@ -588,32 +592,51 @@ const fussnote =
   }
 
   /* B, klebt (Board B): Etikette, «Ihr Lohn …», Zahl und «brutto pro Monat»
-     (angekreuzt dazu «Nach dem Kurs …») bleiben unten am Bildschirm stehen,
-     sobald die weisse Rechnerfläche ins Bild kommt, und rasten an ihrem Platz
-     unter dem Kästchen ein. Erst ab 480 px Fensterhöhe: Auf dem Handy quer
-     bliebe sonst neben Kopfzeile und Streifen kaum Platz für die Eingabe;
-     dort gilt nur A. Nur am Bildschirm, beim Drucken klebt nichts. */
+     bleiben unten am Bildschirm stehen, solange die weisse Rechnerfläche im
+     Bild ist, und rasten an ihrem Platz unter dem Kästchen ein. Erst nachdem
+     im Rechner zum ersten Mal etwas angetippt wurde (data-aktiv, setzt
+     lohnrechner.js; Rückmeldung GL nach dem Handy-Test); vorher und ohne
+     JavaScript steht der Streifen an seinem Platz. «Nach dem Kurs …» klebt
+     nicht mit, so bleibt der Streifen in beiden Zuständen gleich hoch
+     (161 px). Erst ab 480 px Fensterhöhe: Auf dem Handy quer bliebe sonst
+     neben Kopfzeile und Streifen kaum Platz für die Eingabe; dort gilt nur A.
+     Nur am Bildschirm, beim Drucken klebt nichts. */
   @media screen and (max-width: 767px) and (min-height: 480px) {
-    /* .ergebnis bleibt die Live-Region, gibt aber ihre Box ab; so ist die
-       ganze Rechnerfläche (.ui) der Rahmen, in dem der Streifen klebt.
-       Fläche und Abstände tragen die beiden Teile selbst. */
-    .ergebnis {
+    /* .ergebnis bleibt die Live-Region und .ergebnis-zahl ihr erster Teil;
+       beide geben ihre Box ab. So ist die ganze Rechnerfläche (.ui) der
+       Rahmen, in dem der Streifen klebt. Fläche und Abstände tragen Streifen,
+       «Nach dem Kurs …» und der Rest selbst; das Aussehen ändert sich beim
+       ersten Antippen nicht, nur das Kleben kommt dazu. */
+    .ergebnis,
+    .ergebnis-zahl {
       display: contents;
     }
 
     /* Streifen wie im Board B: deckend Ocker hell, oben eine Haarlinie,
        keine Schatten; Innenabstand 12 px, Zahl ohne Abstand zum Titel. */
-    .ergebnis-zahl {
-      position: sticky;
-      bottom: 0;
-      z-index: 1;
+    .ergebnis-streifen {
       padding: calc(var(--space-1) * 1.5) var(--seitenrand);
       border-top: 1px solid var(--color-ocker);
       background-color: var(--color-ocker-hell);
     }
 
+    .rechner[data-aktiv] .ergebnis-streifen {
+      position: sticky;
+      bottom: 0;
+      z-index: 1;
+    }
+
     .zahl {
       margin-top: 0;
+    }
+
+    /* Angekreuzt: «Nach dem Kurs …» unter dem Streifen, auf derselben Fläche
+       wie Jahreslohn und Buttons; 16 px unter «brutto pro Monat», 12 px über
+       der Ocker-Linie wie im Board B. */
+    .nach-kurs {
+      margin: 0;
+      padding: calc(var(--space-1) / 2) var(--seitenrand) calc(var(--space-1) * 1.5);
+      background-color: var(--color-ocker-hell);
     }
 
     /* Jahreslohn und Buttons: eigene Fläche, Ocker-Linie davor wie bisher.
@@ -627,27 +650,23 @@ const fussnote =
       background-color: var(--color-ocker-hell);
     }
 
-    /* Fokus nie hinter dem Streifen: Der Browser hält beim Fokussieren
+    /* Fokus nie hinter dem Streifen: Sobald im Rechner etwas angetippt wurde
+       oder ein Feld den Fokus hat, hält der Browser beim Fokussieren
        (Tastatur, Screenreader) unten so viel frei, wie der Streifen höchstens
-       hoch ist (gemessen 161 px, angekreuzt 233 px; Reserve für Umbrüche bei
-       vergrösserter Schrift). Das Kästchen erhält beim Fokus schon die Höhe
-       für «angekreuzt», weil der Streifen beim Ankreuzen wächst. Buttons und
-       Links stehen nach dem Streifen und liegen nie dahinter. Der
-       unsichtbare Radio-Button deckt das ganze Auswahlfeld ab, damit der
-       Browser das ganze Feld in den freien Bereich scrollt (nicht nur
-       seine Mitte). */
+       hoch ist (161 px, Reserve für Umbrüche bei vergrösserter Schrift). Der
+       Fokus zählt mit, damit ein Feld schon vor dem ersten Tastendruck frei
+       steht, der den Streifen kleben lässt. Buttons und Links stehen nach dem
+       Streifen und liegen nie dahinter. Der unsichtbare Radio-Button deckt
+       das ganze Auswahlfeld ab, damit der Browser das ganze Feld in den
+       freien Bereich scrollt (nicht nur seine Mitte). */
     .rechner-feld input {
       inset: 0;
       width: 100%;
       height: 100%;
     }
 
-    :global(html:has([data-rechner-ui]:not([hidden]))) {
+    :global(html:has([data-rechner]:is([data-aktiv], :focus-within) > [data-rechner-ui]:not([hidden]))) {
       scroll-padding-bottom: calc(var(--space-8) * 3);
-    }
-
-    :global(html:has([data-rechner-ui]:not([hidden]) :is([data-ohne-kurs]:checked, [data-ohne-kurs]:focus))) {
-      scroll-padding-bottom: calc(var(--space-8) * 4 + var(--space-6));
     }
   }
 

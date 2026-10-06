@@ -207,19 +207,31 @@ function bloecke(text, kopf) {
   return inhalte.join('\n');
 }
 
-test('Ergebnisstreifen klebt nur unter 768 px ab 480 px Höhe, Live-Region unverändert', () => {
+test('Ergebnisstreifen klebt nur unter 768 px ab 480 px Höhe und erst nach dem ersten Antippen', () => {
   const komponente = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
+  const skript = readFileSync(new URL('../src/scripts/lohnrechner.js', import.meta.url), 'utf8');
   const [markup, stil] = komponente.split('<style>');
   const klebt = bloecke(stil, '@media screen and (max-width: 767px) and (min-height: 480px)');
-  // Genau ein klebendes Element: der Streifen, unten, deckend, ohne Schatten.
+  // Genau ein klebendes Element: der Streifen, unten, erst mit data-aktiv.
   assert.equal(stil.match(/position: sticky/g).length, 1);
-  assert.match(klebt, /\.ergebnis-zahl \{[^}]*position: sticky;\s*bottom: 0;[^}]*background-color: var\(--color-ocker-hell\);/);
+  assert.match(klebt, /\.rechner\[data-aktiv\] \.ergebnis-streifen \{\s*position: sticky;\s*bottom: 0;/);
+  assert.match(klebt, /\.ergebnis-streifen \{[^}]*background-color: var\(--color-ocker-hell\);/);
   assert.doesNotMatch(stil, /shadow|gradient/);
-  // Die Live-Region gibt ihre Box nur dort ab; ab 768 px bleibt sie der Streifen.
+  // Das Skript setzt data-aktiv beim ersten Antippen (auch der vorgewählten Stundenzahl).
+  assert.match(skript, /wurzel\.addEventListener\('click', function \(\) \{ wurzel\.dataset\.aktiv = ''; \}\);/);
+  // Der Streifen enthält Etikette bis «brutto pro Monat»; «Nach dem Kurs …» steht danach.
+  const streifen = markup.split('<div class="ergebnis-streifen">')[1].split('</div>')[0];
+  assert.match(streifen, /IHRE SCHÄTZUNG[\s\S]*data-monat[\s\S]*brutto pro Monat/);
+  assert.doesNotMatch(streifen, /data-nach-kurs/);
+  assert.match(markup, /<\/div>\s*<p class="nach-kurs" data-nach-kurs hidden>/);
+  // Die Live-Region bleibt dasselbe Element und gibt ihre Box nur dort ab.
   assert.equal(stil.match(/display: contents/g).length, 1);
-  assert.match(klebt, /\.ergebnis \{\s*display: contents;/);
+  assert.match(klebt, /\.ergebnis,\s*\.ergebnis-zahl \{\s*display: contents;/);
   assert.equal(markup.match(/aria-live=/g).length, 1);
   assert.match(markup, /<div class="ergebnis" aria-live="polite">\s*<div class="ergebnis-zahl">/);
-  // Fokus nie hinter dem Streifen: unten frei halten, solange der Rechner da ist.
-  assert.match(klebt, /:global\(html:has\(\[data-rechner-ui\]:not\(\[hidden\]\)\)\) \{\s*scroll-padding-bottom:/);
+  // Fokus nie hinter dem Streifen: unten frei halten, sobald der Rechner benutzt wird.
+  assert.match(
+    klebt,
+    /:global\(html:has\(\[data-rechner\]:is\(\[data-aktiv\], :focus-within\) > \[data-rechner-ui\]:not\(\[hidden\]\)\)\) \{\s*scroll-padding-bottom:/,
+  );
 });
