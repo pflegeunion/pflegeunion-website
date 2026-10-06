@@ -308,7 +308,9 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   Slider, keine Parallax-Effekte, kein Hover-Anheben, kein Festhalten von
   Abschnitten, kein Eingriff ins Scrollen. Erlaubt gemäss Konzept B5: das
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
-  beides mit `prefers-reduced-motion`.
+  beides mit `prefers-reduced-motion`. Einzige Ausnahme vom Festhalten: der
+  Ergebnisstreifen des Lohnrechners unter 768 px (siehe Komponenten;
+  Entscheid GL 06.10.2026).
 - **Sanftes Einblenden beim Scrollen** ist auf der Startseite erlaubt
   (Auftrag «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B
   aus Claude Design): einmal pro Element, sobald es zu etwa 15 % sichtbar
@@ -397,7 +399,10 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   CSS-Variablen in Media Queries nicht wirken, tragen die Komponenten die
   Zahl ein, und zwar nur diese Werte in der Schreibweise `(min-width: Xpx)`
   bzw. `(max-width: X−1 px)`. `npm test` prüft alle Media Queries in `src/`.
-  Neue Breakpoints nur dort ergänzen.
+  Neue Breakpoints nur dort ergänzen. Fensterhöhen stehen in derselben Liste
+  («Höhe X px») und gelten nur zusammen mit einer Breite, Schreibweise
+  `(min-height: Xpx)`; bisher nur **Höhe 480 px** (klebender
+  Ergebnisstreifen des Lohnrechners).
 - `--radius-full` auf der Webseite **nicht verwenden**; Porträts sind eckig.
 - Das Dunkel-Thema aus `design/tokens.json` wird auf der Webseite nicht
   verwendet; `tokens.css` enthält nur das Hell-Thema.
@@ -425,7 +430,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px Ergebnis immer sichtbar (Board «Test Rechner mobil», Kombination B+A, Entscheid GL 06.10.2026): Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis (A), und ab 480 px Fensterhöhe klebt der Streifen mit Etikette, «Ihr Lohn …», Zahl und «brutto pro Monat» (angekreuzt dazu «Nach dem Kurs …») mit `position: sticky; bottom: 0` unten am Bildschirm, solange die Rechnerfläche im Bild ist, und rastet an seinem Platz unter dem Kästchen ein (B; 161 px, angekreuzt 233 px; Ocker hell mit Ocker-Haarlinie oben; `.ergebnis` bleibt die Live-Region mit `display: contents`); `scroll-padding-bottom` hält fokussierte Felder über dem Streifen; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
@@ -524,9 +529,11 @@ src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
                      bewegung.js: Bewegung beim Scrollen (Startseite),
                      unter 1 KB, inline im Kopf
 test/                npm test (node:test ohne Zusatzpakete):
-                     lohnrechner.test.mjs prüft die Ergebniswerte aus D1
-                     und beide Zustände des Kurs-Kästchens,
-                     breakpoints.test.mjs die Media Queries,
+                     lohnrechner.test.mjs prüft die Ergebniswerte aus D1,
+                     beide Zustände des Kurs-Kästchens und die Regeln
+                     des klebenden Ergebnisstreifens,
+                     breakpoints.test.mjs die Media Queries (Breiten
+                     und Fensterhöhen),
                      menue.test.mjs Grösse des Menü-Skripts, die
                      Zeile der Zeitprüfung und die Kopfzeile ohne
                      JavaScript unter 1024 px (nicht sticky),

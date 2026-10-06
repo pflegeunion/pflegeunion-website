@@ -2,6 +2,8 @@
  * Prüft, dass alle Media Queries in src/ nur die Breakpoints verwenden, die
  * in src/styles/global.css (Abschnitt «Breakpoints der Webseite») festgelegt
  * sind: «ab X» als (min-width: Xpx), «unter X» als (max-width: X - 1 px).
+ * Fensterhöhen nur aus derselben Liste («Höhe X px»), als (min-height: Xpx)
+ * und nur zusammen mit einer Breite.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,6 +21,12 @@ function breakpoints() {
   return [...block.matchAll(/^\s*\*\s+(\d{3,4}) px\s/gm)].map((t) => Number(t[1]));
 }
 
+/** Die Fensterhöhen aus global.css: Zeilen der Form « *   Höhe 480 px  …». */
+function hoehen() {
+  const block = globalCss.split('Breakpoints der Webseite')[1]?.split('*/')[0] ?? '';
+  return [...block.matchAll(/^\s*\*\s+Höhe (\d{3,4}) px\s/gm)].map((t) => Number(t[1]));
+}
+
 function dateien(ordner) {
   return readdirSync(ordner, { withFileTypes: true }).flatMap((e) => {
     const pfad = join(ordner, e.name);
@@ -29,6 +37,10 @@ function dateien(ordner) {
 
 test('Breakpoints sind in global.css festgelegt', () => {
   assert.deepEqual(breakpoints(), [360, 480, 640, 768, 1024, 1360]);
+});
+
+test('Fensterhöhen sind in global.css festgelegt', () => {
+  assert.deepEqual(hoehen(), [480]);
 });
 
 test('Media Queries verwenden nur die festgelegten Breakpoints', () => {
@@ -45,6 +57,10 @@ test('Media Queries verwenden nur die festgelegten Breakpoints', () => {
         const px = Number(wert);
         const erlaubt = einheit === 'px' && (art === 'min' ? liste.includes(px) : liste.includes(px + 1));
         if (!erlaubt) fehler.push(`${name}: (${art}-width: ${wert}${einheit})`);
+      }
+      for (const [, art, wert, einheit] of text.matchAll(/(min|max)-height:\s*([\d.]+)([a-z]*)/g)) {
+        const erlaubt = art === 'min' && einheit === 'px' && hoehen().includes(Number(wert)) && /-width:/.test(text);
+        if (!erlaubt) fehler.push(`${name}: (${art}-height: ${wert}${einheit})`);
       }
     }
   }

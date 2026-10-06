@@ -398,6 +398,11 @@ input[type='radio']:checked {
  *            einer Zeile, Demnächst dreispaltig
  *   1360 px  Desktop-Navigation: Kopfzeile in einer Zeile (Logo, Menü,
  *            Telefon, Button); darunter zweizeilig bzw. Burger-Menü
+ *
+ * Fensterhöhe, nur zusammen mit einer Breite und nur in der Schreibweise
+ * (min-height: Xpx); `npm test` prüft auch diese Werte:
+ *   Höhe 480 px  Lohnrechner unter 768 px Breite: Ergebnisstreifen klebt
+ *                unten (darunter, z. B. Handy quer, klebt nichts)
  * =====================================================================
  */
 

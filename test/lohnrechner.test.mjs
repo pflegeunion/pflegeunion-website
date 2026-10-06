@@ -7,11 +7,12 @@
  * abgeschlossen.» (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs,
  * darunter der Lohn nach dem Kurs), Pensionskasse ab BVG-Schwelle mit dem
  * gezeigten Satz, Übergabe an das Formular, Rundung, Anzeigeformat,
- * Skriptgrösse und Postleitzahl-Liste.
+ * Skriptgrösse und Postleitzahl-Liste. Zuletzt die Regeln für den
+ * Ergebnisstreifen, der unter 768 px unten am Bildschirm klebt.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import {
   KONFIG,
   ergebnis,
@@ -189,4 +190,36 @@ test('Postleitzahl-Liste Kanton Zug', () => {
 test('Skriptdatei bleibt unter 10 KB', () => {
   const groesse = statSync(new URL('../src/scripts/lohnrechner.js', import.meta.url)).size;
   assert.ok(groesse < 10 * 1024, `lohnrechner.js ist ${groesse} Bytes gross`);
+});
+
+/** Inhalt aller Blöcke mit diesem Kopf (z. B. einer Media Query). */
+function bloecke(text, kopf) {
+  const inhalte = [];
+  for (let beginn = text.indexOf(kopf); beginn >= 0; beginn = text.indexOf(kopf, beginn + 1)) {
+    let tiefe = 0;
+    let ende = text.indexOf('{', beginn);
+    for (; ende < text.length; ende += 1) {
+      if (text[ende] === '{') tiefe += 1;
+      if (text[ende] === '}' && --tiefe === 0) break;
+    }
+    inhalte.push(text.slice(text.indexOf('{', beginn) + 1, ende));
+  }
+  return inhalte.join('\n');
+}
+
+test('Ergebnisstreifen klebt nur unter 768 px ab 480 px Höhe, Live-Region unverändert', () => {
+  const komponente = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
+  const [markup, stil] = komponente.split('<style>');
+  const klebt = bloecke(stil, '@media screen and (max-width: 767px) and (min-height: 480px)');
+  // Genau ein klebendes Element: der Streifen, unten, deckend, ohne Schatten.
+  assert.equal(stil.match(/position: sticky/g).length, 1);
+  assert.match(klebt, /\.ergebnis-zahl \{[^}]*position: sticky;\s*bottom: 0;[^}]*background-color: var\(--color-ocker-hell\);/);
+  assert.doesNotMatch(stil, /shadow|gradient/);
+  // Die Live-Region gibt ihre Box nur dort ab; ab 768 px bleibt sie der Streifen.
+  assert.equal(stil.match(/display: contents/g).length, 1);
+  assert.match(klebt, /\.ergebnis \{\s*display: contents;/);
+  assert.equal(markup.match(/aria-live=/g).length, 1);
+  assert.match(markup, /<div class="ergebnis" aria-live="polite">\s*<div class="ergebnis-zahl">/);
+  // Fokus nie hinter dem Streifen: unten frei halten, solange der Rechner da ist.
+  assert.match(klebt, /:global\(html:has\(\[data-rechner-ui\]:not\(\[hidden\]\)\)\) \{\s*scroll-padding-bottom:/);
 });
