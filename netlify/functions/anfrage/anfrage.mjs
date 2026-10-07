@@ -13,6 +13,16 @@
  * Erfolg, es wird nichts verschickt. Schlägt nur die Bestätigung fehl, gilt
  * die Anfrage als gesendet; schlägt die Mail an MAIL_TO fehl, Fehler.
  *
+ * Ergebnis per E-Mail (Lohnrechner-Seite, D1): Dasselbe Ziel nimmt das
+ * kleine Formular beim Rechner an, erkennbar am versteckten Feld art=ergebnis.
+ * Geprüft werden E-Mail, Stunden und Kästchen; die Beträge rechnet der
+ * Server selbst (mail.mjs). Die Mail geht nur an die angegebene Adresse
+ * (Antwortadresse MAIL_TO), keine Kopie an MAIL_TO. Rücksprung auf
+ * #ergebnis-gesendet oder #ergebnis-fehler; Spam-Schutz, Rate Limit, Log und
+ * Anmeldung wie bei der Anfrage. Ein Typ-Feld statt eines eigenen Endpunkts,
+ * weil so Rate Limit, Gebremst-Antwort, Prüfung von Quellseite und Spam,
+ * Anmeldung und Log an einer Stelle bleiben.
+ *
  * Rate Limit (Netlify, config.rateLimit): höchstens 5 Aufrufe pro Minute je
  * IP und Domain. Darüber leitet Netlify die Anfrage intern auf
  * /api/anfrage-gebremst um (netlify/functions/anfrage-gebremst.mjs), die mit
@@ -22,8 +32,8 @@
  * Drittdienste). Das Log enthält nie Formularinhalte oder Werte der
  * Umgebung, nur Status, Feldnamen, Graph-Fehlercode und Request-ID.
  */
-import { pruefe, sichererPfad, spamGrund } from './felder.mjs';
-import { mailAnfrage, mailBestaetigung } from './mail.mjs';
+import { ART_ERGEBNIS, pruefe, pruefeErgebnis, sichererPfad, spamGrund } from './felder.mjs';
+import { mailAnfrage, mailBestaetigung, mailErgebnis } from './mail.mjs';
 import { GraphFehler, KonfigFehler, leseUmgebung, sendeMail } from './graph.mjs';
 
 // Netlify liest config statisch aus dem Quelltext: nur Literale verwenden.
@@ -41,12 +51,15 @@ export const config = {
 
 export const GESENDET = 'anfrage-gesendet';
 export const FEHLER = 'anfrage-fehler';
+// Rückmeldungen beim Rechner (Formular «Ergebnis per E-Mail», Lohnrechner.astro).
+export const ERGEBNIS_GESENDET = 'ergebnis-gesendet';
+export const ERGEBNIS_FEHLER = 'ergebnis-fehler';
 
 // Obergrenze für den Formularinhalt (3000 Zeichen Nachricht, kodiert).
 const MAX_BYTES = 64 * 1024;
 
 // Zeitlimits je Aufruf; zusammen unter den 10 Sekunden einer Netlify Function.
-const ZEIT = { token: 3000, anfrage: 3500, bestaetigung: 2000 };
+const ZEIT = { token: 3000, anfrage: 3500, bestaetigung: 2000, ergebnis: 3500 };
 
 /** 303 zurück auf die Seite, mit Anker. */
 export function zurueck(pfad, anker) {
@@ -87,6 +100,13 @@ export async function leseFormular(req) {
   return new URLSearchParams(text);
 }
 
+/** Art des Formulars: 'anfrage' (ohne Feld art), 'ergebnis' oder null (unbekannt). */
+export function formularArt(formular) {
+  const art = formular?.get('art');
+  if (art === null || art === undefined) return 'anfrage';
+  return art === ART_ERGEBNIS ? ART_ERGEBNIS : null;
+}
+
 /**
  * Bearbeitet eine Anfrage. Umgebung, fetch, Uhr und Log lassen sich für
  * Tests ersetzen (gemockter Graph, keine echten Mails).
@@ -97,6 +117,9 @@ export async function bearbeite(req, { env = process.env, fetch = globalThis.fet
   }
   let ziel = '/';
   let schritt = 'formular';
+  let anker = { gesendet: GESENDET, fehler: FEHLER };
+  // Beim Ergebnis per E-Mail trägt jede Logzeile art: 'ergebnis'.
+  let merke = (angaben) => angaben;
   try {
     const formular = await leseFormular(req);
     if (!formular) {
@@ -104,18 +127,33 @@ export async function bearbeite(req, { env = process.env, fetch = globalThis.fet
       return zurueck(ziel, FEHLER);
     }
 
+    const art = formularArt(formular);
+    if (art === ART_ERGEBNIS) {
+      anker = { gesendet: ERGEBNIS_GESENDET, fehler: ERGEBNIS_FEHLER };
+      merke = (angaben) => ({ ...angaben, art });
+    }
+
     const pfad = sichererPfad(formular.get('quellseite'));
     if (pfad) ziel = pfad;
 
     const spam = spamGrund(formular);
     if (spam) {
-      protokoll(log, 'info', { status: 'spam', grund: spam });
-      return zurueck(ziel, GESENDET);
+      protokoll(log, 'info', merke({ status: 'spam', grund: spam }));
+      return zurueck(ziel, anker.gesendet);
+    }
+
+    if (!art) {
+      protokoll(log, 'info', { status: 'ungueltig', feld: 'art' });
+      return zurueck(ziel, FEHLER);
     }
 
     if (!pfad) {
-      protokoll(log, 'info', { status: 'ungueltig', feld: 'quellseite' });
-      return zurueck(ziel, FEHLER);
+      protokoll(log, 'info', merke({ status: 'ungueltig', feld: 'quellseite' }));
+      return zurueck(ziel, anker.fehler);
+    }
+
+    if (art === ART_ERGEBNIS) {
+      return await sendeErgebnis(formular, { ziel, env, fetch, jetzt, log, merke });
     }
 
     const { werte, fehler: ungueltig } = pruefe(formular);
@@ -160,9 +198,42 @@ export async function bearbeite(req, { env = process.env, fetch = globalThis.fet
     protokoll(log, 'info', { status: 'gesendet', bestaetigung });
     return zurueck(ziel, GESENDET);
   } catch (fehler) {
-    protokoll(log, 'error', fehlerEintrag(fehler, schritt));
-    return zurueck(ziel, FEHLER);
+    protokoll(log, 'error', merke(fehlerEintrag(fehler, schritt)));
+    return zurueck(ziel, anker.fehler);
   }
+}
+
+/**
+ * Ergebnis per E-Mail: prüft E-Mail, Stunden und Kästchen, rechnet die
+ * Beträge (mail.mjs) und schickt sie nur an die angegebene Adresse.
+ */
+async function sendeErgebnis(formular, { ziel, env, fetch, jetzt, log, merke }) {
+  const { werte, fehler: ungueltig } = pruefeErgebnis(formular);
+  if (ungueltig) {
+    protokoll(log, 'info', merke({ status: 'ungueltig', feld: ungueltig }));
+    return zurueck(ziel, ERGEBNIS_FEHLER);
+  }
+
+  const { konfig, fehlend } = leseUmgebung(env);
+  if (fehlend) {
+    protokoll(log, 'error', merke({ status: 'fehler', meldung: `Umgebungsvariable fehlt: ${fehlend.join(', ')}` }));
+    return zurueck(ziel, ERGEBNIS_FEHLER);
+  }
+
+  const schritt = 'ergebnis';
+  try {
+    await sendeMail(
+      konfig,
+      { ...mailErgebnis(werte), an: werte.email, antwortAn: konfig.mailTo },
+      { fetch, jetzt, zeitTokenMs: ZEIT.token, schritt, zeitMs: ZEIT.ergebnis },
+    );
+  } catch (fehler) {
+    protokoll(log, 'error', merke(fehlerEintrag(fehler, schritt)));
+    return zurueck(ziel, ERGEBNIS_FEHLER);
+  }
+
+  protokoll(log, 'info', merke({ status: 'gesendet' }));
+  return zurueck(ziel, ERGEBNIS_GESENDET);
 }
 
 export default (req) => bearbeite(req);

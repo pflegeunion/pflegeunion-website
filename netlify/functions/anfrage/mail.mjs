@@ -1,10 +1,12 @@
 /*
- * Texte der beiden Mails (reiner Text, UTF-8): die Anfrage an MAIL_TO und
- * die Eingangsbestätigung an die anfragende Person. Die Bestätigung
- * wiederholt nur das Anliegen (Feld 1), keine weiteren Angaben, damit keine
- * Gesundheitsangaben aus der Nachricht an eine fremde Adresse zurückgehen.
+ * Texte der Mails (reiner Text, UTF-8): die Anfrage an MAIL_TO, die
+ * Eingangsbestätigung an die anfragende Person und das Ergebnis des
+ * Lohnrechners per E-Mail. Die Bestätigung wiederholt nur das Anliegen
+ * (Feld 1), keine weiteren Angaben, damit keine Gesundheitsangaben aus der
+ * Nachricht an eine fremde Adresse zurückgehen.
  */
 import { FELDER } from './felder.mjs';
+import { chf, ergebnis } from '../../../src/scripts/lohnrechner.js';
 
 const LEER = '–';
 const KAESTCHEN = '«Ich habe den Pflegehelferkurs noch nicht abgeschlossen.»';
@@ -78,4 +80,48 @@ export function mailBestaetigung(werte) {
     'Diese Nachricht wurde automatisch versendet. Wenn Sie darauf antworten, erreicht Ihre Nachricht info@pflegeunion.ch.',
   ].join('\n');
   return { betreff: 'Ihre Anfrage bei der Pflegeunion', text };
+}
+
+/*
+ * Ergebnis per E-Mail (Lohnrechner-Seite, Konzept D1 «E-Mail mit dem
+ * Ergebnis»). Die Beträge rechnet der Server selbst aus Stunden und Kästchen,
+ * mit KONFIG und der Rechenlogik von src/scripts/lohnrechner.js (dieselbe
+ * Quelle wie Rechner und Fallback-Tabelle): Lohn mit Kurs und die Zeile «Bis
+ * zum Pflegehelferkurs: …» immer, bei «mehr als 3» «über» statt «rund» und
+ * der Zusatz «Wichtig: …», Pensionskasse nur ab der BVG-Schwelle (Jahreslohn
+ * mit dem gezeigten Satz). Keine weiteren Angaben, keine Kopie an MAIL_TO.
+ *
+ * OFFEN: Der Wortlaut aus D1 «E-Mail mit dem Ergebnis» (Webseitenkonzept
+ * V3.20) lag bei der Umsetzung nicht vor. Die Stellen dafür stehen als
+ * Platzhalter in eckigen Klammern und bleiben sichtbar, bis der Text aus dem
+ * Konzept eingesetzt ist (Textregel: nicht erfinden).
+ */
+export const BETREFF_ERGEBNIS = 'Ihre Lohnschätzung bei der Pflegeunion';
+
+// Zusatz bei «mehr als 3 Stunden», wörtlich wie im Rechner (D1).
+const WICHTIG =
+  'Wichtig: Die Krankenversicherung vergütet die Grundpflege, nicht die Präsenz rund um die Uhr. ' +
+  'Wie viele Stunden bei Ihnen anerkannt werden, zeigt die Abklärung – und im Gespräch zeigen wir ' +
+  'Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung, Hilflosenentschädigung, Ergänzungsleistungen.';
+
+/** Mail mit dem Ergebnis an die angegebene Adresse; werte aus pruefeErgebnis(). */
+export function mailErgebnis({ stufe, ohneKurs }) {
+  const w = ergebnis(stufe, ohneKurs);
+  const text = [
+    '[Anrede und Einleitung: Wortlaut aus Konzept D1 «E-Mail mit dem Ergebnis»]',
+    '',
+    `[Bezeichnung aus D1: Stunden pro Tag] ${stufe.text} pro Tag`,
+    `[Bezeichnung aus D1: Lohn mit Pflegehelferkurs] ${chf(w.monatMitKurs, w.mehr)} brutto pro Monat, ${chf(w.jahrMitKurs, w.mehr)} pro Jahr`,
+    `Bis zum Pflegehelferkurs: ${chf(w.monatEinstieg, w.mehr)} brutto pro Monat, ${chf(w.jahrEinstieg, w.mehr)} pro Jahr`,
+    ...(ohneKurs ? ['[Satz aus D1, wenn «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» angekreuzt ist]'] : []),
+    w.pensionskasse
+      ? '[Versicherungen aus D1, mit Pensionskasse: Jahreslohn ab der BVG-Schwelle]'
+      : '[Versicherungen aus D1, ohne Pensionskasse: Jahreslohn unter der BVG-Schwelle]',
+    ...(w.mehr ? ['', WICHTIG] : []),
+    '',
+    '[Rechenweg und Hinweis auf die Abklärung: Wortlaut aus D1]',
+    '',
+    '[Gruss, Telefon 041 784 26 55 und Absender: Wortlaut aus D1]',
+  ].join('\n');
+  return { betreff: BETREFF_ERGEBNIS, text };
 }

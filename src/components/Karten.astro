@@ -13,10 +13,15 @@
  * und über dem Text (ab 768 px, immer offen); sichtbar und vorgelesen wird
  * immer nur einer.
  *
+ * Mit spalten={3} (Lohnrechner-Seite «So entsteht Ihr Lohn», Claude Design
+ * LR_D03_Prinzip, LR_M03_Prinzip): ab 1024 px drei Karten in einer Reihe,
+ * 768–1023 px zwei Spalten, die dritte Karte über die ganze Breite.
+ *
  * Parameter:
  *   karten    Liste { icon, titel, text }
- *   bewegung  die Karten blenden beim Scrollen einzeln ein (nur Startseite,
- *             global.css «Bewegung»; Standard false)
+ *   spalten   2 (Standard, zwei mal zwei) oder 3 (drei in einer Reihe)
+ *   bewegung  die Karten blenden beim Scrollen einzeln ein (Startseite und
+ *             Lohnrechner-Seite, global.css «Bewegung»; Standard false)
  */
 import Icon, { type IconName } from './Icon.astro';
 
@@ -28,13 +33,14 @@ interface Karte {
 
 interface Props {
   karten: Karte[];
+  spalten?: 2 | 3;
   bewegung?: boolean;
 }
 
-const { karten, bewegung = false } = Astro.props;
+const { karten, spalten = 2, bewegung = false } = Astro.props;
 ---
 
-<ul class="karten liste-blank">
+<ul class:list={['karten', 'liste-blank', { 'karten--drei': spalten === 3 }]}>
   {
     karten.map((k) => (
       <li class="karte" data-bewegung={bewegung ? 'kachel' : undefined}>
@@ -120,6 +126,24 @@ const { karten, bewegung = false } = Astro.props;
       background-color: var(--color-warmgrau);
       padding: calc(var(--space-4) + var(--space-1));
       border-bottom: 0;
+    }
+  }
+
+  /* Drei Karten: 768–1023 px die dritte über die ganze Breite, ab 1024 px
+     drei in einer Reihe. */
+  @media (min-width: 768px) {
+    .karten--drei .karte:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .karten--drei {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .karten--drei .karte:last-child {
+      grid-column: auto;
     }
   }
 

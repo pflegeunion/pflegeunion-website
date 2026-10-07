@@ -1,0 +1,343 @@
+---
+/**
+ * Lohnrechner-Seite /lohnrechner/ (Konzept C2) in der Gestaltung aus Claude
+ * Design, Seite «Lohnrechner» (Boards LR_D01–LR_D09 Desktop 1440, LR_M01–
+ * LR_M09 Mobil 390 und die Zustands-Boards des Rechners). Reihenfolge wie C2:
+ * Hero ohne Bild · Rechner (#rechner, vollständige Fassung ohne sichtbaren
+ * Kopf) · So entsteht Ihr Lohn · Drei Beispiele aus dem Alltag · Was vom
+ * Brutto abgeht · Die Grenzen · Häufige Fragen zum Lohn · Trust-Leiste ·
+ * Anfrage. Alle Texte wörtlich aus den Boards.
+ *
+ * Die Beträge der Beispiele und die Werte in der Fussnote kommen aus
+ * KONFIG und der Rechenlogik von src/scripts/lohnrechner.js (dieselbe
+ * Quelle wie Rechner und Fallback-Tabelle) und werden beim Build gegen die
+ * Werte aus der Korrektur vom 22.09.2026 geprüft.
+ *
+ * Bewegung beim Scrollen wie auf der Startseite (Entscheid GL 07.10.2026):
+ * Übertitel, H2 und Text blenden ein, Karten und FAQ-Fragen gestaffelt.
+ * Kopfzeile, Hero-Text, Telefon, WhatsApp, Buttons, Rechner, Kästchen,
+ * Ergebnisstreifen und Formulare bleiben still.
+ */
+import Basis from '../layouts/Basis.astro';
+import Hero from '../components/Hero.astro';
+import Lohnrechner from '../components/Lohnrechner.astro';
+import Abschnitt from '../components/Abschnitt.astro';
+import Karten from '../components/Karten.astro';
+import Hinweiskasten from '../components/Hinweiskasten.astro';
+import FAQ from '../components/FAQ.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
+import Anfrage from '../components/Anfrage.astro';
+import { KONFIG, ergebnis, chf, stufeFuer } from '../scripts/lohnrechner.js';
+
+const faktoren = [
+  {
+    icon: 'clock',
+    titel: 'Die anerkannten Pflegestunden.',
+    text: 'Unsere Pflegefachperson erfasst den Bedarf bei Ihnen zu Hause mit interRAI, dem anerkannten Schweizer Abklärungsinstrument. Vergütet wird die Grundpflege – Hilfe bei Körperpflege, Anziehen, Essen und Trinken, Bewegen. Typisch sind, je nach Situation, ein bis drei Stunden pro Tag.',
+  },
+  {
+    icon: 'banknote',
+    titel: 'Ihr Stundenlohn.',
+    text: 'CHF 37.95 brutto pro Stunde mit abgeschlossenem Pflegehelferkurs – das ist der Regel-Lohn, denn den Kurs holen alle im ersten Jahr nach, und wir bezahlen ihn. Bis dahin gelten CHF 33.95. Der Lohn ist für alle gleich – unabhängig davon, ob Sie Ihre Mutter, Ihren Partner oder Ihren Bruder pflegen.',
+  },
+  {
+    icon: 'shield-check',
+    titel: 'Die Sozialversicherungen.',
+    text: 'AHV/IV/EO, Arbeitslosen-, Unfall- und Krankentaggeldversicherung sowie Pensionskasse rechnen wir wie in jeder Anstellung ab. Sie erhalten monatlich eine Lohnabrechnung und jährlich einen Lohnausweis.',
+  },
+] as const;
+
+// Drei Beispiele aus dem Alltag: Beträge aus der Rechenlogik des Rechners.
+const spalten = ['Situation', 'Anerkannte Grundpflege', 'Brutto pro Monat, mit Kurs*', 'Brutto pro Monat, Einstieg*'];
+const beispiele = [
+  {
+    situation: 'Ein Ehemann unterstützt seine Frau morgens und abends bei Körperpflege und Anziehen',
+    stunden: 'ca. 1 Stunde pro Tag',
+    stufe: '1',
+  },
+  {
+    situation: 'Eine Tochter pflegt ihre Mutter täglich: Körperpflege, Essen, Bewegen, Toilettengang',
+    stunden: 'ca. 2 Stunden pro Tag',
+    stufe: '2',
+  },
+  {
+    situation: 'Intensive Situation, zum Beispiel nach einem Schlaganfall',
+    stunden: 'ca. 3 Stunden pro Tag',
+    stufe: '3',
+  },
+].map((b) => {
+  const w = ergebnis(stufeFuer(b.stufe));
+  return { ...b, mitKurs: chf(w.monatMitKurs, w.mehr), einstieg: chf(w.monatEinstieg, w.mehr) };
+});
+
+// Kontrollwerte aus der Korrektur vom 22.09.2026 (Lohnrechner-Seite, Tabelle
+// «Drei Beispiele aus dem Alltag»); nur zur Prüfung beim Build.
+const kontrolle = [
+  ['rund CHF 990.–', 'rund CHF 880.–'],
+  ["rund CHF 1'970.–", "rund CHF 1'770.–"],
+  ["rund CHF 2'960.–", "rund CHF 2'650.–"],
+];
+beispiele.forEach((b, i) => {
+  if (b.mitKurs !== kontrolle[i][0] || b.einstieg !== kontrolle[i][1]) {
+    throw new Error(`Beispiel «${b.stunden}» ergibt ${b.mitKurs} / ${b.einstieg}, erwartet ${kontrolle[i].join(' / ')}.`);
+  }
+});
+
+const fussnote =
+  `* Richtwerte bei CHF ${KONFIG.SATZ_KURS.toFixed(2)} (mit Kurs) bzw. CHF ${KONFIG.SATZ_EINSTIEG.toFixed(2)} ` +
+  `(Einstieg) pro Stunde, gerechnet auf sechs Einsatztage pro Woche (${KONFIG.TAGE_MONAT} Tage pro Monat) und ` +
+  'auf zehn Franken gerundet. Massgebend ist die individuelle Abklärung; der definitive Lohn steht in Ihrem ' +
+  'Arbeitsvertrag.';
+
+const grenzen = [
+  'Gesellschaft leisten, beaufsichtigen, nachts anwesend sein: Das ist wertvoll, aber keine Pflege im Sinn der Krankenversicherung – bei keinem Anbieter. Als Betreuung buchbar.',
+  'Haushalt, Einkauf und Administratives sind keine Pflegeleistungen. Als Hauswirtschaft buchbar.',
+  'Medizinische Pflege (Medikamente, Wunden, Injektionen) bieten wir zurzeit noch nicht an und rechnen sie deshalb auch nicht ab.',
+];
+
+const fragen = [
+  {
+    frage: 'Ist der Lohn steuerpflichtig?',
+    antwort:
+      'Ja, es ist normales Erwerbseinkommen. Sie erhalten von uns einen Lohnausweis für die Steuererklärung. Gut zu wissen: Dadurch verbessern Sie zugleich Ihre eigene AHV- und Pensionskassensituation.',
+  },
+  {
+    frage: 'Ich bin pensioniert. Gilt der Lohn trotzdem?',
+    antwort:
+      'Ja. Eine Anstellung im AHV-Alter ist möglich. Ab dem 76. Lebensjahr bestätigen wir die Arbeitsfähigkeit einmal jährlich mit einem einfachen, standardisierten Vorgehen – zu Ihrem Schutz.',
+  },
+  {
+    frage: 'Verliert die gepflegte Person Leistungen, wenn ich Lohn erhalte?',
+    antwort:
+      'Nein. Die Pflege wird über die Krankenversicherung abgerechnet wie bei jedem Spitex-Einsatz; der gesetzliche Eigenanteil bleibt gleich. Ansprüche wie die Hilflosenentschädigung bestehen weiter.',
+  },
+  {
+    frage: 'Warum weniger als drei Stunden pro Tag, wenn ich doch rund um die Uhr da bin?',
+    antwort:
+      'Weil die Krankenversicherung nur die Grundpflege vergütet, nicht die Präsenz. Wir wissen, dass Ihre Arbeit weit darüber hinausgeht. Im kostenlosen Erstgespräch zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung, Hilflosenentschädigung, Ergänzungsleistungen.',
+  },
+  {
+    frage: 'Ich pflege jeden Tag. Warum rechnet der Lohnrechner mit sechs Tagen pro Woche?',
+    antwort:
+      'Weil das Arbeitsgesetz für jede Anstellung einen freien Tag pro Woche vorschreibt – auch für Sie. An diesem Tag übernimmt unsere Vertretung die Grundpflege, damit die gepflegte Person versorgt bleibt und Sie eine echte Pause haben. Bezahlt werden die Tage, an denen Sie selbst pflegen.',
+  },
+  {
+    frage: 'Wann steht mein Lohn definitiv fest?',
+    antwort:
+      'Nach der Abklärung bei Ihnen zu Hause – vor der Unterschrift. Sie erhalten den Arbeitsvertrag mit Stundenlohn und den anerkannten Stunden schriftlich und entscheiden dann in Ruhe.',
+  },
+  {
+    frage: 'Was passiert, wenn ich selbst krank werde?',
+    antwort:
+      'Dann sind Sie über unsere Krankentaggeldversicherung abgesichert: Sie erhalten 80 % Ihres Lohns, bis zu 730 Tage lang. In den ersten 30 Tagen gilt die gesetzliche Lohnfortzahlung. Die Prämie teilen wir mit Ihnen je zur Hälfte. Die Pflege übernimmt in dieser Zeit unsere Vertretung.',
+  },
+];
+---
+
+<Basis
+  bewegung
+  kanonisch="/lohnrechner/"
+  titel="Lohnrechner: Lohn für pflegende Angehörige im Kanton Zug | Pflegeunion Schweiz"
+  beschreibung="Wie viel verdienen pflegende Angehörige? CHF 37.95 pro Stunde mit Pflegehelferkurs, CHF 33.95 zum Einstieg. Rechnen Sie Ihren Monatslohn in 60 Sekunden aus – ohne Registrierung. Mit Beispielen und allen Abzügen."
+>
+  <!-- Hero ohne Bild: der Rechner folgt direkt darunter. -->
+  <Hero
+    etikette="CHF 37.95 PRO STUNDE MIT PFLEGEHELFERKURS · IN 60 SEKUNDEN BERECHNET"
+    titel="Ihr Lohn für die Pflege von Angehörigen."
+    text="Wer einen nahestehenden Menschen pflegt, leistet Arbeit – und Arbeit verdient Lohn. Hier sehen Sie, wie sich Ihr Lohn bei der Pflegeunion zusammensetzt, was typischerweise herauskommt und was vom Brutto abgeht. Ohne Kleingedrucktes."
+    primaer={{ text: 'Zum Rechner', ziel: '#rechner' }}
+    unterseite
+  />
+
+  <!-- Rechner (Baustein F, vollständige Fassung, Anker #rechner) -->
+  <Lohnrechner anker="rechner" vollstaendig kopf={false} bewegung />
+
+  <!-- So entsteht Ihr Lohn -->
+  <Abschnitt label="So entsteht Ihr Lohn" etikette="DAS PRINZIP" titel="Drei Faktoren bestimmen Ihren Lohn." bewegung>
+    <Karten karten={faktoren} spalten={3} bewegung />
+  </Abschnitt>
+
+  <!-- Drei Beispiele aus dem Alltag -->
+  <Abschnitt
+    flaeche="warmgrau"
+    label="Drei Beispiele aus dem Alltag"
+    etikette="WAS DAS KONKRET HEISST"
+    titel="Drei Beispiele aus dem Alltag."
+    bewegung
+  >
+    <table class="beispiele" aria-label="Drei Beispiele aus dem Alltag" data-bewegung="text">
+      <thead>
+        <tr>
+          {spalten.map((sp) => <th scope="col">{sp}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {
+          beispiele.map((b) => (
+            <tr>
+              <th scope="row">{b.situation}</th>
+              <td data-spalte={spalten[1]}>{b.stunden}</td>
+              <td data-spalte={spalten[2]}>{b.mitKurs}</td>
+              <td data-spalte={spalten[3]}>{b.einstieg}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="beispiele-fussnote text-small" data-bewegung="text">{fussnote}</p>
+  </Abschnitt>
+
+  <!-- Was vom Brutto abgeht -->
+  <Abschnitt label="Was vom Brutto abgeht">
+    <div class="brutto">
+      <Hinweiskasten titel="Brutto, netto – und was Sie dafür bekommen." bewegung>
+        <p data-bewegung="text">
+          Von Ihrem Bruttolohn ziehen wir wie jeder Arbeitgeber Ihre Anteile an AHV/IV/EO,
+          Arbeitslosenversicherung, Nichtberufsunfall- und Krankentaggeldversicherung ab – zusammen rund
+          8 %. Ab der gesetzlichen Eintrittsschwelle kommt Ihr Beitrag an die Pensionskasse dazu. Dafür
+          sind Sie versichert wie in jedem anderen Job, und jede Pflegestunde zählt für Ihre eigene Rente.
+        </p>
+      </Hinweiskasten>
+    </div>
+  </Abschnitt>
+
+  <!-- Was nicht vergütet wird -->
+  <Abschnitt
+    flaeche="warmgrau"
+    label="Was nicht vergütet wird"
+    etikette="FAIRERWEISE DAZUGESAGT"
+    titel="Die Grenzen – klar benannt."
+    seitlich
+    bewegung
+  >
+    <div class="grenzen">
+      <ul class="grenzen-liste liste-blank" data-bewegung="text">
+        {grenzen.map((g) => <li>{g}</li>)}
+      </ul>
+      <p class="grenzen-schluss text-h3" data-bewegung="text">
+        Wenn Ihnen jemand verspricht, «alles» werde bezahlt: Seien Sie skeptisch. Wir rechnen Ihnen lieber
+        ehrlich vor, was möglich ist. Das trägt länger.
+      </p>
+    </div>
+  </Abschnitt>
+
+  <!-- Häufige Fragen zum Lohn (H2 ohne Übertitel) -->
+  <Abschnitt label="Häufige Fragen zum Lohn" titel="Häufige Fragen zum Lohn" abstand="mittel" seitlich bewegung>
+    <FAQ fragen={fragen} bewegung />
+  </Abschnitt>
+
+  <TrustLeiste bewegung />
+
+  <Anfrage titel="Bereit für den ersten Schritt?" bewegung />
+</Basis>
+
+<style>
+  /* Drei Beispiele: ab 768 px Tabelle auf weisser Fläche (Situation 40 %,
+     die übrigen Spalten je 20 %), die Situation als normale Zelle. */
+  .beispiele {
+    background-color: var(--color-weiss);
+  }
+
+  .beispiele thead th:first-child {
+    width: 40%;
+  }
+
+  .beispiele tbody th {
+    background-color: var(--color-weiss);
+    color: var(--color-schwarz);
+    font-weight: 400;
+  }
+
+  .beispiele td:nth-of-type(n + 2) {
+    white-space: nowrap;
+  }
+
+  .beispiele-fussnote {
+    max-width: var(--breite-text);
+    margin: var(--space-3) 0 0;
+    color: var(--color-text-gedaempft);
+  }
+
+  /* Unter 768 px: jede Situation als Block ohne Querscrollen (Board
+     LR_M04_Beispiele): die Situation als Kopf auf Tiefblau-hell, darunter
+     die drei Angaben mit der Spaltenbezeichnung davor; reicht die Breite
+     nicht, steht der Wert ungetrennt unter der Bezeichnung. Der
+     Tabellenkopf bleibt für Screenreader. */
+  @media (max-width: 767px) {
+    .beispiele,
+    .beispiele tbody,
+    .beispiele tr,
+    .beispiele th,
+    .beispiele td {
+      display: block;
+    }
+
+    .beispiele {
+      background-color: transparent;
+    }
+
+    .beispiele thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .beispiele tbody tr {
+      margin-top: var(--space-2);
+      border: 1px solid var(--color-linie);
+      background-color: var(--color-weiss);
+    }
+
+    .beispiele tbody th,
+    .beispiele td {
+      border: 0;
+    }
+
+    .beispiele tbody th {
+      background-color: var(--color-tiefblau-hell);
+      color: var(--color-tiefblau);
+      font-weight: 700;
+    }
+
+    .beispiele td {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      column-gap: var(--space-2);
+      border-top: 1px solid var(--color-linie);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .beispiele td::before {
+      content: attr(data-spalte);
+      font-weight: 400;
+    }
+  }
+
+  /* Was vom Brutto abgeht: Kasten höchstens 680 px Text plus Innenabstand. */
+  .brutto {
+    max-width: calc(var(--breite-text) + 2 * var(--space-4));
+  }
+
+  /* Die Grenzen: Liste mit Haarlinien, Abschlusssatz Lato Bold 22 px. */
+  .grenzen {
+    max-width: var(--breite-text);
+  }
+
+  .grenzen-liste {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .grenzen-liste li {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .grenzen-schluss {
+    margin: var(--space-4) 0 0;
+  }
+</style>
