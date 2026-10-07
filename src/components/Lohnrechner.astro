@@ -17,8 +17,8 @@
  * Stunden» steht «über» statt «rund» und der Zusatzhinweis erscheint.
  *
  * Unter 768 px eine ruhige, vollständige Ansicht (Entscheid GL 07.10.2026):
- * kompaktere Abstände (Board «Test Rechner mobil», Variante A), «Erstgespräch
- * vereinbaren» direkt unter «brutto pro Monat», darunter Jahresbetrag, «Nach
+ * kompaktere Abstände (Board «Test Rechner mobil», Variante A), «Kostenloses
+ * Erstgespräch vereinbaren» direkt unter «brutto pro Monat», darunter Jahresbetrag, «Nach
  * dem Kurs …» und die übrigen Angaben; der Zusatzhinweis steht nach dem
  * Ergebnis. Nur die Anzeige ist umgestellt (order), das HTML bleibt. Der
  * Sprung zum Rechner beginnt mobil mit der Frage. Nichts klebt. Ab 768 px
@@ -47,8 +47,8 @@
  * Fallback-Tabelle nutzen dieselbe Rechenlogik, die Tabelle wird beim Build
  * gegen die Kontrollwerte aus D1 geprüft.
  *
- * «Erstgespräch vereinbaren» springt zu #kontakt und übergibt die Schätzung
- * an das Formular (siehe Anfrage.astro).
+ * «Kostenloses Erstgespräch vereinbaren» springt zu #kontakt und übergibt die
+ * Schätzung an das Formular (siehe Anfrage.astro).
  *
  * Parameter:
  *   anker         id des Sprungziels (Standard 'lohnrechner'): ab 768 px der
@@ -169,7 +169,7 @@ const fussnote =
         </table>
 
         <div class="knoepfe">
-          <a class="button" href="#kontakt">Erstgespräch vereinbaren</a>
+          <a class="button" href="#kontakt">Kostenloses Erstgespräch vereinbaren</a>
           {
             !vollstaendig && (
               <a class="button button--sekundaer" href="/lohnrechner/">
@@ -279,7 +279,7 @@ const fussnote =
             }
 
             <div class="knoepfe">
-              <a class="button" href="#kontakt" data-erstgespraech>Erstgespräch vereinbaren</a>
+              <a class="button" href="#kontakt" data-erstgespraech>Kostenloses Erstgespräch vereinbaren</a>
               {
                 vollstaendig ? (
                   <button type="button" class="button button--sekundaer" data-email>
@@ -593,15 +593,15 @@ const fussnote =
      weisse Fläche unter dem Kästchen 16 statt 24 px, Ergebnis oben 24 statt
      32 px, «Ihr Lohn …» 8 statt 16 px unter der Etikette.
 
-     Reihenfolge: «Erstgespräch vereinbaren» direkt unter «brutto pro Monat»,
-     darunter Jahresbetrag, «Nach dem Kurs …» und die übrigen Angaben. Der
-     Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit
-     sich über dem Button beim Antippen nichts verschiebt. Umgestellt wird nur
-     die Anzeige (order); im HTML bleibt alles, wie der Desktop es braucht.
-     Dafür geben Eingabe, die beiden Teile des Ergebnisses und die Buttons
-     ihre Box ab (display: contents); .ergebnis selbst bleibt die Live-Region
-     mit eigener Box. Die beiden Buttons behalten ihre Reihenfolge, die
-     Tab-Reihenfolge stimmt also mit der Anzeige überein. */
+     Reihenfolge: «Kostenloses Erstgespräch vereinbaren» direkt unter «brutto
+     pro Monat», darunter Jahresbetrag, «Nach dem Kurs …» und die übrigen
+     Angaben. Der Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem
+     Ergebnis, damit sich über dem Button beim Antippen nichts verschiebt.
+     Umgestellt wird nur die Anzeige (order); im HTML bleibt alles, wie der
+     Desktop es braucht. Dafür geben Eingabe, die beiden Teile des Ergebnisses
+     und die Buttons ihre Box ab (display: contents); .ergebnis selbst bleibt
+     die Live-Region mit eigener Box. Die beiden Buttons behalten ihre
+     Reihenfolge, die Tab-Reihenfolge stimmt also mit der Anzeige überein. */
   @media (max-width: 767px) {
     .ui {
       display: flex;
