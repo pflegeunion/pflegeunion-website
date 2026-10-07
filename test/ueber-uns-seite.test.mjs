@@ -82,7 +82,8 @@ test('Texte wörtlich aus den Boards (Claude Design, Seite «Über uns»)', () =
     'Abrechnung über die Krankenversicherung',
     'Bedarfsabklärung mit interRAI, dem anerkannten Schweizer Standard',
     'Instruktion, wöchentliche Begleitung in den ersten vier Wochen, danach monatliche Hausbesuche – schriftlich geregelt',
-    'Mitglied im nationalen Fehlermeldesystem CIRRNET [Freigabe GL ausstehend]',
+    // CIRRNET: Wortlaut gemäss Entscheid GL 07.10.2026, ohne Platzhalter (im Canvas noch die alte Fassung).
+    'Angeschlossen an das nationale Fehlermeldesystem CIRRNET',
     'Digitale, lückenlose Pflegedokumentation – für Behörden prüfbar, für Sie transparent',
     // Demnächst (UU_D08_Demnaechst)
     'WIR BAUEN AUS',
@@ -98,6 +99,7 @@ test('Texte wörtlich aus den Boards (Claude Design, Seite «Über uns»)', () =
     "Fragen zur Stelle beantwortet Christoph Willi, Pflegedienstleitung:{' '} <a class=\"tippflaeche-zeile\" href=\"tel:+41417842655\">041 784 26 55</a>",
   ];
   for (const text of texte) assert.ok(quelle.includes(text), text);
+  assert.ok(!quelle.includes('[Freigabe GL ausstehend]'), 'CIRRNET-Zeile ohne Platzhalter');
 });
 
 test('Hero: ohne Button, Telefon und WhatsApp, Teambild als sichtbarer Platzhalter', () => {

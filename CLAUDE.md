@@ -39,9 +39,11 @@ solange sie nicht ausdrücklich geändert werden.
   CHF 36.– liegt (Regieanweisung C3). Auf `/ueber-uns/` offen (Teil F,
   Punkte 10, 13, 14; Daten von Michel Gurnari): «[Teambild folgt]», je
   «[Foto folgt]» für Team und Vorstand, «[Hintergrund in einer Zeile]»,
-  Treuhand «[Name]», «[Firma, Ort]», «[Aufgabe in einer Zeile]», CIRRNET
-  «[Freigabe GL ausstehend]» und die Stellenliste; Fotos und Personen
-  stehen an einer Stelle in `src/daten/personen.mjs`.
+  Treuhand «[Name]», «[Firma, Ort]», «[Aufgabe in einer Zeile]» und die
+  Stellenliste; Fotos und Personen stehen an einer Stelle in
+  `src/daten/personen.mjs`. Die CIRRNET-Zeile unter «Qualität» lautet
+  «Angeschlossen an das nationale Fehlermeldesystem CIRRNET» (Entscheid GL
+  07.10.2026; im Canvas noch die alte Fassung).
 - Das verbindliche Erscheinungsbild steht in `design/brand-book.md`, die
   Werte dazu in `design/tokens.json` (siehe Design-Tokens).
 
