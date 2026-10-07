@@ -1,0 +1,89 @@
+---
+/**
+ * Porträt im Hochformat 3:4 (Claude Design, Seite «Über uns»: Team
+ * UU_D03_Team/UU_M03_Team, Vorstand UU_D04_Vorstand_A/UU_M04_Vorstand_A;
+ * Entscheid Michel Gurnari 07.10.2026). Eckig, ohne Schatten.
+ *
+ * Mit Foto: <img> aus den WebP-Dateien unter public/bilder/ (je 480, 800
+ * und 1200 px breit, 1200 × 1600 px), Lazy Loading, Alt-Text = Name.
+ * Ohne Foto: ruhige Fläche mit dem sichtbaren Text «[Foto folgt]» unten
+ * links, als echter Text im HTML (die Go-live-Sperre erkennt ihn), kein
+ * Icon, keine Silhouette.
+ *
+ * Die Breite bestimmt der umgebende Baustein (Klasse über `class`), die
+ * Höhe folgt aus 3:4.
+ *
+ * Parameter:
+ *   foto   Basisname der WebP-Dateien unter public/bilder/; leer = Platzhalter
+ *   name   Name der Person (Alt-Text)
+ *   art    'team' (Standard): Platzhalter Warmgrau auf Weiss, Text 13 px,
+ *          ab 768 px 15 px; 'vorstand': Platzhalter Weiss mit Haarlinie auf
+ *          Warmgrau, Text 13 px
+ *   sizes  sizes-Attribut für das srcset
+ *   class  zusätzliche Klassen (Breite)
+ */
+interface Props {
+  foto?: string;
+  name: string;
+  art?: 'team' | 'vorstand';
+  sizes?: string;
+  class?: string;
+}
+
+const { foto = '', name, art = 'team', sizes = '100vw', class: klasse } = Astro.props;
+
+// Breiten der WebP-Dateien wie bei den übrigen Fotos.
+const breiten = [480, 800, 1200];
+const srcset = foto ? breiten.map((w) => `/bilder/${foto}-${w}.webp ${w}w`).join(', ') : '';
+---
+
+{
+  foto ? (
+    <img
+      class:list={['portraet', klasse]}
+      src={`/bilder/${foto}-800.webp`}
+      srcset={srcset}
+      sizes={sizes}
+      alt={name}
+      width="1200"
+      height="1600"
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div class:list={['portraet', 'portraet--leer', `portraet--${art}`, klasse]}>
+      <span class:list={[art === 'team' ? 'text-platzhalter-verdichtet' : 'text-platzhalter']}>[Foto folgt]</span>
+    </div>
+  )
+}
+
+<style>
+  .portraet {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .portraet--leer {
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-1);
+    color: var(--color-text-gedaempft);
+  }
+
+  .portraet--team {
+    background-color: var(--color-warmgrau);
+  }
+
+  .portraet--vorstand {
+    background-color: var(--color-weiss);
+    border: 1px solid var(--color-linie);
+  }
+
+  @media (min-width: 768px) {
+    .portraet--team {
+      padding: var(--space-2);
+    }
+  }
+</style>

@@ -16,9 +16,18 @@
  *
  * Adresse, Telefon und Logo zusätzlich als schema.org Organization (JSON-LD).
  *
- * Keine Parameter.
+ * Parameter:
+ *   organisation  zusätzliche Angaben zur Organization (JSON-LD), z. B. der
+ *                 Status als nicht gewinnorientierter Verein auf Über uns
+ *                 (Standard: keine)
  */
 import Icon from './Icon.astro';
+
+interface Props {
+  organisation?: Record<string, unknown>;
+}
+
+const { organisation: zusatz = {} } = Astro.props;
 
 const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 const email = 'info@pflegeunion.ch';
@@ -75,6 +84,7 @@ const organisation = {
       closes: '22:00',
     },
   ],
+  ...zusatz,
 };
 ---
 

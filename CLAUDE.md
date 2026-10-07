@@ -36,7 +36,12 @@ solange sie nicht ausdrücklich geändert werden.
   Mindestdauer, Frist; Teil F, Punkt 1). Diese Werte und die Vergleichszeile
   stehen an einer Stelle, in `src/daten/betreuung.mjs` (`TARIF`); die
   Vergleichszeile mit `vergleich: null` ausblenden, wenn unser Tarif über
-  CHF 36.– liegt (Regieanweisung C3).
+  CHF 36.– liegt (Regieanweisung C3). Auf `/ueber-uns/` offen (Teil F,
+  Punkte 10, 13, 14; Daten von Michel Gurnari): «[Teambild folgt]», je
+  «[Foto folgt]» für Team und Vorstand, «[Hintergrund in einer Zeile]»,
+  Treuhand «[Name]», «[Firma, Ort]», «[Aufgabe in einer Zeile]», CIRRNET
+  «[Freigabe GL ausstehend]» und die Stellenliste; Fotos und Personen
+  stehen an einer Stelle in `src/daten/personen.mjs`.
 - Das verbindliche Erscheinungsbild steht in `design/brand-book.md`, die
   Werte dazu in `design/tokens.json` (siehe Design-Tokens).
 
@@ -80,8 +85,8 @@ solange sie nicht ausdrücklich geändert werden.
     der Kopfzeile folgt. Kein eigenes Skript für den Versand. `npm test`
     prüft Grösse (Stand: 1'012 von 1'023 Bytes) und Verhalten.
   - Zusätzlich erlaubt ist das **Bewegungs-Skript** `src/scripts/bewegung.js`
-    (Startseite, Lohnrechner-Seite und Betreuung & Hauswirtschaft; drittes
-    Kleinskript neben Menü und Akkordeons): unter
+    (Startseite, Lohnrechner-Seite, Betreuung & Hauswirtschaft und Über uns;
+    drittes Kleinskript neben Menü und Akkordeons): unter
     1 KB, ohne Framework, getrennt vom Lohnrechner. `Basis.astro` setzt es
     mit dem Parameter `bewegung` inline in den `<head>`, ohne `defer`, damit
     die Startklasse vor dem ersten Zeichnen steht (kein Aufblitzen, das
@@ -377,10 +382,10 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
   beides mit `prefers-reduced-motion`.
 - **Sanftes Einblenden beim Scrollen** ist auf der Startseite, der
-  Lohnrechner-Seite und Betreuung & Hauswirtschaft erlaubt (Auftrag
+  Lohnrechner-Seite, Betreuung & Hauswirtschaft und Über uns erlaubt (Auftrag
   «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B aus Claude
   Design; Unterseiten wie die Startseite, Entscheid GL 07.10.2026 und
-  Auftrag Phase 6.2): einmal pro Element, sobald es zu etwa 15 % sichtbar
+  Aufträge Phase 6.2 und 6.3): einmal pro Element, sobald es zu etwa 15 % sichtbar
   ist, 40 px von unten und von transparent auf voll in 700 ms ease-out;
   im Abschnitt gestaffelt (Übertitel, H2, Text je 80 ms; Kacheln, Schritte,
   FAQ-Fragen und Personen je 120 ms). Die Bilder «Passt es?» und Betreuung
@@ -439,7 +444,11 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   «CHF» und «.–» in der Rechner-Zahl, 24 px, B5). Aus Claude Design
   (Fassung A): `.text-button` (17/22 px Bold, Auswahlfelder des Rechners),
   `.text-h3-verdichtet` und `.text-body-verdichtet` (unter 768 px 18/28 bzw.
-  16/24 px, darüber wie `.text-h3` bzw. `.text-body`). Dazu `.button--sekundaer`,
+  16/24 px, darüber wie `.text-h3` bzw. `.text-body`), aus der Seite «Über
+  uns» `.text-zeile` (16/24 px, Vorstand und Treuhand) sowie
+  `.text-platzhalter` und `.text-platzhalter-verdichtet` (13/16 px,
+  «[Foto folgt]» in den Porträtfeldern; im Team ab 768 px wie `.text-small`).
+  Dazu `.button--sekundaer`,
   `.etikette` (Übertitel in Tiefblau), `.textspalte` (680 px),
   `.kaestchen` (Checkbox, siehe Gestaltung) und `.visually-hidden`.
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
@@ -452,7 +461,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   `--abstand-abschnitt` (64 px, ab 1024 px 96 px), `--seitenrand` (16 px,
   ab 768 px 24 px), `--hoehe-sticky` (Höhe der sticky Kopfzeile für
   Sprungziele; 0, wenn sie ohne JavaScript unter 1024 px wegscrollt),
-  `--schritt-zahl-spalte` (Spalte der Schrittzahlen).
+  `--schritt-zahl-spalte` (Spalte der Schrittzahlen), `--breite-portraet`
+  (96 px) und `--breite-portraet-klein` (84 px) für die Porträts auf Über uns.
 - Die Werte der Bewegung beim Scrollen sind ebenfalls keine Design-Tokens
   und stehen nur im Abschnitt «Bewegung» von `global.css`, je eine Zeile:
   `--bewegung-weg` (40 px), `--bewegung-dauer` (700 ms), `--bewegung-kurve`,
@@ -482,28 +492,29 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 
 | Komponente | Zweck | Einsatz gemäss Konzept |
 | --- | --- | --- |
-| `Hero.astro` | Hero (C1 Abschnitt 1; Claude Design H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button, Telefonzeile, WhatsApp-Zeile; Foto eckig mit `object-fit: cover`, ab 1024 px randabfallend rechts ab Rasterspalte 8 über die volle Höhe des Abschnitts (Text sieben von zwölf Spalten), unter 1024 px nach dem Text randabfallend über die volle Breite, quadratisch, direkt am Abschnittsende; Bildmitte so, dass beide Personen auf jeder Breite vollständig sichtbar bleiben; ohne Ring, ohne Ocker-Linie; Foto ohne Lazy Loading, `fetchpriority="high"` (unter 1024 px startet der Zoom erst, sobald das Foto ins Bild kommt); zwischen Rahmen (`.hero-bild`) und Foto die Ebene `.hero-ebene` für den Zoom beim Scrollen; Abschnitt und Rahmen schneiden mit `overflow: hidden`, wo die Zeitleiste wirkt mit `overflow: clip`; ohne `bild` und `bildIdee` ohne Bild und ohne Mindesthöhe (Lohnrechner-Seite), `unterseite` setzt `.text-h1--sub` (40 px), `bildHoehe` gibt das Format der Datei an, `bildPosition` den Bildausschnitt ab 1024 px (Betreuung & Hauswirtschaft) | Erster Abschnitt jeder Seite |
+| `Hero.astro` | Hero (C1 Abschnitt 1; Claude Design H1b_Desktop, H1b_Mobil, Entscheid GL 24.09.2026): Übertitel, H1 in Playfair, Text max. 560 px, Primär- und Sekundär-Button (ohne `primaer` kein Button, die Telefonzeile folgt 24 px bzw. ab 1024 px 32 px nach dem Text: Über uns), Telefonzeile, WhatsApp-Zeile; Foto eckig mit `object-fit: cover`, ab 1024 px randabfallend rechts ab Rasterspalte 8 über die volle Höhe des Abschnitts (Text sieben von zwölf Spalten), unter 1024 px nach dem Text randabfallend über die volle Breite, quadratisch, direkt am Abschnittsende; Bildmitte so, dass beide Personen auf jeder Breite vollständig sichtbar bleiben; ohne Ring, ohne Ocker-Linie; Foto ohne Lazy Loading, `fetchpriority="high"` (unter 1024 px startet der Zoom erst, sobald das Foto ins Bild kommt); zwischen Rahmen (`.hero-bild`) und Foto die Ebene `.hero-ebene` für den Zoom beim Scrollen; Abschnitt und Rahmen schneiden mit `overflow: hidden`, wo die Zeitleiste wirkt mit `overflow: clip`; ohne Foto mit `bildIdee` eine Warmgrau-Fläche mit dem Text als echtem Text im HTML (Über uns «[Teambild folgt]»), ohne `bild` und `bildIdee` ohne Bild und ohne Mindesthöhe, `unterseite` setzt `.text-h1--sub` (40 px), `bildHoehe` gibt das Format der Datei an, `bildPosition` den Bildausschnitt ab 1024 px (Betreuung & Hauswirtschaft, Lohnrechner-Seite), `bildPositionMobil` den im Quadrat unter 1024 px (Standard unten, Lohnrechner-Seite oben) | Erster Abschnitt jeder Seite |
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Bild im ersten Bildschirm: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht, ausser im Hero; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar); mit `spalten={3}` ab 1024 px drei in einer Reihe (768–1023 px die dritte über die ganze Breite); Icon freiwillig; `flaeche="weiss"` für Karten auf Weiss in einem Warmgrau-Abschnitt | Startseite «Was Sie erhalten», Lohnrechner-Seite «So entsteht Ihr Lohn» (drei), Betreuung «Leistungen» und «Für wen» (ohne Icon, auf Weiss) |
 | `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
 | `Header.astro` | Kopfzeile (B2): sticky, mit JavaScript auch unter 1024 px (bestätigt GL 07.10.2026); ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig); ohne JavaScript unter 1024 px nicht sticky (Navigation offen, die Kopfzeile scrollt weg); der Menüpunkt der aktuellen Seite trägt `aria-current="page"` und ist 2 px unterstrichen (8 px unter der Schrift) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen. «Beratung anfragen» ist 20 px breiter als «Lohn berechnen»; mit diesem Button (`.kopfzeile--breiter-button`) rückt die Kopfzeile unter 480 px enger zusammen, ohne kleinere Schrift und ohne kleinere Tippflächen: 360–479 px ohne Zwischenräume, unter 360 px zusätzlich Seitenrand 4 px und Button-Innenabstand 12 px (bei 320 px 311 statt 327 px). Startseite und alle anderen Seiten unverändert |
-| `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
+| `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization (Name, Adresse, Telefon); Parameter `organisation` ergänzt Angaben, über `Basis.astro` (Über uns: `nonprofitStatus`) | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
 | `TrustLeiste.astro` | Baustein A: fünf Belege mit Linien-Icon in Ocker | Unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt jeder Unterseite |
 | `Anfrage.astro` | Baustein B: Anfrage-Abschnitt mit Kontaktangaben (Telefon, E-Mail, WhatsApp) und Formular (D2, acht Felder), Anker `#kontakt`; mobil E-Mail, Erreichbarkeit und Nachricht unter «Weitere Angaben (freiwillig)»; Versand an `/api/anfrage` (Netlify Function, siehe Formular), Rückmeldungen `#anfrage-gesendet` und `#anfrage-fehler` oben im Formular per `:target`; Telefon und E-Mail mit `pattern` aus `felder.mjs`; Honeypot und Feld `dauer` für die Zeitprüfung | Am Ende jeder Seite; H2 je Seite per Parameter `titel`; Parameter `anliegen` wählt Feld 1 im HTML vor (nur Betreuung & Hauswirtschaft) |
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt; Startseite «Ehrlich gesagt», Betreuung «Finanzielle Hilfen» (Kasten 744 px breit) |
-| `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell; mit `seitlich` und `ebene={2}` aufgebaut wie der Hinweiskasten «Ehrlich gesagt» (Titel als H2, ab 1024 px links), immer offen | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt; Betreuung: Tarif |
+| `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell; mit `seitlich` und `ebene={2}` aufgebaut wie der Hinweiskasten «Ehrlich gesagt» (Titel als H2, ab 1024 px links), immer offen | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt; Betreuung: Tarif; Über uns: Nicht gewinnorientiert |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite; Lohnrechner-Seite sieben (C2) |
 | `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px eine ruhige, vollständige Ansicht ohne klebende Elemente (Entscheid GL 07.10.2026): Abstände aus Board «Test Rechner mobil», Variante A (Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis), und nur per CSS (`order`, die Hüllen `.eingabe`, `.ergebnis-zahl`, `.ergebnis-rest` und `.knoepfe` mit `display: contents`, die Live-Region `.ergebnis` behält ihre Box) die Reihenfolge «brutto pro Monat» · «Kostenloses Erstgespräch vereinbaren» (8 px darunter) · Ocker-Linie · Jahresbetrag · «Nach dem Kurs …» · zweiter Button («Alle Details zum Lohn») am Schluss; der Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit sich über dem Button beim Antippen nichts verschiebt (Ocker-Linie, zweiter Button am Schluss, Zusatzhinweis nach dem Ergebnis und 8 px bestätigt GL 07.10.2026); Sprungziel ist das Element `.rechner-anker` mit der id aus `anker` am Anfang der Rechnerfläche, ab 768 px am Anfang des Abschnitts (wie bisher), darunter an der Frage «Wie viele Stunden pro Tag …» (ohne JavaScript an der Tabelle), die Höhe der Kopfzeile zieht `scroll-padding-top` ab; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (id des Sprungziels, Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: statt «Alle Details zum Lohn» die Zeile «Ergebnis per E-Mail erhalten» mit dem E-Mail-Formular, siehe Formular; Desktop in einer zweiten Zeile unter «Kostenloses Erstgespräch vereinbaren», mobil am Schluss des Ergebnisses), `kopf` (Standard true; false: ohne sichtbaren Übertitel, H2 und Einleitung, die H2 «Lohnrechner» nur für Vorleseprogramme). **Stundensätze, Tage, BVG-Schwelle und Stundenstufen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`, `kopf={false}`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
+| `Portraet.astro` | Porträt im Hochformat 3:4 (Claude Design UU_D03/UU_M03, UU_D04/UU_M04 Variante A): mit Foto `<img>` (WebP 480/800/1200, Lazy Loading, Alt-Text = Name), ohne Foto ruhige Fläche mit dem sichtbaren Text «[Foto folgt]» (kein Icon, keine Silhouette); `art="team"` Warmgrau, `art="vorstand"` Weiss mit Haarlinie; die Breite setzt die Seite | Über uns: Team (mobil 96 × 128 px neben dem Namen, ab 768 px über dem Namen, bei 1440 px 384 × 512 px), Vorstand (84 × 112 px, ab 768 px 96 × 128 px) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
 - Die Parameter jeder Komponente sind im Kommentarkopf der Datei beschrieben.
 - Der Parameter `bewegung` (Hero, Abschnitt, Lohnrechner, TrustLeiste,
   Karten, Schritte, Bildflaeche, Hinweiskasten, FAQ, Anfrage, dazu
   `Basis.astro` für das Skript) markiert die bewegten Elemente mit
-  `data-bewegung` (auch Kernbotschaft); nur Startseite, Lohnrechner-Seite
-  und Betreuung & Hauswirtschaft setzen ihn (siehe Gestaltung).
+  `data-bewegung` (auch Kernbotschaft); nur Startseite, Lohnrechner-Seite,
+  Betreuung & Hauswirtschaft und Über uns setzen ihn (siehe Gestaltung).
 - Die Startseite `src/pages/index.astro` setzt die zwölf Abschnitte aus
   Konzept C1 in dieser Reihenfolge um: Hero · Lohnrechner · Trust-Leiste ·
   Was Sie erhalten · So funktioniert es (`#ablauf`) · Passt es? · Ehrlich
@@ -522,6 +533,26 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   `link rel="canonical"` (Parameter `kanonisch` in `Basis.astro`), Eintrag
   in `/sitemap.xml` (`src/pages/sitemap.xml.ts`, ohne Zusatzpaket; neue
   Seiten dort ergänzen). Tarif und Bedingungen aus `src/daten/betreuung.mjs`.
+- Die Seite Über uns `src/pages/ueber-uns.astro` (`/ueber-uns/`, Claude
+  Design Seite «Über uns», Gesamtansicht mit Vorstand Variante A; Variante B
+  wird nicht gebaut) setzt in dieser Reihenfolge um: Hero (ohne Button,
+  Telefon- und WhatsApp-Zeile, «[Teambild folgt]» bis zum Foto) · Warum es
+  uns gibt · Team (drei Personen mit Porträt, Name, Funktion und Zitat) ·
+  Vorstand und Treuhand (fünf Personen mit Porträtfeld, Treuhand ohne Foto,
+  Zwischentitel als H3) · Grundsätze (mobil Grundsatz sichtbar, Erklärung
+  ausklappbar) · Nicht gewinnorientiert (Kernbotschaft, einziger
+  Ocker-Kasten) · Qualität · Demnächst (sechs Kacheln wie Startseite) ·
+  Stellen (`#stellen`, Stellenliste als Platzhalter, «Bewerbung senden» →
+  `mailto:info@pflegeunion.ch`; kein JobPosting, solange keine Stelle mit
+  Pensum und Eintrittsdatum feststeht) · Trust-Leiste · Anfrage («Reden wir
+  über Ihre Situation.», nichts vorgewählt). Kopfzeile «Lohn berechnen» →
+  `/#lohnrechner`, «Über uns» aktiv. Meta-Titel und -Beschreibung aus dem
+  Auftrag Phase 6.3, canonical, Sitemap, Organization mit
+  `nonprofitStatus`. Teambild, Team, Vorstand und Treuhand stehen an einer
+  Stelle in `src/daten/personen.mjs` (pro Person Name, Funktion, Zitat oder
+  Hintergrund, Foto; leer = Platzhalter); ein Foto wird dort mit einer
+  Zeile ergänzt (WebP 480/800/1200 unter `public/bilder/`, Lizenz in
+  `LIZENZEN.md`).
 - Fotos liegen als WebP unter `public/bilder/` (je 480, 800 und 1200 px
   breit, `srcset`, eckig), Herkunft und Lizenz in `LIZENZEN.md`.
   `Bildflaeche.astro` bindet sie über `bild` ein; ohne Foto zeigt sie die
@@ -535,7 +566,9 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 - Die Lohnrechner-Seite `src/pages/lohnrechner.astro` (`/lohnrechner/`,
   Konzept C2; Claude Design Seite «Lohnrechner», Boards LR_D01–LR_D09,
   LR_M01–LR_M09 und die Zustands-Boards) setzt in dieser Reihenfolge um:
-  Hero ohne Bild (`unterseite`, H1 40 px, Button «Zum Rechner» → `#rechner`)
+  Hero mit Bild (Unsplash+ WoLeTwKGzms, Zuschnitt aus dem Canvas wie auf
+  Betreuung & Hauswirtschaft, oben ausgerichtet; `unterseite`, H1 40 px,
+  Button «Zum Rechner» → `#rechner`)
   · Rechner (`anker="rechner"`, `vollstaendig`, `kopf={false}`: ohne
   sichtbaren Kopf, H2 «Lohnrechner» nur für Vorleseprogramme; mobil wie auf
   der Startseite, Sprung an die Frage) · So entsteht Ihr Lohn (Karten mit
@@ -604,18 +637,21 @@ public/              favicon-32.png und apple-touch-icon.png
 src/components/      wiederkehrende Bausteine (Header, Footer, Hero, Abschnitt,
                      Lohnrechner, TrustLeiste, Karten, Schritte, Bildflaeche,
                      Anfrage, Hinweiskasten, Kernbotschaft, FAQ, Demnaechst,
-                     Icon) und die Lucide-Lizenz
+                     Portraet, Icon) und die Lucide-Lizenz
 src/layouts/         Layouts, z. B. Basis.astro (Kopf- und Fusszeile)
 src/pages/           Seiten, eine Datei pro Seite (index.astro,
-                     lohnrechner.astro, betreuung-hauswirtschaft.astro);
+                     lohnrechner.astro, betreuung-hauswirtschaft.astro,
+                     ueber-uns.astro);
                      bausteine.astro ist die interne Musterseite;
                      sitemap.xml.ts erzeugt /sitemap.xml
 src/daten/           betreuung.mjs: Tarif und Bedingungen der Betreuung
-                     (an einer Stelle, Platzhalter bis zum GL-Entscheid)
+                     (an einer Stelle, Platzhalter bis zum GL-Entscheid);
+                     personen.mjs: Teambild, Team, Vorstand und Treuhand
+                     der Seite Über uns (Fotos leer = Platzhalter)
 src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
                      (Sätze, Stufen), unter 10 KB;
                      bewegung.js: Bewegung beim Scrollen (Startseite,
-                     Lohnrechner-Seite, Betreuung),
+                     Lohnrechner-Seite, Betreuung, Über uns),
                      unter 1 KB, inline im Kopf
 test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1,
@@ -640,6 +676,9 @@ test/                npm test (node:test ohne Zusatzpakete):
                      betreuung-seite.test.mjs die Seite
                      Betreuung & Hauswirtschaft (Reihenfolge, Texte,
                      Vorbelegung, Kopfzeile, SEO, Verweise),
+                     ueber-uns-seite.test.mjs die Seite Über uns
+                     (Reihenfolge, Texte, Personen, Platzhalter,
+                     Stellen, SEO, Verweise),
                      platzhalter.test.mjs die Go-live-Sperre
 src/styles/          tokens.css (erzeugt, nicht bearbeiten) und global.css
                      mit Schrifteinbindung, Web-Anpassungen, Breakpoints,

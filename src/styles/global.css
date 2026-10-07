@@ -364,6 +364,28 @@ input[type='radio']:checked {
   }
 }
 
+/* Zeilen unter dem Namen in Vorstand und Treuhand (Claude Design, Über uns
+   UU_D04/UU_M04 Variante A: ruhiger als das Team): Lato 16/24. */
+.text-zeile {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/* «[Foto folgt]» in den Porträtfeldern (Claude Design, Über uns): 13/16;
+   im Team ab 768 px wie .text-small (15/22). */
+.text-platzhalter,
+.text-platzhalter-verdichtet {
+  font-size: 13px;
+  line-height: 16px;
+}
+
+@media (min-width: 768px) {
+  .text-platzhalter-verdichtet {
+    font-size: 15px;
+    line-height: 22px;
+  }
+}
+
 /* Ende der Web-Anpassungen gemäss Konzept V3 B5. */
 
 /*
@@ -419,6 +441,11 @@ input[type='radio']:checked {
 
   /* Spalte der Schrittzahlen (Abschnitt «So funktioniert es», ab 768 px). */
   --schritt-zahl-spalte: calc(var(--space-8) + var(--space-2));
+
+  /* Porträts 3:4 (Über uns): 96 px breit (Team unter 768 px, Vorstand ab
+     768 px), Vorstand unter 768 px 84 px. */
+  --breite-portraet: calc(var(--space-8) + var(--space-4));
+  --breite-portraet-klein: calc(var(--space-8) + var(--space-3) - var(--space-1) / 2);
 
   /* Abstand oben und unten in jedem Abschnitt (64 px, ab 1024 px 96 px)
      und Seitenrand (16 px, ab 768 px 24 px), Claude Design Fassung A. */

@@ -23,9 +23,14 @@ interface Props {
    * Beobachtung kommen immer zusammen an.
    */
   bewegung?: boolean;
+  /**
+   * Zusätzliche Angaben zur schema.org Organization in der Fusszeile, z. B.
+   * nonprofitStatus auf Über uns.
+   */
+  organisation?: Record<string, unknown>;
 }
 
-const { titel, beschreibung, noindex = false, kanonisch, buttonText, buttonZiel, bewegung = false } = Astro.props;
+const { titel, beschreibung, noindex = false, kanonisch, buttonText, buttonZiel, bewegung = false, organisation } = Astro.props;
 const kanonischeAdresse = kanonisch ? new URL(kanonisch, Astro.site ?? 'https://pflegeunion.ch/').href : undefined;
 ---
 
@@ -70,6 +75,6 @@ const kanonischeAdresse = kanonisch ? new URL(kanonisch, Astro.site ?? 'https://
       <slot />
     </main>
 
-    <Footer />
+    <Footer organisation={organisation} />
   </body>
 </html>
