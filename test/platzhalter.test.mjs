@@ -2,10 +2,10 @@
  * Prüft die Go-live-Sperre für Platzhalter (scripts/platzhalter.mjs, läuft
  * in `npm run build`): «[XX» und «[X]» im HTML und jeder Text in eckigen
  * Klammern im sichtbaren Text werden gefunden; eckige Klammern in CSS,
- * Skripten und Attributen von Selektoren nicht. Der Production-Build
- * (CONTEXT=production) bricht mit Funden ab, Vorschauen und lokale Builds
- * warnen nur. Dazu: Die offenen Werte der Betreuung stehen an einer Stelle
- * (src/daten/betreuung.mjs).
+ * Skripten und Attributen von Selektoren nicht. Mit Funden bricht nur der
+ * Production-Build für die Domain pflegeunion.ch ab (Netlify-Variable URL);
+ * Testseite, Vorschauen und lokale Builds warnen nur. Dazu: Die offenen
+ * Werte der Betreuung stehen an einer Stelle (src/daten/betreuung.mjs).
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -35,15 +35,31 @@ test('eckige Klammern in CSS, Skripten und Selektoren zählen nicht', () => {
   assert.deepEqual(platzhalterIn(seite('<p>Alles entschieden: CHF 52.– pro Stunde.</p>')), []);
 });
 
-test('Production-Build bricht ab, Vorschau und lokal nur Warnung', () => {
+test('Sperre greift nur mit der Domain pflegeunion.ch (E4 Punkt 8)', () => {
   const funde = { 'index.html': ['[XX.–]'] };
-  assert.equal(bewerte(funde, 'production').code, 1);
-  assert.match(bewerte(funde, 'production').zeilen.join('\n'), /abgebrochen[\s\S]*index\.html: \[XX\.–\]/);
-  for (const kontext of ['deploy-preview', 'branch-deploy', undefined]) {
-    assert.equal(bewerte(funde, kontext).code, 0);
-    assert.match(bewerte(funde, kontext).zeilen[0], /Warnung/);
+  // Abbruch: Production-Build für die echte Domain, mit oder ohne www.
+  for (const URL of ['https://pflegeunion.ch', 'https://www.pflegeunion.ch', 'https://pflegeunion.ch/']) {
+    const { code, zeilen } = bewerte(funde, { URL, CONTEXT: 'production' });
+    assert.equal(code, 1, URL);
+    assert.match(zeilen.join('\n'), /abgebrochen[\s\S]*index\.html: \[XX\.–\]/);
   }
-  assert.equal(bewerte({}, 'production').code, 0);
+  // Nur Warnung: Testseite (heute der Production-Kontext), Vorschauen und
+  // Branch deploys (auch nach dem Wechsel auf die Domain), andere Adressen, lokal.
+  const warnung = [
+    { URL: 'https://pflegeunion-test.netlify.app', CONTEXT: 'production' },
+    { URL: 'https://pflegeunion.ch', CONTEXT: 'deploy-preview' },
+    { URL: 'https://pflegeunion.ch', CONTEXT: 'branch-deploy' },
+    { URL: 'https://pflegeunion.ch.example.org', CONTEXT: 'production' },
+    { URL: 'http://pflegeunion.ch', CONTEXT: 'production' },
+    {},
+  ];
+  for (const umgebung of warnung) {
+    const { code, zeilen } = bewerte(funde, umgebung);
+    assert.equal(code, 0, JSON.stringify(umgebung));
+    assert.match(zeilen[0], /Warnung/);
+  }
+  // Ohne Funde nie ein Abbruch.
+  assert.equal(bewerte({}, { URL: 'https://pflegeunion.ch', CONTEXT: 'production' }).code, 0);
 });
 
 test('prüft alle HTML-Seiten eines Ordners', () => {
