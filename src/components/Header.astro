@@ -26,6 +26,15 @@
  * Hauswirtschaft «Beratung anfragen» → #kontakt, auf allen anderen Seiten
  * «Lohn berechnen» → /#lohnrechner, auch auf der Startseite.
  *
+ * «Beratung anfragen» ist 20 px breiter als «Lohn berechnen» (Lato Bold
+ * 17 px: 141 statt 122 px); bei 320 px bräuchte die Kopfzeile 327 px. Mit
+ * diesem Button (Klasse .kopfzeile--breiter-button) rückt sie deshalb nur
+ * unter 480 px enger zusammen, Schrift und Tippflächen bleiben gleich:
+ * 360–479 px ohne Zwischenräume (wie unter 360 px), unter 360 px zusätzlich
+ * 4 statt 8 px Seitenrand und 12 statt 16 px Button-Innenabstand. Bei
+ * 320 px braucht die Kopfzeile so 311 px. Ab 480 px und auf allen anderen
+ * Seiten bleibt alles wie bisher.
+ *
  * Der Menüpunkt der aktuellen Seite (z. B. «Lohnrechner» auf /lohnrechner/)
  * trägt aria-current="page" und ist 2 px unterstrichen.
  *
@@ -57,9 +66,9 @@ interface Props {
 
 // Primär-Button je Seite gemäss B2; der Pfad ohne abschliessenden Schrägstrich.
 const pfad = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const buttonJeSeite: Record<string, { text: string; ziel: string }> = {
+const buttonJeSeite: Record<string, { text: string; ziel: string; breit?: boolean }> = {
   '/lohnrechner': { text: 'Lohn berechnen', ziel: '#rechner' },
-  '/betreuung-hauswirtschaft': { text: 'Beratung anfragen', ziel: '#kontakt' },
+  '/betreuung-hauswirtschaft': { text: 'Beratung anfragen', ziel: '#kontakt', breit: true },
 };
 const standardButton = buttonJeSeite[pfad] ?? { text: 'Lohn berechnen', ziel: '/#lohnrechner' };
 
@@ -68,6 +77,9 @@ const {
   buttonZiel = standardButton.ziel,
   utility = true,
 } = Astro.props;
+
+// Breiter als «Lohn berechnen»: unter 480 px enger (siehe oben und Stil).
+const breiterButton = Boolean(standardButton.breit) && buttonText === standardButton.text;
 
 const menue = [
   { text: 'So funktioniert es', ziel: '/#ablauf' },
@@ -96,7 +108,7 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
   )
 }
 
-<header class="kopfzeile" id="kopfzeile">
+<header class:list={['kopfzeile', { 'kopfzeile--breiter-button': breiterButton }]} id="kopfzeile">
   <div class="kopfzeile-inhalt">
     <a class="logo" href="/">
       <img class="logo-horizontal" src="/logos/logo-horizontal-de.svg" alt={logoAlt} width="242" height="48" />
@@ -391,10 +403,31 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
     }
   }
 
+  /* «Beratung anfragen» unter 360 px: Seitenrand 4 px, Button-Innenabstand
+     12 px (bei 320 px 311 statt 327 px). */
+  @media (max-width: 359px) {
+    .kopfzeile--breiter-button .kopfzeile-inhalt {
+      padding-inline: calc(var(--space-1) / 2);
+    }
+
+    .kopfzeile--breiter-button .kopf-button {
+      padding-inline: calc(var(--space-1) * 1.5);
+    }
+  }
+
   /* Ab 360 px: Zwischenräume 8 px (Kopfzeile_Mobil). */
   @media (min-width: 360px) {
     .kopfzeile-inhalt {
       gap: var(--space-1);
+    }
+  }
+
+  /* «Beratung anfragen» 360–479 px: ohne Zwischenräume wie unter 360 px (bei
+     360 px 351 statt 375 px); die Tippflächen von Telefon und Burger lassen
+     je 10 px Luft um ihr Icon. */
+  @media (min-width: 360px) and (max-width: 479px) {
+    .kopfzeile--breiter-button .kopfzeile-inhalt {
+      gap: 0;
     }
   }
 

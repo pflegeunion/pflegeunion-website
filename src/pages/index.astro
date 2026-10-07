@@ -22,6 +22,7 @@ import Hinweiskasten from '../components/Hinweiskasten.astro';
 import Demnaechst from '../components/Demnaechst.astro';
 import FAQ from '../components/FAQ.astro';
 import Anfrage from '../components/Anfrage.astro';
+import { TARIF } from '../daten/betreuung.mjs';
 
 const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
 
@@ -280,7 +281,7 @@ const fragen = [
           }
         </ul>
         <p class="tarif" data-bewegung="text">
-          Private Leistung zu einem festen Stundentarif von CHF [XX.–], ohne Zuschläge.
+          Private Leistung zu einem festen Stundentarif von CHF {TARIF.stunde}, ohne Zuschläge.
           Ergänzungsleistungen und Zusatzversicherungen können sich beteiligen – wir prüfen das mit
           Ihnen.
         </p>

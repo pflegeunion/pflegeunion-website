@@ -3,23 +3,42 @@
  * Baustein D – Kernbotschaft-Kasten (Konzept V3 B4).
  *
  * Fläche ocker-hell, Etikette in Tiefblau, Titel Lato Bold Tiefblau, Inhalt als
- * Slot. Höchstens einer pro Seite. Auf der Startseite: der Lohn-Abschnitt.
+ * Slot. Höchstens einer pro Seite. Auf der Startseite: der Lohn-Abschnitt;
+ * auf Betreuung & Hauswirtschaft: der Tarif.
+ *
+ * Mit `seitlich` (Claude Design BH_D04_Tarif, BH_M04_Tarif: Titel als H2,
+ * Aufbau wie der Hinweiskasten «Ehrlich gesagt»): Innenabstand 32/24 px, ab
+ * 1024 px 64 px; ab 1024 px stehen Etikette und Titel links (4 von 12
+ * Spalten), der Inhalt rechts (8 Spalten, max. 680 px). Immer offen, auch
+ * mobil.
  *
  * Parameter:
  *   etikette  Übertitel
  *   titel     Titel des Kastens
+ *   ebene     Überschriftenebene des Titels: 3 (Standard, Kasten in einem
+ *             Abschnitt) oder 2 (der Kasten ist selbst der Abschnitt, z. B.
+ *             «Tarif» auf Betreuung & Hauswirtschaft)
+ *   seitlich  Titel ab 1024 px links neben dem Inhalt (Standard false)
+ *   bewegung  Etikette und Titel blenden beim Scrollen ein (Startseite und
+ *             Unterseiten, global.css «Bewegung»; Standard false)
  */
 interface Props {
   etikette: string;
   titel: string;
+  ebene?: 2 | 3;
+  seitlich?: boolean;
+  bewegung?: boolean;
 }
 
-const { etikette, titel } = Astro.props;
+const { etikette, titel, ebene = 3, seitlich = false, bewegung = false } = Astro.props;
+const bw = bewegung ? 'text' : undefined;
 ---
 
-<div class="kasten">
-  <p class="text-label etikette">{etikette}</p>
-  <h3 class="text-h3">{titel}</h3>
+<div class:list={['kasten', { 'kasten--seitlich': seitlich }]}>
+  <div class="kasten-kopf">
+    <p class="text-label etikette" data-bewegung={bw}>{etikette}</p>
+    {ebene === 2 ? <h2 class="text-h2" data-bewegung={bw}>{titel}</h2> : <h3 class="text-h3" data-bewegung={bw}>{titel}</h3>}
+  </div>
   <div class="kasten-inhalt">
     <slot />
   </div>
@@ -31,13 +50,48 @@ const { etikette, titel } = Astro.props;
     padding: var(--space-3);
   }
 
+  .kasten h2,
   .kasten h3 {
     color: var(--color-tiefblau);
+  }
+
+  .kasten--seitlich {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .kasten--seitlich .kasten-inhalt {
+    max-width: var(--breite-text);
+  }
+
+  .kasten--seitlich .kasten-kopf h2 {
+    margin-bottom: var(--space-3);
   }
 
   @media (min-width: 768px) {
     .kasten {
       padding: var(--space-4);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .kasten--seitlich {
+      padding: var(--space-8);
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: start;
+    }
+
+    .kasten--seitlich .kasten-kopf {
+      grid-column: 1 / span 4;
+    }
+
+    .kasten--seitlich .kasten-kopf h2 {
+      margin-bottom: 0;
+    }
+
+    .kasten--seitlich .kasten-inhalt {
+      grid-column: 5 / span 8;
     }
   }
 </style>

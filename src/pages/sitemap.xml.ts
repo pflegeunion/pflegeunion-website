@@ -5,7 +5,7 @@
  */
 import type { APIRoute } from 'astro';
 
-export const SEITEN = ['/', '/lohnrechner/'];
+export const SEITEN = ['/', '/lohnrechner/', '/betreuung-hauswirtschaft/'];
 
 export const GET: APIRoute = ({ site }) => {
   const basis = site ?? new URL('https://pflegeunion.ch/');

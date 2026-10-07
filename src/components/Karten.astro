@@ -17,16 +17,23 @@
  * LR_D03_Prinzip, LR_M03_Prinzip): ab 1024 px drei Karten in einer Reihe,
  * 768–1023 px zwei Spalten, die dritte Karte über die ganze Breite.
  *
+ * Ohne Icon (Betreuung & Hauswirtschaft «Für wen», Claude Design
+ * BH_D03_Fuer_wen, BH_M03_Fuer_wen): mobil nur der Titel in der Zeile zum
+ * Antippen, der Text ohne Einzug; ab 768 px Titel und Text. Mit
+ * flaeche="weiss" stehen die Karten ab 768 px auf Weiss (Abschnitt auf
+ * Warmgrau).
+ *
  * Parameter:
- *   karten    Liste { icon, titel, text }
+ *   karten    Liste { icon?, titel, text }
  *   spalten   2 (Standard, zwei mal zwei) oder 3 (drei in einer Reihe)
+ *   flaeche   Fläche der Karten ab 768 px: 'warmgrau' (Standard) oder 'weiss'
  *   bewegung  die Karten blenden beim Scrollen einzeln ein (Startseite und
- *             Lohnrechner-Seite, global.css «Bewegung»; Standard false)
+ *             Unterseiten, global.css «Bewegung»; Standard false)
  */
 import Icon, { type IconName } from './Icon.astro';
 
 interface Karte {
-  icon: IconName;
+  icon?: IconName;
   titel: string;
   text: string;
 }
@@ -34,22 +41,25 @@ interface Karte {
 interface Props {
   karten: Karte[];
   spalten?: 2 | 3;
+  flaeche?: 'warmgrau' | 'weiss';
   bewegung?: boolean;
 }
 
-const { karten, spalten = 2, bewegung = false } = Astro.props;
+const { karten, spalten = 2, flaeche = 'warmgrau', bewegung = false } = Astro.props;
 ---
 
 <ul class:list={['karten', 'liste-blank', { 'karten--drei': spalten === 3 }]}>
   {
     karten.map((k) => (
-      <li class="karte" data-bewegung={bewegung ? 'kachel' : undefined}>
+      <li class:list={['karte', { 'karte--weiss': flaeche === 'weiss', 'karte--ohne-icon': !k.icon }]} data-bewegung={bewegung ? 'kachel' : undefined}>
         <details class="klappe">
           <summary>
             <span class="zeile-kopf">
-              <span class="karte-icon">
-                <Icon name={k.icon} groesse={32} />
-              </span>
+              {k.icon && (
+                <span class="karte-icon">
+                  <Icon name={k.icon} groesse={32} />
+                </span>
+              )}
               <h3 class="text-faq zeile-titel">{k.titel}</h3>
             </span>
             <span class="klappe-icon">
@@ -58,9 +68,11 @@ const { karten, spalten = 2, bewegung = false } = Astro.props;
             </span>
           </summary>
           <div class="karte-inhalt">
-            <span class="karte-icon offen">
-              <Icon name={k.icon} groesse={32} />
-            </span>
+            {k.icon && (
+              <span class="karte-icon offen">
+                <Icon name={k.icon} groesse={32} />
+              </span>
+            )}
             <h3 class="text-h3 karte-titel offen">{k.titel}</h3>
             <p class="karte-text">{k.text}</p>
           </div>
@@ -109,6 +121,11 @@ const { karten, spalten = 2, bewegung = false } = Astro.props;
     padding: 0 0 var(--space-2) var(--space-6);
   }
 
+  /* Ohne Icon: Text ohne Einzug. */
+  .karte--ohne-icon .karte-text {
+    padding-left: 0;
+  }
+
   .offen {
     display: none;
   }
@@ -126,6 +143,10 @@ const { karten, spalten = 2, bewegung = false } = Astro.props;
       background-color: var(--color-warmgrau);
       padding: calc(var(--space-4) + var(--space-1));
       border-bottom: 0;
+    }
+
+    .karte--weiss {
+      background-color: var(--color-weiss);
     }
   }
 
@@ -156,6 +177,10 @@ const { karten, spalten = 2, bewegung = false } = Astro.props;
       .karte-titel.offen {
         display: block;
         margin: var(--space-3) 0 0;
+      }
+
+      .karte--ohne-icon .karte-titel.offen {
+        margin-top: 0;
       }
 
       .karte-text {

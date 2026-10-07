@@ -6,7 +6,7 @@
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",
     "dev": "npm run tokens && astro dev",
-    "build": "npm run tokens && astro build",
+    "build": "npm run tokens && astro build && node scripts/platzhalter.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test test/*.test.mjs"

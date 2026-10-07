@@ -651,9 +651,9 @@ main {
 
 /*
  * =====================================================================
- * Bewegung beim Scrollen (Startseite und Lohnrechner-Seite; Auftrag
- * «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B aus
- * Claude Design; Lohnrechner-Seite: Entscheid GL 07.10.2026).
+ * Bewegung beim Scrollen (Startseite, Lohnrechner-Seite und Betreuung &
+ * Hauswirtschaft; Auftrag «Startseite: sanfte Bewegung beim Scrollen»,
+ * Vorlage Variante B aus Claude Design; Unterseiten wie die Startseite).
  *
  * Elemente mit dem Attribut data-bewegung starten einmal, sobald etwa
  * 15 % von ihnen sichtbar sind; beim Zurückscrollen passiert nichts mehr.
@@ -668,7 +668,7 @@ main {
  *                 davon wächst die Ebene darum (.hero-ebene) beim Scrollen
  *                 durch den Hero bis 105 % (animation-timeline: view())
  *
- * src/scripts/bewegung.js (inline im Kopf der Startseite) setzt die
+ * src/scripts/bewegung.js (inline im Kopf dieser Seiten) setzt die
  * Startklasse .bewegung auf <html> nur, wenn «Bewegung reduzieren» nicht
  * aktiv ist und der Browser IntersectionObserver kennt; gestartete
  * Elemente erhalten .bewegt. Ohne JavaScript, bei einem Fehler, mit

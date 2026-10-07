@@ -22,15 +22,18 @@
  *   telefon    Telefonzeile anzeigen (Standard true)
  *   whatsapp   WhatsApp-Zeile «Lieber schreiben? Auf WhatsApp» anzeigen (Standard true)
  *   bild       Basisname der WebP-Dateien unter public/bilder/ (je 480, 800
- *              und 1200 px breit, Hochformat 1200 × 1513 px); kein Lazy
- *              Loading, fetchpriority="high"
+ *              und 1200 px breit, Hochformat); kein Lazy Loading,
+ *              fetchpriority="high"
+ *   bildHoehe  Höhe der 1200 px breiten Datei (Standard 1513, Startseite)
+ *   bildPosition  Bildausschnitt ab 1024 px als object-position (Standard
+ *              «50% 100%», unten ausgerichtet wie unter 1024 px)
  *   bildAlt    Alternativtext zum Bild
  *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt;
  *              ohne bild und bildIdee steht kein Bild (Hero ohne Bild, z. B.
  *              Lohnrechner-Seite C2: der Text steht allein, ohne Mindesthöhe)
  *   unterseite H1 als Seitentitel einer Unterseite (.text-h1--sub, 40 px;
  *              Standard false)
- *   bewegung   Bewegung beim Scrollen (nur Startseite, global.css «Bewegung»):
+ *   bewegung   Bewegung beim Scrollen (Startseite und Unterseiten, global.css «Bewegung»):
  *              das Foto zoomt beim Laden von 108 % auf 100 %, die Ebene
  *              darum (.hero-ebene) beim Scrollen bis 105 %; der Rahmen
  *              (.hero-bild) bleibt fest. Text, Buttons, Telefon und
@@ -52,6 +55,8 @@ interface Props {
   telefon?: boolean;
   whatsapp?: boolean;
   bild?: string;
+  bildHoehe?: number;
+  bildPosition?: string;
   bildAlt?: string;
   bildIdee?: string;
   unterseite?: boolean;
@@ -67,6 +72,8 @@ const {
   telefon = true,
   whatsapp = true,
   bild,
+  bildHoehe = 1513,
+  bildPosition,
   bildAlt = '',
   bildIdee = '',
   unterseite = false,
@@ -118,7 +125,7 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 
   {
     mitBild && (
-      <figure class="hero-bild">
+      <figure class="hero-bild" style={bildPosition ? `--bild-position: ${bildPosition}` : undefined}>
         {bild ? (
           <div class="hero-ebene">
             <img
@@ -127,7 +134,7 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
               sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
               alt={bildAlt}
               width="1200"
-              height="1513"
+              height={bildHoehe}
               loading="eager"
               fetchpriority="high"
               decoding="sync"
@@ -303,6 +310,12 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 
     .hero-absatz {
       margin-bottom: calc(var(--space-4) + var(--space-1));
+    }
+
+    /* Bildausschnitt je Foto (Parameter bildPosition), sonst unten
+       ausgerichtet wie unter 1024 px. */
+    .hero-bild img {
+      object-position: var(--bild-position, 50% 100%);
     }
 
     .hero-bild {

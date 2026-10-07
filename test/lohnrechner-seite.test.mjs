@@ -149,7 +149,7 @@ test('Kopfzeile: «Lohnrechner» aktiv, «Lohn berechnen» auf #rechner', () => 
 
 test('Sitemap und Verweise auf /lohnrechner/', () => {
   // Sitemap (src/pages/sitemap.xml.ts, als Text gelesen: läuft auch ohne TypeScript in Node).
-  assert.match(lies('src/pages/sitemap.xml.ts'), /export const SEITEN = \['\/', '\/lohnrechner\/'\];/);
+  assert.match(lies('src/pages/sitemap.xml.ts'), /export const SEITEN = \[[^\]]*'\/lohnrechner\/'/);
   for (const datei of ['src/components/Header.astro', 'src/components/Footer.astro', 'src/components/Lohnrechner.astro']) {
     assert.match(lies(datei), /'\/lohnrechner\/'|href="\/lohnrechner\/"/, datei);
   }

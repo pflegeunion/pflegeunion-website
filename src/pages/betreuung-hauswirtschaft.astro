@@ -1,0 +1,248 @@
+---
+/**
+ * Betreuung & Hauswirtschaft (Konzept C3) in der Gestaltung aus Claude
+ * Design, Seite «Betreuung & Hauswirtschaft» (BH_D01–BH_D09, BH_M01–BH_M09).
+ * Alle Texte wörtlich aus den Boards; Meta-Titel und Meta-Beschreibung aus
+ * C3.
+ *
+ * Reihenfolge wie C3: Hero · Leistungen · Für wen · Tarif (Kernbotschaft,
+ * einziger Ocker-Kasten der Seite) · Finanzielle Hilfen (Hinweiskasten) ·
+ * So funktioniert es · Häufige Fragen · Trust-Leiste · Anfrage. Die
+ * Kopfzeile zeigt hier «Beratung anfragen» → #kontakt (Header.astro), im
+ * Formular ist «Betreuung und Hauswirtschaft» vorgewählt.
+ *
+ * Tarif, Zuschläge, Mindestdauer, Frist und Vergleichszeile kommen aus
+ * src/daten/betreuung.mjs (Platzhalter aus C3, bis die Geschäftsleitung
+ * entscheidet).
+ *
+ * Bewegung beim Scrollen wie auf der Startseite (global.css «Bewegung»).
+ */
+import Basis from '../layouts/Basis.astro';
+import Hero from '../components/Hero.astro';
+import Abschnitt from '../components/Abschnitt.astro';
+import Karten from '../components/Karten.astro';
+import Kernbotschaft from '../components/Kernbotschaft.astro';
+import Hinweiskasten from '../components/Hinweiskasten.astro';
+import Schritte from '../components/Schritte.astro';
+import FAQ from '../components/FAQ.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
+import Anfrage from '../components/Anfrage.astro';
+import { TARIF } from '../daten/betreuung.mjs';
+
+const leistungen = [
+  {
+    icon: 'home',
+    titel: 'Haushalt.',
+    text: 'Einkaufen, Kochen, Reinigen, Wäsche – so, wie es bei Ihnen zu Hause üblich ist.',
+  },
+  {
+    icon: 'map-pin',
+    titel: 'Begleitung.',
+    text: 'Zum Arzt, zur Therapie, zur Bank, zum Coiffeur – oder einfach an die frische Luft.',
+  },
+  {
+    icon: 'users',
+    titel: 'Gesellschaft und Aktivierung.',
+    text: 'Gespräche, Spiele, Spaziergänge, gemeinsames Kochen. Jemand, der zuhört und Zeit hat.',
+  },
+  {
+    icon: 'clock',
+    titel: 'Entlastung für pflegende Angehörige.',
+    text: 'Ein paar Stunden pro Woche, damit auch Sie einmal durchatmen, einkaufen oder eigene Termine wahrnehmen können.',
+  },
+] as const;
+
+const fuerWen = [
+  {
+    titel: 'Sie pflegen bereits mit uns',
+    text: 'Sie sind bei der Pflegeunion als pflegender Angehöriger angestellt oder werden es bald? Dann ergänzt Betreuung und Hauswirtschaft Ihre Pflege dort, wo die Krankenversicherung nicht zahlt: Haushalt, Begleitung, Gesellschaft – und Entlastung für Sie selbst. Ihre Pflegefachperson plant das mit Ihnen.',
+  },
+  {
+    titel: 'Sie brauchen Unterstützung im Alltag',
+    text: 'Sie oder Ihre Eltern leben im Kanton Zug und brauchen regelmässig jemanden, der einkauft, kocht, begleitet oder Gesellschaft leistet – ohne dass Pflege nötig ist? Auch dann kommen wir. Sobald Pflege dazukommt, sagen wir Ihnen ehrlich, was wir heute leisten und was noch nicht.',
+  },
+];
+
+const hilfen = [
+  {
+    begriff: 'Ergänzungsleistungen (EL):',
+    text: 'Wenn Rente und Einkommen nicht reichen, übernimmt die EL zusätzliche Krankheits- und Behinderungskosten – auch Beiträge an Betreuung und Haushaltshilfe.',
+  },
+  {
+    begriff: 'Hilflosenentschädigung:',
+    text: 'Wer im Alltag regelmässig auf Hilfe angewiesen ist, hat Anspruch auf einen monatlichen Beitrag der AHV/IV – unabhängig von Einkommen und Vermögen.',
+  },
+  {
+    begriff: 'Zusatzversicherungen:',
+    text: 'Manche Zusatzversicherungen beteiligen sich an Betreuung und Haushaltshilfe. Wir helfen Ihnen beim Nachfragen.',
+  },
+];
+
+const schritte = [
+  {
+    titel: 'Erstgespräch.',
+    text: 'Sie erzählen, was Sie brauchen – am Telefon oder bei Ihnen zu Hause. Kostenlos und unverbindlich. Wir melden uns innert 24 Stunden an Werktagen.',
+  },
+  {
+    titel: 'Offerte.',
+    text: 'Sie erhalten schriftlich, welche Leistungen wir in welchem Umfang erbringen, wer kommt und was es kostet.',
+  },
+  {
+    titel: 'Start.',
+    text: 'Ihre Betreuungsperson kommt zu den vereinbarten Zeiten. Passt etwas nicht, sagen Sie es uns – wir passen an.',
+  },
+];
+
+const fragen = [
+  {
+    frage: 'Kommt immer dieselbe Person?',
+    antwort:
+      'Wir planen mit festen Bezugspersonen und stellen Ihnen Ihr Team vor. Bei Ferien oder Krankheit informieren wir Sie vorher, wer kommt.',
+  },
+  {
+    frage: 'Wie kurzfristig kann ich buchen oder absagen?',
+    antwort: `Regelmässige Einsätze planen wir mit Ihnen fest. Änderungen melden Sie bis ${TARIF.frist} am Vortag; die Details stehen in Ihrer Offerte.`,
+  },
+  {
+    frage: 'Meine Mutter braucht auch Hilfe beim Duschen. Übernehmen Sie das?',
+    antwort:
+      'Hilfe bei der Körperpflege ist Grundpflege und wird über die Krankenversicherung vergütet. Wenn ein Angehöriger sie leisten kann, stellen wir ihn dafür an. Pflege durch unser eigenes Fachpersonal bieten wir demnächst an – rufen Sie an, wir sagen Ihnen den Stand.',
+  },
+  {
+    frage: 'Muss ich die Leistungen vorstrecken?',
+    antwort:
+      'Sie erhalten von uns monatlich eine Rechnung über die geleisteten Stunden. Beiträge von Ergänzungsleistungen oder Zusatzversicherungen beantragen wir mit Ihnen; die Rückerstattung läuft je nach Stelle direkt an Sie.',
+  },
+];
+---
+
+<Basis
+  bewegung
+  titel="Betreuung und Haushaltshilfe zu Hause im Kanton Zug | Pflegeunion Schweiz"
+  beschreibung="Einkauf, Mahlzeiten, Begleitung, Gesellschaft, Entlastung für Angehörige: Betreuung und Hauswirtschaft der Pflegeunion im ganzen Kanton Zug. Fester Stundentarif, Erstgespräch kostenlos."
+  kanonisch="/betreuung-hauswirtschaft/"
+>
+  <!-- Hero -->
+  <Hero
+    etikette="BETREUUNG & HAUSWIRTSCHAFT · IM GANZEN KANTON ZUG"
+    titel="Manchmal braucht es keine Pflege, sondern jemanden, der da ist."
+    text="Ein Einkauf, der zu schwer geworden ist. Ein Mittagessen, das allein nicht mehr schmeckt. Ein Arzttermin, zu dem niemand begleiten kann. Unsere Betreuungspersonen packen an, hören zu und bringen Struktur in den Tag – regelmässig, verlässlich, mit festen Bezugspersonen."
+    primaer={{ text: 'Beratung anfragen', ziel: '#kontakt' }}
+    bild="betreuung-rosengarten"
+    bildHoehe={1321}
+    bildPosition="50% 70%"
+    bildAlt="Eine junge Frau begleitet eine ältere Frau mit Rollator durch einen blühenden Rosengarten; beide lachen."
+    unterseite
+    bewegung
+  />
+
+  <!-- Leistungen (vier Karten) -->
+  <Abschnitt label="Leistungen" etikette="WAS WIR ÜBERNEHMEN" titel="Alltag, der wieder funktioniert." bewegung>
+    <Karten karten={leistungen} bewegung />
+  </Abschnitt>
+
+  <!-- Für wen (zwei Wege) -->
+  <Abschnitt flaeche="warmgrau" label="Für wen" etikette="FÜR WEN" titel="Zwei Wege – einer passt zu Ihnen." bewegung>
+    <Karten karten={fuerWen} flaeche="weiss" bewegung />
+  </Abschnitt>
+
+  <!-- Tarif (Kernbotschaft, Ocker hell) -->
+  <Abschnitt label="Tarif">
+    <Kernbotschaft
+      etikette="EIN TARIF, KEINE ÜBERRASCHUNGEN"
+      titel={`CHF ${TARIF.stunde} pro Stunde. Das ist alles.`}
+      ebene={2}
+      seitlich
+      bewegung
+    >
+      <div class="absaetze">
+        <p data-bewegung="text">
+          Betreuung und Hauswirtschaft sind private Leistungen; die Krankenversicherung übernimmt sie
+          nicht. Bei uns gilt ein einziger Stundentarif von CHF {TARIF.stunde} – {TARIF.zuschlaege}.
+          Einsätze dauern mindestens {TARIF.mindestdauer}. Sie erhalten vor dem ersten Einsatz eine
+          schriftliche Offerte; was darin steht, gilt.
+        </p>
+        {TARIF.vergleich && <p data-bewegung="text">{TARIF.vergleich}</p>}
+      </div>
+    </Kernbotschaft>
+  </Abschnitt>
+
+  <!-- Finanzielle Hilfen (Hinweiskasten) -->
+  <Abschnitt flaeche="warmgrau" label="Finanzielle Hilfen">
+    <div class="hilfen">
+      <Hinweiskasten titel="Diese Unterstützungen stehen Ihnen möglicherweise zu." bewegung>
+        <ul class="hilfen-liste liste-blank" data-bewegung="text">
+          {
+            hilfen.map((h) => (
+              <li>
+                <strong>{h.begriff}</strong> {h.text}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="hilfen-schluss" data-bewegung="text">
+          Wir prüfen diese Ansprüche im kostenlosen Erstgespräch mit. Das gehört bei uns zur Beratung.
+        </p>
+      </Hinweiskasten>
+    </div>
+  </Abschnitt>
+
+  <!-- So funktioniert es (drei Schritte) -->
+  <Abschnitt
+    label="So funktioniert es"
+    etikette="IN DREI SCHRITTEN"
+    titel="Vom Anruf zum ersten Einsatz."
+    seitlich
+    inhaltSpalte={6}
+    bewegung
+  >
+    <Schritte name="Vom Anruf zum ersten Einsatz." schritte={schritte} bewegung />
+  </Abschnitt>
+
+  <!-- Häufige Fragen -->
+  <Abschnitt
+    flaeche="warmgrau"
+    anker="fragen"
+    label="Häufige Fragen"
+    titel="Häufige Fragen"
+    abstand="mittel"
+    seitlich
+    bewegung
+  >
+    <FAQ fragen={fragen} bewegung />
+  </Abschnitt>
+
+  <!-- Trust-Leiste und Anfrage -->
+  <TrustLeiste bewegung />
+  <Anfrage titel="Reden wir darüber, was Ihnen den Alltag erleichtert." anliegen="Betreuung und Hauswirtschaft" bewegung />
+</Basis>
+
+<style>
+  /* Tarif: Absätze im Abstand von 24 px (Board BH_D04_Tarif). */
+  .absaetze {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .absaetze p {
+    margin: 0;
+  }
+
+  /* Finanzielle Hilfen: Kasten so breit wie die Textspalte plus Innenabstand
+     (Board BH_D05_Hilfen, 744 px). */
+  .hilfen {
+    max-width: calc(var(--breite-text) + 2 * var(--space-4));
+  }
+
+  .hilfen-liste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .hilfen-schluss {
+    margin: var(--space-3) 0 0;
+    font-weight: 700;
+  }
+</style>
