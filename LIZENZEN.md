@@ -10,16 +10,20 @@ Die Fotos stammen aus Unsplash+ und sind über das Unsplash+-Konto der
 Pflegeunion lizenziert (Unsplash+-Lizenz, <https://unsplash.com/plus/license>).
 Auf der Webseite liegen sie als WebP unter `public/bilder/`, je 480, 800 und
 1200 px breit (die Vorlagen aus dem Design-Canvas sind 1200 × 800 px, beim Hero
-ein Hochformat-Zuschnitt von 1212 × 1528 px aus dem Original 5568 × 3712 px).
+der Startseite ein Hochformat-Zuschnitt von 1212 × 1528 px, beim Hero von
+Betreuung & Hauswirtschaft einer von 1212 × 1334 px, beide aus dem Original
+5568 × 3712 px).
 
 | Datei (Basisname) | Unsplash+-Foto-ID | Urheber laut Unsplash | Einsatz | Alt-Text |
 | --- | --- | --- | --- | --- |
 | `hero-seeufer` | kcCMWn0G9Zo | Getty Images (Fotograf nicht angegeben) | Startseite, Hero | Eine Frau legt am Seeufer den Arm um einen Mann im Rollstuhl; beide blicken auf den See und den Herbstwald im Morgenlicht. |
 | `passt-familie-tisch` | IOk4hghiTIE | Getty Images (Fotograf nicht angegeben) | Startseite, «Passt es?» (ab 768 px) | Eine ältere Frau im Rollstuhl sitzt mit ihrer Familie zu Hause am Tisch und trinkt ein Glas Wasser. |
 | `betreuung-kueche` | 4L2wt5H82gE | Getty Images (Fotograf nicht angegeben) | Startseite, Betreuung & Hauswirtschaft (ab 768 px) | Eine Betreuerin und eine ältere Frau bereiten zusammen in der Küche das Essen zu. |
+| `betreuung-rosengarten` | ohkIw4iyoWs | Getty Images (Fotograf nicht angegeben) | Betreuung & Hauswirtschaft, Hero (Entscheid Michel Gurnari 07.10.2026) | Eine junge Frau begleitet eine ältere Frau mit Rollator durch einen blühenden Rosengarten; beide lachen. |
 
 Links zu den Fotos: <https://unsplash.com/photos/kcCMWn0G9Zo>,
-<https://unsplash.com/photos/IOk4hghiTIE>, <https://unsplash.com/photos/4L2wt5H82gE>.
+<https://unsplash.com/photos/IOk4hghiTIE>, <https://unsplash.com/photos/4L2wt5H82gE>,
+<https://unsplash.com/photos/ohkIw4iyoWs>.
 
 ## Schriften
 

@@ -53,14 +53,19 @@
  *   anker       id des Abschnitts (Standard 'kontakt')
  *   quellseite  Wert des versteckten Felds «quellseite», Ziel des Rücksprungs
  *               nach dem Absenden (Standard: aktueller Pfad)
- *   bewegung    Übertitel, H2 und Text blenden beim Scrollen ein (nur
- *               Startseite, global.css «Bewegung»; Standard false). Telefon,
+ *   anliegen    in Feld 1 vorgewählter Wert aus ANLIEGEN, im HTML (selected),
+ *               ohne JavaScript; z. B. «Betreuung und Hauswirtschaft» auf
+ *               Betreuung & Hauswirtschaft (C3). Feld 2 bleibt dann über die
+ *               :has()-Regel verborgen. Standard: der erste Wert.
+ *   bewegung    Übertitel, H2 und Text blenden beim Scrollen ein (Startseite
+ *               und Unterseiten, global.css «Bewegung»; Standard false). Telefon,
  *               E-Mail, WhatsApp und das Formular bewegen sich nie.
  */
 interface Props {
   titel?: string;
   anker?: string;
   quellseite?: string;
+  anliegen?: (typeof ANLIEGEN)[number];
   bewegung?: boolean;
 }
 
@@ -71,8 +76,13 @@ const {
   titel = 'Reden wir über Ihre Situation.',
   anker = 'kontakt',
   quellseite = Astro.url.pathname,
+  anliegen: vorgewaehlt,
   bewegung = false,
 } = Astro.props;
+
+if (vorgewaehlt !== undefined && !ANLIEGEN.includes(vorgewaehlt)) {
+  throw new Error(`Anfrage.astro: unbekanntes Anliegen «${vorgewaehlt}»`);
+}
 
 const bw = bewegung ? 'text' : undefined;
 
@@ -140,7 +150,7 @@ const erreichbar = ERREICHBAR;
       <div class="feld">
         <label for="anfrage-anliegen">Ich interessiere mich für:</label>
         <select id="anfrage-anliegen" name="anliegen" required>
-          {anliegen.map((a) => <option value={a}>{a}</option>)}
+          {anliegen.map((a) => <option value={a} selected={a === vorgewaehlt}>{a}</option>)}
         </select>
       </div>
 

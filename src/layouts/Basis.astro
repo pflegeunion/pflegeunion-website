@@ -9,11 +9,13 @@ interface Props {
   beschreibung?: string;
   /** Seite nicht indexieren (interne Seiten wie /bausteine/). */
   noindex?: boolean;
+  /** Pfad der kanonischen Adresse, z. B. '/lohnrechner/' (link rel="canonical"). */
+  kanonisch?: string;
   /** Beschriftung und Ziel des Primär-Buttons in der Kopfzeile. */
   buttonText?: string;
   buttonZiel?: string;
   /**
-   * Bewegung beim Scrollen (nur Startseite, global.css «Bewegung»):
+   * Bewegung beim Scrollen (Startseite und Unterseiten, global.css «Bewegung»):
    * src/scripts/bewegung.js steht dann inline im Kopf, vor dem ersten
    * Zeichnen der Seite. So ist die Startklasse gesetzt, bevor etwas
    * erscheint (kein Aufblitzen, das Hero-Bild springt nicht), ohne
@@ -23,7 +25,8 @@ interface Props {
   bewegung?: boolean;
 }
 
-const { titel, beschreibung, noindex = false, buttonText, buttonZiel, bewegung = false } = Astro.props;
+const { titel, beschreibung, noindex = false, kanonisch, buttonText, buttonZiel, bewegung = false } = Astro.props;
+const kanonischeAdresse = kanonisch ? new URL(kanonisch, Astro.site ?? 'https://pflegeunion.ch/').href : undefined;
 ---
 
 <!doctype html>
@@ -35,6 +38,7 @@ const { titel, beschreibung, noindex = false, buttonText, buttonZiel, bewegung =
     <title>{titel}</title>
     {beschreibung && <meta name="description" content={beschreibung} />}
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {kanonischeAdresse && <link rel="canonical" href={kanonischeAdresse} />}
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link
