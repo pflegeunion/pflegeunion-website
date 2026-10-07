@@ -13,6 +13,10 @@
  * und über dem Text (ab 768 px, immer offen); sichtbar und vorgelesen wird
  * immer nur einer.
  *
+ * Mit spalten={3} (Lohnrechner-Seite «So entsteht Ihr Lohn», Claude Design
+ * LR_D03_Prinzip, LR_M03_Prinzip): ab 1024 px drei Karten in einer Reihe,
+ * 768–1023 px zwei Spalten, die dritte Karte über die ganze Breite.
+ *
  * Ohne Icon (Betreuung & Hauswirtschaft «Für wen», Claude Design
  * BH_D03_Fuer_wen, BH_M03_Fuer_wen): mobil nur der Titel in der Zeile zum
  * Antippen, der Text ohne Einzug; ab 768 px Titel und Text. Mit
@@ -21,6 +25,7 @@
  *
  * Parameter:
  *   karten    Liste { icon?, titel, text }
+ *   spalten   2 (Standard, zwei mal zwei) oder 3 (drei in einer Reihe)
  *   flaeche   Fläche der Karten ab 768 px: 'warmgrau' (Standard) oder 'weiss'
  *   bewegung  die Karten blenden beim Scrollen einzeln ein (Startseite und
  *             Unterseiten, global.css «Bewegung»; Standard false)
@@ -35,14 +40,15 @@ interface Karte {
 
 interface Props {
   karten: Karte[];
+  spalten?: 2 | 3;
   flaeche?: 'warmgrau' | 'weiss';
   bewegung?: boolean;
 }
 
-const { karten, flaeche = 'warmgrau', bewegung = false } = Astro.props;
+const { karten, spalten = 2, flaeche = 'warmgrau', bewegung = false } = Astro.props;
 ---
 
-<ul class="karten liste-blank">
+<ul class:list={['karten', 'liste-blank', { 'karten--drei': spalten === 3 }]}>
   {
     karten.map((k) => (
       <li class:list={['karte', { 'karte--weiss': flaeche === 'weiss', 'karte--ohne-icon': !k.icon }]} data-bewegung={bewegung ? 'kachel' : undefined}>
@@ -141,6 +147,24 @@ const { karten, flaeche = 'warmgrau', bewegung = false } = Astro.props;
 
     .karte--weiss {
       background-color: var(--color-weiss);
+    }
+  }
+
+  /* Drei Karten: 768–1023 px die dritte über die ganze Breite, ab 1024 px
+     drei in einer Reihe. */
+  @media (min-width: 768px) {
+    .karten--drei .karte:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .karten--drei {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .karten--drei .karte:last-child {
+      grid-column: auto;
     }
   }
 

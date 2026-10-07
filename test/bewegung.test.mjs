@@ -3,7 +3,7 @@
  * bleibt unter 1 KB, setzt die Startklasse nur mit IntersectionObserver und
  * ohne «Bewegung reduzieren», staffelt je Abschnitt, beendet die
  * Beobachtung pro Element und nimmt die Startklasse bei einem Fehler zurück.
- * Dazu: Das Skript steht nur auf Startseite und Betreuung-Seite im Kopf, alle Werte stehen
+ * Dazu: Das Skript steht nur auf Startseite, Lohnrechner- und Betreuung-Seite im Kopf, alle Werte stehen
  * in global.css an einer Stelle, und die Regeln, die etwas verstecken,
  * wirken nur mit der Startklasse, am Bildschirm und ohne «Bewegung
  * reduzieren».
@@ -125,15 +125,15 @@ test('bei einem Fehler nimmt das Skript die Startklasse zurück', () => {
   assert.equal(imRueckruf.html.classList.contains('bewegung'), false);
 });
 
-test('Skript nur auf Startseite und Betreuung-Seite, inline im Kopf', () => {
+test('Skript nur auf Startseite, Lohnrechner- und Betreuung-Seite, inline im Kopf', () => {
   const basis = lies('src/layouts/Basis.astro');
   const kopf = basis.split('<head>')[1].split('</head>')[0];
   assert.match(kopf, /\{bewegung && <script is:inline set:html=\{bewegungSkript\} \/>\}/);
   assert.match(basis, /import bewegungSkript from '\.\.\/scripts\/bewegung\.js\?raw';/);
   const seiten = readdirSync(new URL('../src/pages/', import.meta.url)).filter((n) => n.endsWith('.astro'));
   const mitBewegung = seiten.filter((n) => /<Basis\s[^>]*\bbewegung\b/.test(lies(`src/pages/${n}`)));
-  // Betreuung & Hauswirtschaft: Bewegung wie auf der Startseite (Auftrag Phase 6.2).
-  assert.deepEqual(mitBewegung, ['betreuung-hauswirtschaft.astro', 'index.astro']);
+  // Lohnrechner-Seite (Entscheid GL 07.10.2026) und Betreuung & Hauswirtschaft (Auftrag Phase 6.2): Bewegung wie auf der Startseite.
+  assert.deepEqual(mitBewegung, ['betreuung-hauswirtschaft.astro', 'index.astro', 'lohnrechner.astro']);
 });
 
 test('Werte der Bewegung stehen in global.css an einer Stelle', () => {

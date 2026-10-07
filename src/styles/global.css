@@ -651,9 +651,9 @@ main {
 
 /*
  * =====================================================================
- * Bewegung beim Scrollen (Startseite und Betreuung & Hauswirtschaft;
- * Auftrag «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B
- * aus Claude Design; Unterseiten wie die Startseite).
+ * Bewegung beim Scrollen (Startseite, Lohnrechner-Seite und Betreuung &
+ * Hauswirtschaft; Auftrag «Startseite: sanfte Bewegung beim Scrollen»,
+ * Vorlage Variante B aus Claude Design; Unterseiten wie die Startseite).
  *
  * Elemente mit dem Attribut data-bewegung starten einmal, sobald etwa
  * 15 % von ihnen sichtbar sind; beim Zurückscrollen passiert nichts mehr.
