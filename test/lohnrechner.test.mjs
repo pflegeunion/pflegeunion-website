@@ -7,11 +7,12 @@
  * abgeschlossen.» (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs,
  * darunter der Lohn nach dem Kurs), Pensionskasse ab BVG-Schwelle mit dem
  * gezeigten Satz, Übergabe an das Formular, Rundung, Anzeigeformat,
- * Skriptgrösse und Postleitzahl-Liste.
+ * Skriptgrösse und Postleitzahl-Liste. Zuletzt die mobile Ansicht: nichts
+ * klebt, Reihenfolge nur unter 768 px per CSS, Sprungziel an der Frage.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import {
   KONFIG,
   ergebnis,
@@ -189,4 +190,44 @@ test('Postleitzahl-Liste Kanton Zug', () => {
 test('Skriptdatei bleibt unter 10 KB', () => {
   const groesse = statSync(new URL('../src/scripts/lohnrechner.js', import.meta.url)).size;
   assert.ok(groesse < 10 * 1024, `lohnrechner.js ist ${groesse} Bytes gross`);
+});
+
+/** Inhalt aller Blöcke mit diesem Kopf (z. B. einer Media Query). */
+function bloecke(text, kopf) {
+  const inhalte = [];
+  for (let beginn = text.indexOf(kopf); beginn >= 0; beginn = text.indexOf(kopf, beginn + 1)) {
+    let tiefe = 0;
+    let ende = text.indexOf('{', beginn);
+    for (; ende < text.length; ende += 1) {
+      if (text[ende] === '{') tiefe += 1;
+      if (text[ende] === '}' && --tiefe === 0) break;
+    }
+    inhalte.push(text.slice(text.indexOf('{', beginn) + 1, ende));
+  }
+  return inhalte.join('\n');
+}
+
+test('Mobil: nichts klebt, Button unter «brutto pro Monat», Sprung zur Frage', () => {
+  const komponente = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
+  const skript = readFileSync(new URL('../src/scripts/lohnrechner.js', import.meta.url), 'utf8');
+  const [markup, stil] = komponente.split('<style>');
+  const mobil = bloecke(stil, '@media (max-width: 767px)');
+  // Kein klebendes Element, kein Freihalten unten, keine Logik dafür im Skript.
+  assert.doesNotMatch(stil, /sticky|scroll-padding-bottom|data-aktiv/);
+  assert.doesNotMatch(skript, /sticky|aktiv/);
+  // Reihenfolge nur unter 768 px umgestellt: Button, Jahresbetrag, «Nach dem Kurs …»;
+  // der Zusatzhinweis folgt nach dem Ergebnis.
+  assert.match(mobil, /\.ergebnis \[data-erstgespraech\] \{\s*order: 1;/);
+  assert.match(mobil, /\.zeile-2 \{\s*order: 2;/);
+  assert.match(mobil, /\.nach-kurs \{\s*order: 3;/);
+  assert.match(mobil, /\.mehr-hinweis \{\s*order: 1;/);
+  assert.equal((stil.match(/\sorder: \d/g) || []).length, (mobil.match(/\sorder: \d/g) || []).length);
+  // Die Live-Region behält ihre Box; nur die Hüllen darin geben sie ab.
+  assert.match(mobil, /\.eingabe,\s*\.ergebnis-zahl,\s*\.ergebnis-rest,\s*\.ergebnis \.knoepfe \{\s*display: contents;/);
+  assert.equal((stil.match(/display: contents;/g) || []).length, 1);
+  assert.match(markup, /<div class="ergebnis" aria-live="polite">/);
+  // Sprungziel: eigenes Element in der Rechnerfläche, ausserhalb von Tabelle und Rechner-Oberfläche.
+  assert.match(markup, /<section class="rechner-abschnitt" aria-label="Lohnrechner">/);
+  assert.match(markup, /data-stunden=\{nameStunden\}>[\s\S]*?<span id=\{anker\} class="rechner-anker"><\/span>\s*(<!--[^>]*-->\s*)?<div class="fallback"/);
+  assert.match(mobil, /\.rechner-anker \{\s*top: var\(--space-3\);/);
 });
