@@ -221,11 +221,19 @@ solange sie nicht ausdrücklich geändert werden.
     rechnet mit KONFIG und der Rechenlogik aus `lohnrechner.js` (`mailErgebnis`
     in `mail.mjs`). Mail nur an die angegebene Adresse, `replyTo` `MAIL_TO`,
     `saveToSentItems: false`, keine Kopie an `MAIL_TO`, nichts gespeichert.
-    Betreff «Ihre Lohnschätzung bei der Pflegeunion»; Lohn mit Kurs und die
-    Zeile «Bis zum Pflegehelferkurs: …» immer, bei «mehr als 3» «über» und
-    der Zusatz «Wichtig: …» wie im Rechner. **Der übrige Wortlaut aus D1
-    «E-Mail mit dem Ergebnis» fehlt noch und steht als Platzhalter in
-    eckigen Klammern** (Text nachliefern, dann in `mail.mjs` einsetzen).
+    Reiner Text, wörtlich aus Webseitenkonzept V3.20, D1 «E-Mail mit dem
+    Ergebnis» (`mailErgebnis` in `mail.mjs`, `npm test` vergleicht das
+    Beispiel 2 Stunden Zeichen für Zeichen): Betreff «Ihre Lohnschätzung bei
+    der Pflegeunion»; «Grundpflege pro Tag: …» mit den Stunden wie im Rechner
+    geschrieben; «Ihr Lohn mit Pflegehelferkurs: …» pro Monat und Jahr; «Bis
+    zum Pflegehelferkurs: …» nur pro Monat; Rechenweg «… × 26 Tage ×
+    CHF 37.95» (Werte aus KONFIG). Bei «mehr als 3» alle Beträge mit
+    «über», im Rechenweg «3 Stunden» und nach «Bis zum Pflegehelferkurs …»
+    als eigener Absatz der Zusatz «Wichtig: …» im Wortlaut des Rechners.
+    Keine Zeile zu Versicherungen; das Kästchen ändert die Mail nicht. Der
+    WhatsApp-Link ist derselbe wie auf der Webseite und steht allein am
+    Zeilenende, ohne Satzzeichen danach (klickbar in Outlook, Gmail und
+    Apple Mail).
     Rückmeldung per 303 und `:target` beim Rechner: `#ergebnis-gesendet`
     («Die E-Mail ist unterwegs. Falls sie nicht ankommt, schauen Sie bitte im
     Spam-Ordner nach.») oder `#ergebnis-fehler` (Tiefblau-Fläche, Telefon und

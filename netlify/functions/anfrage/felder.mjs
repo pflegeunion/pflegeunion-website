@@ -116,7 +116,8 @@ export function pruefe(formular) {
 /**
  * Prüft das Formular «Ergebnis per E-Mail». Gibt { werte: { email, stufe,
  * ohneKurs } } zurück (stufe aus KONFIG.stufen) oder { fehler: name } mit
- * dem Namen des ersten ungültigen Felds (nie den Wert).
+ * dem Namen des ersten ungültigen Felds (nie den Wert). Das Kästchen wird
+ * nur geprüft: Die Mail ist laut D1 in beiden Zuständen gleich.
  */
 export function pruefeErgebnis(formular) {
   const email = saeubere(formular.get('email'));

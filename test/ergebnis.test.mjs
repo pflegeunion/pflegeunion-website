@@ -5,7 +5,8 @@
  * gemocktem Microsoft Graph (keine echten Mails, Testschlüssel wird hier
  * erzeugt). Der Server rechnet die Beträge selbst; für alle sechs Auswahlen
  * und beide Zustände des Kästchens stehen in der Mail dieselben Beträge wie
- * in der Ergebnistabelle D1 (und damit im Rechner). Nach jedem Aufruf wird
+ * in der Ergebnistabelle D1 (und damit im Rechner), im Wortlaut aus Konzept
+ * V3.20, D1 «E-Mail mit dem Ergebnis». Nach jedem Aufruf wird
  * geprüft, dass das Log weder die E-Mail-Adresse noch andere Formular- oder
  * Umgebungswerte enthält.
  *
@@ -19,9 +20,9 @@ import { readFileSync } from 'node:fs';
 import { bearbeite, ERGEBNIS_FEHLER, ERGEBNIS_GESENDET } from '../netlify/functions/anfrage/anfrage.mjs';
 import { bearbeite as bearbeiteGebremst } from '../netlify/functions/anfrage-gebremst.mjs';
 import { ART_ERGEBNIS, LAENGE } from '../netlify/functions/anfrage/felder.mjs';
-import { BETREFF_ERGEBNIS, mailErgebnis } from '../netlify/functions/anfrage/mail.mjs';
+import { BETREFF_ERGEBNIS, WHATSAPP, mailErgebnis } from '../netlify/functions/anfrage/mail.mjs';
 import { leereTokenSpeicher } from '../netlify/functions/anfrage/graph.mjs';
-import { KONFIG, ergebnis } from '../src/scripts/lohnrechner.js';
+import { KONFIG } from '../src/scripts/lohnrechner.js';
 
 const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
 const PEM = privateKey.export({ type: 'pkcs8', format: 'pem' });
@@ -130,11 +131,42 @@ async function sende(felder = {}, { env = ENV, g = graph(), funktion = bearbeite
 }
 
 /** Zeilen der Mail mit den Beträgen. */
-const betraege = (text) => text.split('\n').filter((z) => z.includes('CHF'));
+const betraege = (text) => text.split('\n').filter((z) => /^(Ihr Lohn mit Pflegehelferkurs|Bis zum Pflegehelferkurs):/.test(z));
+
+// Wortlaut aus Konzept V3.20, D1 «E-Mail mit dem Ergebnis», Beispiel 2 Stunden;
+// der WhatsApp-Link wie auf der Webseite, mit der vorbereiteten Nachricht.
+const WORTLAUT_2_STUNDEN = `Guten Tag
+
+Hier ist Ihre Schätzung aus dem Lohnrechner der Pflegeunion.
+
+Grundpflege pro Tag: 2 Stunden
+Ihr Lohn mit Pflegehelferkurs: rund CHF 1'970.– brutto pro Monat, rund CHF 23'700.– pro Jahr
+Bis zum Pflegehelferkurs: rund CHF 1'770.– brutto pro Monat
+
+So rechnen wir: 2 Stunden × 26 Tage × CHF 37.95, gerundet auf zehn Franken. Wir rechnen mit sechs Einsatztagen pro Woche, weil das Gesetz einen freien Tag vorschreibt. Den Pflegehelferkurs bezahlen wir.
+
+Das Ergebnis ist eine Schätzung. Verbindlich wird Ihre Zahl nach der kostenlosen Abklärung bei Ihnen zu Hause.
+
+Fragen? Rufen Sie uns an: 041 784 26 55, Mo bis Fr, 08.00–17.00 Uhr.
+Lieber schreiben? Auf WhatsApp: https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A
+Oder antworten Sie einfach auf diese E-Mail.
+
+Freundliche Grüsse
+Pflegeunion Schweiz
+Grundstrasse 4b · 6343 Rotkreuz
+041 784 26 55 · info@pflegeunion.ch
+
+Ihre E-Mail-Adresse haben wir nur für diese Nachricht verwendet und nicht gespeichert.`;
+
+/** Zusatz bei «mehr als 3» aus dem Rechner (Lohnrechner.astro), Leerraum zusammengefasst. */
+function zusatzImRechner() {
+  const quelle = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
+  return quelle.split('data-mehr hidden>')[1].split('</p>')[0].replace(/\s+/g, ' ').trim();
+}
 
 beforeEach(() => leereTokenSpeicher());
 
-test('Erfolg (2 Stunden): Mail nur an die angegebene Adresse, Antwort an MAIL_TO, keine Kopie', async () => {
+test('Erfolg (2 Stunden): Wortlaut D1, nur an die angegebene Adresse, Antwort an MAIL_TO, keine Kopie', async () => {
   const { antwort, ort, mails, log, g } = await sende();
   assert.equal(antwort.status, 303);
   assert.equal(ort, GESENDET);
@@ -150,68 +182,75 @@ test('Erfolg (2 Stunden): Mail nur an die angegebene Adresse, Antwort an MAIL_TO
   assert.equal(mail.saveToSentItems, false, 'keine Kopie in den gesendeten Elementen');
   assert.equal(mail.message.subject, 'Ihre Lohnschätzung bei der Pflegeunion');
   assert.equal(mail.message.body.contentType, 'Text');
-  const text = mail.message.body.content;
-  assert.ok(text.includes('2 Stunden pro Tag'));
-  assert.deepEqual(betraege(text), [
-    "[Bezeichnung aus D1: Lohn mit Pflegehelferkurs] rund CHF 1'970.– brutto pro Monat, rund CHF 23'700.– pro Jahr",
-    "Bis zum Pflegehelferkurs: rund CHF 1'770.– brutto pro Monat, rund CHF 21'200.– pro Jahr",
-  ]);
-  assert.doesNotMatch(text, /Wichtig:/);
-  assert.match(text, /mit Pensionskasse/);
+  assert.equal(mail.message.body.content, WORTLAUT_2_STUNDEN);
   // Keine Angabe der Person ausser der Adresse als Empfänger.
-  assert.ok(!text.includes(ADRESSE));
+  assert.ok(!mail.message.body.content.includes(ADRESSE));
   assert.deepEqual(log, [{ anfrage: 'gesendet', art: 'ergebnis' }]);
 });
 
-for (const [wert, text, monatKurs, jahrKurs, monatEinstieg, jahrEinstieg] of TABELLE_D1) {
+for (const [wert, text, monatKurs, jahrKurs, monatEinstieg] of TABELLE_D1) {
   for (const ohneKurs of [false, true]) {
     test(`Beträge wie Tabelle D1: «${text}», Kästchen ${ohneKurs ? 'angekreuzt' : 'leer'}`, async () => {
       const { ort, mails } = await sende({ stunden: wert, ohne_kurs: ohneKurs ? 'ja' : undefined });
       assert.equal(ort, GESENDET);
       const inhalt = mails[0].message.body.content;
-      assert.ok(inhalt.includes(`] ${text} pro Tag`), text);
-      // Lohn mit Kurs und «Bis zum Pflegehelferkurs: …» immer, in beiden Zuständen.
+      const zeilen = inhalt.split('\n');
+      // Stunden wie im Rechner geschrieben.
+      assert.ok(zeilen.includes(`Grundpflege pro Tag: ${text}`), text);
+      // Lohn mit Kurs pro Monat und Jahr, «Bis zum Pflegehelferkurs» nur pro Monat.
       assert.deepEqual(betraege(inhalt), [
-        `[Bezeichnung aus D1: Lohn mit Pflegehelferkurs] ${monatKurs} brutto pro Monat, ${jahrKurs} pro Jahr`,
-        `Bis zum Pflegehelferkurs: ${monatEinstieg} brutto pro Monat, ${jahrEinstieg} pro Jahr`,
+        `Ihr Lohn mit Pflegehelferkurs: ${monatKurs} brutto pro Monat, ${jahrKurs} pro Jahr`,
+        `Bis zum Pflegehelferkurs: ${monatEinstieg} brutto pro Monat`,
       ]);
-      // Pensionskasse wie im Rechner: Jahreslohn mit dem gezeigten Satz ab der BVG-Schwelle.
-      const stufe = KONFIG.stufen.find((s) => s.wert === wert);
-      const pk = ergebnis(stufe, ohneKurs).pensionskasse;
-      assert.match(inhalt, pk ? /mit Pensionskasse/ : /ohne Pensionskasse/);
-      assert.equal(/Wichtig:/.test(inhalt), wert === 'mehr');
-      assert.equal(/angekreuzt ist\]/.test(inhalt), ohneKurs);
+      // Rechenweg mit den Stunden der Stufe, bei «mehr als 3» mit 3 Stunden.
+      const gerechnet = wert === 'mehr' ? '3 Stunden' : text;
+      assert.ok(inhalt.includes(`So rechnen wir: ${gerechnet} × 26 Tage × CHF 37.95, gerundet auf zehn Franken.`), gerechnet);
+      // Zusatz nur bei «mehr als 3», als eigener Absatz nach «Bis zum Pflegehelferkurs …».
+      const bis = zeilen.findIndex((z) => z.startsWith('Bis zum Pflegehelferkurs:'));
+      if (wert === 'mehr') assert.deepEqual(zeilen.slice(bis + 1, bis + 4), ['', zusatzImRechner(), '']);
+      else assert.doesNotMatch(inhalt, /Wichtig:/);
+      // Keine Zeile zu Versicherungen; das Kästchen ändert die Mail nicht.
+      assert.doesNotMatch(inhalt, /versichert|Pensionskasse|AHV|Krankentaggeld/);
+      assert.equal(inhalt, mailErgebnis({ stufe: KONFIG.stufen.find((s) => s.wert === wert) }).text);
     });
   }
 }
 
-test('«mehr als 3»: «über» statt «rund» und der Zusatz «Wichtig: …» wörtlich wie im Rechner', async () => {
+test('«mehr als 3»: «über» statt «rund», Rechenweg mit 3 Stunden, Zusatz «Wichtig: …» wie im Rechner', async () => {
   const { mails } = await sende({ stunden: 'mehr' });
   const inhalt = mails[0].message.body.content;
-  assert.doesNotMatch(betraege(inhalt).join('\n'), /rund/);
-  const quelle = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
-  const hinweis = quelle
-    .split('data-mehr hidden>')[1]
-    .split('</p>')[0]
-    .replace(/\s+/g, ' ')
-    .trim();
+  const hinweis = zusatzImRechner();
   assert.ok(hinweis.startsWith('Wichtig: '));
-  assert.ok(inhalt.split('\n').includes(hinweis), 'Zusatz wie im Rechner');
+  assert.equal(
+    inhalt,
+    WORTLAUT_2_STUNDEN.replace('Grundpflege pro Tag: 2 Stunden', 'Grundpflege pro Tag: mehr als 3 Stunden')
+      .replace("rund CHF 1'970.– brutto pro Monat, rund CHF 23'700.– pro Jahr", "über CHF 2'960.– brutto pro Monat, über CHF 35'500.– pro Jahr")
+      .replace("Bis zum Pflegehelferkurs: rund CHF 1'770.– brutto pro Monat", `Bis zum Pflegehelferkurs: über CHF 2'650.– brutto pro Monat\n\n${hinweis}`)
+      .replace('So rechnen wir: 2 Stunden', 'So rechnen wir: 3 Stunden'),
+  );
+  assert.doesNotMatch(betraege(inhalt).join('\n'), /rund/);
 });
 
-test('Kästchen angekreuzt, 2 Stunden: ohne Pensionskasse (21\'184.80 unter der BVG-Schwelle)', async () => {
+test('Kästchen angekreuzt: dieselbe Mail, kein zusätzlicher Satz', async () => {
   const leer = (await sende({ stunden: '2' })).mails[0].message.body.content;
   const angekreuzt = (await sende({ stunden: '2', ohne_kurs: 'ja' })).mails[0].message.body.content;
-  assert.match(leer, /mit Pensionskasse/);
-  assert.match(angekreuzt, /ohne Pensionskasse/);
-  assert.deepEqual(betraege(leer), betraege(angekreuzt));
+  assert.equal(angekreuzt, leer);
+});
+
+test('WhatsApp-Link wie auf der Webseite, allein am Zeilenende', () => {
+  const anfrage = readFileSync(new URL('../src/components/Anfrage.astro', import.meta.url), 'utf8');
+  const link = anfrage.match(/const whatsapp = '([^']+)';/)[1];
+  assert.equal(WHATSAPP, link);
+  const zeile = mailErgebnis({ stufe: KONFIG.stufen[0] }).text.split('\n').find((z) => z.includes('wa.me'));
+  assert.equal(zeile, `Lieber schreiben? Auf WhatsApp: ${link}`);
+  assert.ok(zeile.endsWith(link), 'kein Satzzeichen nach dem Link');
 });
 
 test('Beträge kommen nie vom Browser', async () => {
   const { mails } = await sende({ ergebnis: "rund CHF 9'999.–", monat: '9999', jahr: '99999', satz: '99.95' });
   const inhalt = mails[0].message.body.content;
   assert.doesNotMatch(inhalt, /9'999|99'999|99\.95/);
-  assert.deepEqual(betraege(inhalt), betraege(mailErgebnis({ stufe: KONFIG.stufen[2], ohneKurs: false }).text));
+  assert.equal(inhalt, WORTLAUT_2_STUNDEN);
 });
 
 test('Ungültige E-Mail (wie im Anfrageformular): Fehler-Anker, nichts gesendet', async () => {
@@ -400,12 +439,13 @@ test('Formular beim Rechner: Ziel, Felder, Spam-Schutz und Rückmeldungen', () =
 const SKRIPT_SHA256 = '5a67a070129f';
 
 test('Wortlaut der Mails für 2 Stunden und «mehr als 3»', () => {
-  const zwei = mailErgebnis({ stufe: KONFIG.stufen[2], ohneKurs: false });
-  const mehr = mailErgebnis({ stufe: KONFIG.stufen[5], ohneKurs: false });
+  const zwei = mailErgebnis({ stufe: KONFIG.stufen[2] });
+  const mehr = mailErgebnis({ stufe: KONFIG.stufen[5] });
   assert.equal(zwei.betreff, BETREFF_ERGEBNIS);
   assert.equal(mehr.betreff, BETREFF_ERGEBNIS);
+  assert.equal(zwei.text, WORTLAUT_2_STUNDEN);
   if (process.env.MAIL_ZEIGEN) {
-    for (const [titel, m] of [['2 Stunden', zwei], ['mehr als 3', mehr], ['2 Stunden, Kästchen angekreuzt', mailErgebnis({ stufe: KONFIG.stufen[2], ohneKurs: true })]]) {
+    for (const [titel, m] of [['2 Stunden', zwei], ['mehr als 3', mehr]]) {
       console.log(`--- ${titel}\nBetreff: ${m.betreff}\n\n${m.text}\n`);
     }
   }
