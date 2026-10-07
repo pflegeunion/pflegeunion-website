@@ -187,6 +187,11 @@ test('Stellen: Anker #stellen, Liste aus src/daten/stellen.mjs, Bewerbung per E-
   assert.ok(stellen.includes('<p class="stelle-titel">{s.titel}</p> <p class="stelle-angaben">{s.angaben.join(\' · \')}</p>'));
   assert.doesNotMatch(lies('src/daten/stellen.mjs'), /['"]JobPosting['"]/);
   assert.match(stellen, /<a class="button" href="mailto:info@pflegeunion\.ch">Bewerbung senden<\/a>/);
+  // Darunter die Adresse als Link mit Tippfläche 44 px (Entscheid GL 07.10.2026).
+  assert.match(
+    stellen,
+    /Bewerbung senden<\/a> <\/p> <p class="stellen-adresse"> <a class="tippflaeche-zeile" href="mailto:info@pflegeunion\.ch">info@pflegeunion\.ch<\/a> <\/p>/,
+  );
   // Erst mit einer konkreten Stelle (Pensum, Eintrittsdatum) als JobPosting auszeichnen.
   assert.doesNotMatch(lies('src/pages/ueber-uns.astro'), /['"]JobPosting['"]/);
 });

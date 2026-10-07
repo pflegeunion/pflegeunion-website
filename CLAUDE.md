@@ -546,8 +546,9 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   Stellen (`#stellen`; ruhige Liste auf Weiss, eine Stelle pro Eintrag,
   Titel fett, Angaben darunter normal mit « · »; Daten an einer Stelle in
   `src/daten/stellen.mjs`, eine weitere Stelle mit einer Zeile; «Bewerbung
-  senden» → `mailto:info@pflegeunion.ch`; kein JobPosting, solange keine
-  Stelle mit Pensum und Eintrittsdatum feststeht) · Trust-Leiste · Anfrage («Reden wir
+  senden» → `mailto:info@pflegeunion.ch`, darunter die Adresse
+  «info@pflegeunion.ch» als Link mit Tippfläche 44 px; kein JobPosting,
+  solange keine Stelle mit Pensum und Eintrittsdatum feststeht) · Trust-Leiste · Anfrage («Reden wir
   über Ihre Situation.», nichts vorgewählt). Kopfzeile «Lohn berechnen» →
   `/#lohnrechner`, «Über uns» aktiv. Meta-Titel und -Beschreibung aus dem
   Auftrag Phase 6.3, canonical, Sitemap, Organization mit

@@ -311,6 +311,9 @@ const qualitaet = [
       <p class="knopfzeile">
         <a class="button" href="mailto:info@pflegeunion.ch">Bewerbung senden</a>
       </p>
+      <p class="stellen-adresse">
+        <a class="tippflaeche-zeile" href="mailto:info@pflegeunion.ch">info@pflegeunion.ch</a>
+      </p>
       <p class="stellen-fragen">
         Fragen zur Stelle beantwortet Christoph Willi, Pflegedienstleitung:{' '}
         <a class="tippflaeche-zeile" href="tel:+41417842655">041 784 26 55</a>
@@ -543,6 +546,16 @@ const qualitaet = [
   .knopfzeile .button {
     display: block;
     width: 100%;
+  }
+
+  /* Bewerbungsadresse unter dem Button, auch ohne Mailprogramm lesbar
+     (Entscheid GL 07.10.2026); Tippfläche 44 px. */
+  .stellen-adresse {
+    margin: var(--space-1) 0 0;
+  }
+
+  .stellen-adresse a {
+    white-space: nowrap;
   }
 
   .stellen-fragen {
