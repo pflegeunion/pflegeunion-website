@@ -21,16 +21,16 @@ solange sie nicht ausdrücklich geändert werden.
   eckige Klammer mehr in ihrem HTML steht. `npm run build` prüft nach dem
   Astro-Build alle Seiten in `dist/` (`scripts/platzhalter.mjs`): «[XX» und
   «[X]» im ganzen HTML, dazu jeden Text in eckigen Klammern im sichtbaren
-  Text. Die Sperre greift mit der Domain pflegeunion.ch (Go-live-Bedingung
-  E4 Punkt 8; Entscheid 07.10.2026): Nur wenn Netlify für die echte Domain
-  baut (Netlify-Variable `URL` ist `https://pflegeunion.ch` oder
-  `https://www.pflegeunion.ch` und `CONTEXT=production`), bricht der Build
-  ab und Netlify veröffentlicht ihn nicht. In allen anderen Fällen gibt es
-  nur eine Warnung: auf der Testseite pflegeunion-test.netlify.app (heute
-  der Production-Kontext, sie veröffentlicht bis zum Tarif-Entscheid
-  weiter), in Deploy Previews und Branch deploys (auch nach dem Wechsel
-  auf die Domain, denn `URL` ist bei Netlify in allen Kontexten dieselbe)
-  und lokal. Offen sind zurzeit
+  Text. Die Sperre greift erst mit der Netlify-Umgebungsvariable `GO_LIVE`
+  mit dem Wert `ja` (Go-live-Bedingung E4 Punkt 8; Entscheid GL
+  07.10.2026): Dann bricht der Build ab und Netlify veröffentlicht ihn
+  nicht. Ohne diese Variable gibt es nur eine Warnung: auf der Testseite
+  pflegeunion-test.netlify.app, unter pflegeunion.ch mit Passwortschutz für
+  die ganze Seite (noch nicht öffentlich, veröffentlicht bis zum
+  Tarif-Entscheid weiter), in Deploy Previews, Branch deploys und lokal.
+  Die Adresse (`URL`) zählt nicht. Vor dem Go-live in Netlify GO_LIVE=ja
+  setzen und das Passwort entfernen; die Sperre verhindert, dass
+  Platzhalter öffentlich werden (Konzept E4 Punkt 8). Offen sind zurzeit
   (Stand 07.10.2026) der Tarif der Betreuung auf der Startseite
   (Abschnitt 8) und auf `/betreuung-hauswirtschaft/` (Tarif, Zuschläge,
   Mindestdauer, Frist; Teil F, Punkt 1). Diese Werte und die Vergleichszeile
@@ -669,5 +669,5 @@ netlify/functions/   anfrage/: Netlify Function für den Formularversand
 - Vor dem Commit `npm run build` und `npm test` ausführen und sicherstellen,
   dass beides fehlerfrei durchläuft. Der Build erzeugt zuerst `src/styles/tokens.css`
   aus `design/tokens.json` und prüft am Schluss die Platzhalter (lokal nur
-  Warnung; Abbruch nur mit der Domain pflegeunion.ch, siehe Go-live-Sperre).
+  Warnung; Abbruch nur mit `GO_LIVE=ja`, siehe Go-live-Sperre).
 - Keine zusätzlichen Abhängigkeiten ohne Absprache.

@@ -2,16 +2,19 @@
  * Prüft die Go-live-Sperre für Platzhalter (scripts/platzhalter.mjs, läuft
  * in `npm run build`): «[XX» und «[X]» im HTML und jeder Text in eckigen
  * Klammern im sichtbaren Text werden gefunden; eckige Klammern in CSS,
- * Skripten und Attributen von Selektoren nicht. Mit Funden bricht nur der
- * Production-Build für die Domain pflegeunion.ch ab (Netlify-Variable URL);
- * Testseite, Vorschauen und lokale Builds warnen nur. Dazu: Die offenen
- * Werte der Betreuung stehen an einer Stelle (src/daten/betreuung.mjs).
+ * Skripten und Attributen von Selektoren nicht. Mit Funden bricht der Build
+ * nur mit der Netlify-Variable GO_LIVE=ja ab; ohne sie (Testseite,
+ * pflegeunion.ch mit Passwortschutz, Vorschauen, lokal) nur Warnung, die
+ * Adresse (URL) zählt nicht. Dazu: Die offenen Werte der Betreuung stehen an
+ * einer Stelle (src/daten/betreuung.mjs).
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { bewerte, platzhalterIn, pruefeOrdner } from '../scripts/platzhalter.mjs';
 import { TARIF } from '../src/daten/betreuung.mjs';
 
@@ -35,31 +38,66 @@ test('eckige Klammern in CSS, Skripten und Selektoren zählen nicht', () => {
   assert.deepEqual(platzhalterIn(seite('<p>Alles entschieden: CHF 52.– pro Stunde.</p>')), []);
 });
 
-test('Sperre greift nur mit der Domain pflegeunion.ch (E4 Punkt 8)', () => {
+test('Sperre greift nur mit GO_LIVE=ja (E4 Punkt 8)', () => {
   const funde = { 'index.html': ['[XX.–]'] };
-  // Abbruch: Production-Build für die echte Domain, mit oder ohne www.
-  for (const URL of ['https://pflegeunion.ch', 'https://www.pflegeunion.ch', 'https://pflegeunion.ch/']) {
-    const { code, zeilen } = bewerte(funde, { URL, CONTEXT: 'production' });
-    assert.equal(code, 1, URL);
-    assert.match(zeilen.join('\n'), /abgebrochen[\s\S]*index\.html: \[XX\.–\]/);
+  // Abbruch: GO_LIVE=ja, unabhängig von Adresse und Kontext.
+  const abbruch = [
+    { GO_LIVE: 'ja' },
+    { GO_LIVE: 'ja', URL: 'https://pflegeunion.ch', CONTEXT: 'production' },
+    { GO_LIVE: 'ja', URL: 'https://pflegeunion-test.netlify.app', CONTEXT: 'production' },
+    { GO_LIVE: 'ja', URL: 'https://pflegeunion.ch', CONTEXT: 'deploy-preview' },
+    { GO_LIVE: ' Ja ' },
+  ];
+  for (const umgebung of abbruch) {
+    const { code, zeilen } = bewerte(funde, umgebung);
+    assert.equal(code, 1, JSON.stringify(umgebung));
+    assert.match(zeilen.join('\n'), /abgebrochen, GO_LIVE=ja[\s\S]*index\.html: \[XX\.–\]/);
   }
-  // Nur Warnung: Testseite (heute der Production-Kontext), Vorschauen und
-  // Branch deploys (auch nach dem Wechsel auf die Domain), andere Adressen, lokal.
+  // Nur Warnung: ohne GO_LIVE=ja, auch unter der Domain pflegeunion.ch
+  // (Passwortschutz vor dem Go-live), auf der Testseite, in Vorschauen und lokal.
   const warnung = [
+    { URL: 'https://pflegeunion.ch', CONTEXT: 'production' },
+    { URL: 'https://www.pflegeunion.ch', CONTEXT: 'production' },
     { URL: 'https://pflegeunion-test.netlify.app', CONTEXT: 'production' },
     { URL: 'https://pflegeunion.ch', CONTEXT: 'deploy-preview' },
-    { URL: 'https://pflegeunion.ch', CONTEXT: 'branch-deploy' },
-    { URL: 'https://pflegeunion.ch.example.org', CONTEXT: 'production' },
-    { URL: 'http://pflegeunion.ch', CONTEXT: 'production' },
+    { GO_LIVE: 'nein', URL: 'https://pflegeunion.ch', CONTEXT: 'production' },
+    { GO_LIVE: 'true' },
+    { GO_LIVE: '' },
     {},
   ];
   for (const umgebung of warnung) {
     const { code, zeilen } = bewerte(funde, umgebung);
     assert.equal(code, 0, JSON.stringify(umgebung));
-    assert.match(zeilen[0], /Warnung/);
+    assert.match(zeilen[0], /Warnung .*mit GO_LIVE=ja bricht der Build hier ab/);
+    assert.match(zeilen.join('\n'), /index\.html: \[XX\.–\]/);
   }
   // Ohne Funde nie ein Abbruch.
-  assert.equal(bewerte({}, { URL: 'https://pflegeunion.ch', CONTEXT: 'production' }).code, 0);
+  assert.equal(bewerte({}, { GO_LIVE: 'ja' }).code, 0);
+});
+
+test('Skript liest GO_LIVE aus der Umgebung und setzt den Exit-Code', () => {
+  const skript = fileURLToPath(new URL('../scripts/platzhalter.mjs', import.meta.url));
+  const ordner = mkdtempSync(join(tmpdir(), 'platzhalter-'));
+  const lauf = (umgebung) => {
+    const env = { ...process.env, ...umgebung };
+    for (const name of ['GO_LIVE', 'URL', 'CONTEXT']) if (!(name in umgebung)) delete env[name];
+    return spawnSync(process.execPath, [skript, ordner], { env, encoding: 'utf8' });
+  };
+  try {
+    writeFileSync(join(ordner, 'index.html'), seite('<p>CHF [XX.–]</p>'));
+    const ohne = lauf({ URL: 'https://pflegeunion.ch', CONTEXT: 'production' });
+    assert.equal(ohne.status, 0);
+    assert.match(ohne.stderr, /Warnung \(ohne GO_LIVE\)[\s\S]*index\.html: \[XX\.–\]/);
+    const mit = lauf({ GO_LIVE: 'ja' });
+    assert.equal(mit.status, 1);
+    assert.match(mit.stderr, /abgebrochen, GO_LIVE=ja[\s\S]*index\.html: \[XX\.–\]/);
+    writeFileSync(join(ordner, 'index.html'), seite('<p>CHF 52.– pro Stunde.</p>'));
+    const sauber = lauf({ GO_LIVE: 'ja' });
+    assert.equal(sauber.status, 0);
+    assert.match(sauber.stdout, /keine eckigen Klammern/);
+  } finally {
+    rmSync(ordner, { recursive: true, force: true });
+  }
 });
 
 test('prüft alle HTML-Seiten eines Ordners', () => {
