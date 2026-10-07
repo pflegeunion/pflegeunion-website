@@ -6,7 +6,7 @@ solange sie nicht ausdrücklich geändert werden.
 ## Massgebende Grundlagen
 
 - Massgebend ist das Webseitenkonzept in seiner aktuellen Fassung (Stand
-  heute: V3.3 vom 22.09.2026) und der Styleguide Pflegeunion in seiner
+  heute: V3.20 vom 07.10.2026) und der Styleguide Pflegeunion in seiner
   aktuellen Fassung (Stand heute: V1.2). Beide liegen im Claude-Projekt
   «Webseite Pflegeunion», nicht im Repository (vertraulich); die betreffenden
   Abschnitte werden dem Auftrag angehängt. Bei Widerspruch zwischen CLAUDE.md
@@ -129,7 +129,7 @@ solange sie nicht ausdrücklich geändert werden.
     Funktion prüft, verschickt und antwortet mit 303 zurück auf die Seite,
     von der die Anfrage kam, mit `#anfrage-gesendet` (Bestätigungstext aus
     D2) oder `#anfrage-fehler`; beide Texte und die Eingangsbestätigung
-    wörtlich aus Konzept V3.16, D2. Beide Rückmeldungen stehen oben im Formular,
+    wörtlich aus Webseitenkonzept V3.20, D2. Beide Rückmeldungen stehen oben im Formular,
     erscheinen nur per `:target` und tragen `tabindex="-1"` (Fokus beim
     Sprung); der Fehler als Tiefblau-Fläche mit weisser Schrift und weissen
     Links (Telefon, WhatsApp). Rücksprung nur auf eigene Pfade (beginnt mit
@@ -419,7 +419,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Bildflaeche.astro` | Eckige Bildfläche mit festem Seitenverhältnis (3:2 oder 4:3); ohne Foto Warmgrau mit gedämpftem Text zur Bildidee, mit Foto `<img>` mit Lazy Loading (Bild im ersten Bildschirm: `prioritaet`) | Überall, wo das Konzept ein Bild vorsieht, ausser im Hero; keine Stockbilder, keine Icons als Ersatz |
 | `Karten.astro` | Karten (C1 Abschnitt 4, B5): ab 768 px zwei mal zwei auf Warmgrau, Linien-Icon Ocker, Titel `.text-h3`, Text; keine Buttons; mobil Mobil-Verdichtung (Titel sichtbar, Text ausklappbar) | Startseite «Was Sie erhalten», Betreuung «Leistungen» |
 | `Schritte.astro` | Nummerierte Schritte mit Haarlinien, Zahl in `.text-step` (Tiefblau), Titel, Text; mobil Mobil-Verdichtung (Zahl und Titel sichtbar, Text ausklappbar); schema.org HowTo | Startseite «So funktioniert es» (fünf), Betreuung (drei) |
-| `Header.astro` | Kopfzeile (B2): sticky; ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig); ohne JavaScript unter 1024 px nicht sticky (Navigation offen, die Kopfzeile scrollt weg) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
+| `Header.astro` | Kopfzeile (B2): sticky, mit JavaScript auch unter 1024 px (bestätigt GL 07.10.2026); ab 1360 px eine Zeile (Logo, fünf Menüpunkte, Telefon, Primär-Button); 1024–1359 px Hauptzeile 72 px und Menüzeile 50 px, beide sticky; darüber ab 1024 px die Utility-Zeile, die wegscrollt; unter 1024 px Burger rechts mit Menü-Skript, Telefon-Icon und Button bleiben sichtbar (nie Utility-Zeile und Burger gleichzeitig); ohne JavaScript unter 1024 px nicht sticky (Navigation offen, die Kopfzeile scrollt weg) | Jede Seite über `Basis.astro`; Primär-Button je Seite automatisch: Lohnrechner-Seite «Lohn berechnen» → `#rechner`, Betreuung & Hauswirtschaft «Beratung anfragen» → `#kontakt`, alle anderen Seiten (auch die Startseite) «Lohn berechnen» → `/#lohnrechner`; Parameter `buttonText`, `buttonZiel` nur für Ausnahmen |
 | `Footer.astro` | Fusszeile (B3): Negativ-Logo, drei Spalten, Vertrauenszeile, Copyright, schema.org Organization | Jede Seite über `Basis.astro` |
 | `Abschnitt.astro` | Rahmen für jeden Seitenabschnitt (B5): Fläche weiss oder warmgrau, Anker, Etikette, H2, Innenbreite 1200 px | Alle Seitenabschnitte; Flächen wechseln zwischen Weiss und Warmgrau |
 | `TrustLeiste.astro` | Baustein A: fünf Belege mit Linien-Icon in Ocker | Unter dem Lohnrechner der Startseite, über dem Kontaktabschnitt jeder Unterseite |
@@ -427,7 +427,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px eine ruhige, vollständige Ansicht ohne klebende Elemente (Entscheid GL 07.10.2026): Abstände aus Board «Test Rechner mobil», Variante A (Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis), und nur per CSS (`order`, die Hüllen `.eingabe`, `.ergebnis-zahl`, `.ergebnis-rest` und `.knoepfe` mit `display: contents`, die Live-Region `.ergebnis` behält ihre Box) die Reihenfolge «brutto pro Monat» · «Kostenloses Erstgespräch vereinbaren» · Ocker-Linie · Jahresbetrag · «Nach dem Kurs …» · zweiter Button; der Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit sich über dem Button beim Antippen nichts verschiebt; Sprungziel ist das Element `.rechner-anker` mit der id aus `anker` am Anfang der Rechnerfläche, ab 768 px am Anfang des Abschnitts (wie bisher), darunter an der Frage «Wie viele Stunden pro Tag …» (ohne JavaScript an der Tabelle), die Höhe der Kopfzeile zieht `scroll-padding-top` ab; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (id des Sprungziels, Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px eine ruhige, vollständige Ansicht ohne klebende Elemente (Entscheid GL 07.10.2026): Abstände aus Board «Test Rechner mobil», Variante A (Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis), und nur per CSS (`order`, die Hüllen `.eingabe`, `.ergebnis-zahl`, `.ergebnis-rest` und `.knoepfe` mit `display: contents`, die Live-Region `.ergebnis` behält ihre Box) die Reihenfolge «brutto pro Monat» · «Kostenloses Erstgespräch vereinbaren» (8 px darunter) · Ocker-Linie · Jahresbetrag · «Nach dem Kurs …» · zweiter Button («Alle Details zum Lohn») am Schluss; der Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit sich über dem Button beim Antippen nichts verschiebt (Ocker-Linie, zweiter Button am Schluss, Zusatzhinweis nach dem Ergebnis und 8 px bestätigt GL 07.10.2026); Sprungziel ist das Element `.rechner-anker` mit der id aus `anker` am Anfang der Rechnerfläche, ab 768 px am Anfang des Abschnitts (wie bisher), darunter an der Frage «Wie viele Stunden pro Tag …» (ohne JavaScript an der Tabelle), die Höhe der Kopfzeile zieht `scroll-padding-top` ab; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (id des Sprungziels, Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle und Stundenstufen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
@@ -471,10 +471,6 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
     die Grundpflege, damit die gepflegte Person versorgt bleibt und Sie eine
     echte Pause haben. Bezahlt werden die Tage, an denen Sie selbst
     pflegen.»
-- Die Postleitzahl-Liste `KONFIG.plzZug` in `src/scripts/lohnrechner.js` ist
-  eine **vorläufige Liste** der elf Zuger Gemeinden inklusive Ortsteile, ohne
-  6344 Meierskappel (LU); sie ist von der Geschäftsstelle zu prüfen (Konzept
-  Teil F, Punkt 5).
 - Die interne Musterseite `/bausteine/` (`src/pages/bausteine.astro`) zeigt
   jeden Baustein einmal mit Beispieltext. Sie ist `noindex`, steht nicht im
   Menü und **wird vor dem Go-live entfernt**.
@@ -500,10 +496,10 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   **Pensionskasse nur mit Bedingung** (ab BVG-Schwelle).
 - Buttons sagen, was passiert («Lohn berechnen», «Kostenloses Erstgespräch
   vereinbaren», «Anfrage senden»); nie «Mehr erfahren», «Absenden», «Jetzt …».
-- Wo die Webseite das **Erstgespräch** nennt, steht **«kostenlos»** dabei
-  (Webseitenkonzept V3.20, Entscheid GL 07.10.2026): alle Buttons
-  «Kostenloses Erstgespräch vereinbaren», in der Fusszeile «Kostenloses
-  Erstgespräch», im Fliesstext «im kostenlosen Erstgespräch». Ausgenommen
+- **Erstgespräch immer mit «kostenlos»** (Webseitenkonzept V3.20, Entscheid
+  GL 07.10.2026): Button «Kostenloses Erstgespräch vereinbaren», Link
+  «Kostenloses Erstgespräch» (z. B. Fusszeile), im Satz «im kostenlosen
+  Erstgespräch». Ausgenommen
   sind Schritt 1 «Erstgespräch.» (mit «Kostenlos und unverbindlich.»),
   Übertitel und Text im Anfrage-Abschnitt (nennen «kostenlos» bereits), die
   Rechnerzeile über dem Formular und Namen im Code (`data-erstgespraech`,
@@ -531,7 +527,7 @@ src/layouts/         Layouts, z. B. Basis.astro (Kopf- und Fusszeile)
 src/pages/           Seiten, eine Datei pro Seite; bausteine.astro ist die
                      interne Musterseite
 src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
-                     (Sätze, Stufen, Postleitzahlen), unter 10 KB;
+                     (Sätze, Stufen), unter 10 KB;
                      bewegung.js: Bewegung beim Scrollen (Startseite),
                      unter 1 KB, inline im Kopf
 test/                npm test (node:test ohne Zusatzpakete):
@@ -568,9 +564,11 @@ netlify/functions/   anfrage/: Netlify Function für den Formularversand
   einreichen. **Claude eröffnet Pull Requests, Menschen mergen.** Nie direkt
   auf main pushen.
 - **Nichts kommt auf main ohne gesehene Netlify-Vorschau.**
-- Zahlen mit Aussenwirkung, Leistungsversprechen, Personen-Nennungen,
-  Impressum und Datenschutz brauchen eine **zweite Freigabe der
-  Geschäftsleitung** im Pull Request.
+- **Freigabe** (Entscheid GL 07.10.2026): Michel Gurnari entscheidet und
+  gibt frei, im Einverständnis mit Cristian Fernandez – auch bei Zahlen mit
+  Aussenwirkung, Leistungsversprechen, Personen-Nennungen und Zitaten. Eine
+  zweite Freigabe der Geschäftsleitung gibt es nicht mehr. Impressum und
+  Datenschutz werden zusätzlich juristisch geprüft.
 - Vor dem Commit `npm run build` und `npm test` ausführen und sicherstellen,
   dass beides fehlerfrei durchläuft. Der Build erzeugt zuerst `src/styles/tokens.css`
   aus `design/tokens.json`.
