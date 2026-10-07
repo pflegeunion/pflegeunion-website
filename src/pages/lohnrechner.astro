@@ -3,10 +3,15 @@
  * Lohnrechner-Seite /lohnrechner/ (Konzept C2) in der Gestaltung aus Claude
  * Design, Seite «Lohnrechner» (Boards LR_D01–LR_D09 Desktop 1440, LR_M01–
  * LR_M09 Mobil 390 und die Zustands-Boards des Rechners). Reihenfolge wie C2:
- * Hero ohne Bild · Rechner (#rechner, vollständige Fassung ohne sichtbaren
+ * Hero mit Bild · Rechner (#rechner, vollständige Fassung ohne sichtbaren
  * Kopf) · So entsteht Ihr Lohn · Drei Beispiele aus dem Alltag · Was vom
  * Brutto abgeht · Die Grenzen · Häufige Fragen zum Lohn · Trust-Leiste ·
  * Anfrage. Alle Texte wörtlich aus den Boards.
+ *
+ * Hero-Bild Unsplash+ WoLeTwKGzms (Zuschnitt aus dem Canvas, Board
+ * LR_D01_Hero/LR_M01_Hero; Lizenz in LIZENZEN.md) wie auf Betreuung &
+ * Hauswirtschaft; oben ausgerichtet, damit beide Köpfe auch auf breiten
+ * Bildschirmen und im Quadrat unter 1024 px ganz sichtbar bleiben.
  *
  * Die Beträge der Beispiele und die Werte in der Fussnote kommen aus
  * KONFIG und der Rechenlogik von src/scripts/lohnrechner.js (dieselbe
@@ -146,7 +151,13 @@ const fragen = [
     titel="Ihr Lohn für die Pflege von Angehörigen."
     text="Wer einen nahestehenden Menschen pflegt, leistet Arbeit – und Arbeit verdient Lohn. Hier sehen Sie, wie sich Ihr Lohn bei der Pflegeunion zusammensetzt, was typischerweise herauskommt und was vom Brutto abgeht. Ohne Kleingedrucktes."
     primaer={{ text: 'Zum Rechner', ziel: '#rechner' }}
+    bild="lohnrechner-umarmung"
+    bildHoehe={1321}
+    bildPosition="50% 0%"
+    bildPositionMobil="50% 0%"
+    bildAlt="Eine erwachsene Tochter und ihre Mutter umarmen sich zu Hause und lächeln."
     unterseite
+    bewegung
   />
 
   <!-- Rechner (Baustein F, vollständige Fassung, Anker #rechner) -->

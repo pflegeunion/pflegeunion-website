@@ -17,7 +17,9 @@
  *   etikette   Übertitel
  *   titel      H1; als Liste werden die Teile mit Zeilenumbruch gesetzt
  *   text       Fliesstext
- *   primaer    { text, ziel } Primär-Button
+ *   primaer    { text, ziel } Primär-Button (optional; ohne Button folgt die
+ *              Telefonzeile direkt auf den Text: 24 px, ab 1024 px 32 px,
+ *              Über uns)
  *   sekundaer  { text, ziel } Sekundär-Button (optional)
  *   telefon    Telefonzeile anzeigen (Standard true)
  *   whatsapp   WhatsApp-Zeile «Lieber schreiben? Auf WhatsApp» anzeigen (Standard true)
@@ -27,10 +29,13 @@
  *   bildHoehe  Höhe der 1200 px breiten Datei (Standard 1513, Startseite)
  *   bildPosition  Bildausschnitt ab 1024 px als object-position (Standard
  *              «50% 100%», unten ausgerichtet wie unter 1024 px)
+ *   bildPositionMobil  Bildausschnitt unter 1024 px im Quadrat als
+ *              object-position (Standard «50% 100%», unten ausgerichtet)
  *   bildAlt    Alternativtext zum Bild
- *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt;
- *              ohne bild und bildIdee steht kein Bild (Hero ohne Bild, z. B.
- *              Lohnrechner-Seite C2: der Text steht allein, ohne Mindesthöhe)
+ *   bildIdee   Text zur Bildidee für die Warmgrau-Fläche, solange kein Foto
+ *              vorliegt (z. B. «[Teambild folgt]» auf Über uns); ohne bild und
+ *              bildIdee steht kein Bild (der Text steht allein, ohne
+ *              Mindesthöhe)
  *   unterseite H1 als Seitentitel einer Unterseite (.text-h1--sub, 40 px;
  *              Standard false)
  *   bewegung   Bewegung beim Scrollen (Startseite und Unterseiten, global.css «Bewegung»):
@@ -50,13 +55,14 @@ interface Props {
   etikette: string;
   titel: string | string[];
   text: string;
-  primaer: Knopf;
+  primaer?: Knopf;
   sekundaer?: Knopf;
   telefon?: boolean;
   whatsapp?: boolean;
   bild?: string;
   bildHoehe?: number;
   bildPosition?: string;
+  bildPositionMobil?: string;
   bildAlt?: string;
   bildIdee?: string;
   unterseite?: boolean;
@@ -74,6 +80,7 @@ const {
   bild,
   bildHoehe = 1513,
   bildPosition,
+  bildPositionMobil,
   bildAlt = '',
   bildIdee = '',
   unterseite = false,
@@ -88,20 +95,30 @@ const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe
 // Breiten der WebP-Dateien; die Vorlage aus dem Design-Canvas ist 1212 × 1528 px.
 const breiten = [480, 800, 1200];
 const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join(', ') : '';
+
+// Bildausschnitte als CSS-Variablen am Rahmen (nur die gesetzten).
+const bildStil =
+  [bildPosition && `--bild-position: ${bildPosition}`, bildPositionMobil && `--bild-position-mobil: ${bildPositionMobil}`]
+    .filter(Boolean)
+    .join('; ') || undefined;
 ---
 
 <section class:list={['hero', { 'hero--ohne-bild': !mitBild }]} aria-label="Einstieg">
   <div class="hero-inhalt">
-    <div class="hero-text">
+    <div class:list={['hero-text', { 'hero-text--ohne-knopf': !primaer }]}>
       <p class="text-label etikette">{etikette}</p>
       <h1 class:list={['text-h1', { 'text-h1--sub': unterseite }]}>
         {titelTeile.map((teil, i) => (i === 0 ? teil : [<br />, teil]))}
       </h1>
       <p class="hero-absatz">{text}</p>
-      <div class="knoepfe">
-        <a class="button" href={primaer.ziel}>{primaer.text}</a>
-        {sekundaer && <a class="button button--sekundaer" href={sekundaer.ziel}>{sekundaer.text}</a>}
-      </div>
+      {
+        primaer && (
+          <div class="knoepfe">
+            <a class="button" href={primaer.ziel}>{primaer.text}</a>
+            {sekundaer && <a class="button button--sekundaer" href={sekundaer.ziel}>{sekundaer.text}</a>}
+          </div>
+        )
+      }
       {
         telefon && (
           <p class="telefon">
@@ -125,7 +142,7 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 
   {
     mitBild && (
-      <figure class="hero-bild" style={bildPosition ? `--bild-position: ${bildPosition}` : undefined}>
+      <figure class="hero-bild" style={bildStil}>
         {bild ? (
           <div class="hero-ebene">
             <img
@@ -171,6 +188,12 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
     margin-bottom: var(--space-4);
   }
 
+  /* Ohne Button: die Telefonzeile folgt 24 px nach dem Text (Board
+     UU_M01_Hero). */
+  .hero-text--ohne-knopf .hero-absatz {
+    margin-bottom: var(--space-3);
+  }
+
   .knoepfe {
     display: grid;
     gap: var(--space-2);
@@ -208,7 +231,8 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 
   /* Foto unter 1024 px: nach dem Text, volle Breite, quadratisch, direkt am
      Abschnittsende (Board H1b_Mobil). Die Vorlage ist ein Hochformat; unten
-     ausgerichtet zeigt das Quadrat beide Personen vollständig. */
+     ausgerichtet zeigt das Quadrat beide Personen vollständig (Ausschnitt je
+     Foto: Parameter bildPositionMobil). */
   .hero-bild {
     margin: 0;
     aspect-ratio: 1 / 1;
@@ -241,7 +265,7 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 100%;
+    object-position: var(--bild-position-mobil, 50% 100%);
   }
 
   .bild-idee {
@@ -310,6 +334,11 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
 
     .hero-absatz {
       margin-bottom: calc(var(--space-4) + var(--space-1));
+    }
+
+    /* Ohne Button: 32 px bis zur Telefonzeile (Board UU_D01_Hero). */
+    .hero-text--ohne-knopf .hero-absatz {
+      margin-bottom: var(--space-4);
     }
 
     /* Bildausschnitt je Foto (Parameter bildPosition), sonst unten

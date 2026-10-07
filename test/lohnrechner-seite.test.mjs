@@ -8,7 +8,7 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { KONFIG, chf, ergebnis, stufeFuer } from '../src/scripts/lohnrechner.js';
@@ -35,15 +35,29 @@ test('Abschnitte in der Reihenfolge von C2', () => {
   assert.deepEqual([...stellen].sort((a, b) => a - b), stellen);
 });
 
-test('Hero ohne Bild, H1 der Unterseite, «Zum Rechner» auf #rechner', () => {
+test('Hero mit Bild (WoLeTwKGzms), H1 der Unterseite, «Zum Rechner» auf #rechner', () => {
   const hero = quelle.split('<Hero')[1].split('/>')[0];
-  assert.doesNotMatch(hero, /bild/);
+  assert.match(hero, /bild="lohnrechner-umarmung"/);
+  assert.match(hero, /bildHoehe=\{1321\}/);
+  assert.match(hero, /bildAlt="Eine erwachsene Tochter und ihre Mutter umarmen sich zu Hause und lächeln\."/);
+  // Oben ausgerichtet: beide Köpfe bleiben im Hochformat ab 1024 px und im Quadrat darunter ganz sichtbar.
+  assert.match(hero, /bildPosition="50% 0%"/);
+  assert.match(hero, /bildPositionMobil="50% 0%"/);
+  assert.match(hero, /\bbewegung\b/);
   assert.match(hero, /primaer=\{\{ text: 'Zum Rechner', ziel: '#rechner' \}\}/);
   assert.match(hero, /\bunterseite\b/);
   assert.doesNotMatch(hero, /sekundaer/);
+  for (const breite of [480, 800, 1200]) {
+    const groesse = statSync(new URL(`../public/bilder/lohnrechner-umarmung-${breite}.webp`, import.meta.url)).size;
+    assert.ok(groesse < 150 * 1024, `${breite}: ${groesse} Bytes`);
+  }
   const komponente = lies('src/components/Hero.astro');
   assert.match(komponente, /const mitBild = Boolean\(bild \|\| bildIdee\);/);
   assert.match(komponente, /class:list=\{\['text-h1', \{ 'text-h1--sub': unterseite \}\]\}/);
+  assert.match(komponente, /object-position: var\(--bild-position-mobil, 50% 100%\);/);
+  const lizenzen = lies('LIZENZEN.md');
+  assert.match(lizenzen, /`lohnrechner-umarmung` \| WoLeTwKGzms \|/);
+  assert.ok(lizenzen.includes('https://unsplash.com/photos/WoLeTwKGzms'));
 });
 
 test('Texte wörtlich aus den Boards (Claude Design, Seite «Lohnrechner»)', () => {

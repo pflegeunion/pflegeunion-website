@@ -12,7 +12,8 @@ Auf der Webseite liegen sie als WebP unter `public/bilder/`, je 480, 800 und
 1200 px breit (die Vorlagen aus dem Design-Canvas sind 1200 × 800 px, beim Hero
 der Startseite ein Hochformat-Zuschnitt von 1212 × 1528 px, beim Hero von
 Betreuung & Hauswirtschaft einer von 1212 × 1334 px, beide aus dem Original
-5568 × 3712 px).
+5568 × 3712 px, beim Hero der Lohnrechner-Seite einer von 1212 × 1334 px aus dem
+Original 5327 × 3552 px).
 
 | Datei (Basisname) | Unsplash+-Foto-ID | Urheber laut Unsplash | Einsatz | Alt-Text |
 | --- | --- | --- | --- | --- |
@@ -20,10 +21,11 @@ Betreuung & Hauswirtschaft einer von 1212 × 1334 px, beide aus dem Original
 | `passt-familie-tisch` | IOk4hghiTIE | Getty Images (Fotograf nicht angegeben) | Startseite, «Passt es?» (ab 768 px) | Eine ältere Frau im Rollstuhl sitzt mit ihrer Familie zu Hause am Tisch und trinkt ein Glas Wasser. |
 | `betreuung-kueche` | 4L2wt5H82gE | Getty Images (Fotograf nicht angegeben) | Startseite, Betreuung & Hauswirtschaft (ab 768 px) | Eine Betreuerin und eine ältere Frau bereiten zusammen in der Küche das Essen zu. |
 | `betreuung-rosengarten` | ohkIw4iyoWs | Getty Images (Fotograf nicht angegeben) | Betreuung & Hauswirtschaft, Hero (Entscheid Michel Gurnari 07.10.2026) | Eine junge Frau begleitet eine ältere Frau mit Rollator durch einen blühenden Rosengarten; beide lachen. |
+| `lohnrechner-umarmung` | WoLeTwKGzms | Getty Images (Fotograf nicht angegeben) | Lohnrechner-Seite, Hero (Entscheid Michel Gurnari 07.10.2026) | Eine erwachsene Tochter und ihre Mutter umarmen sich zu Hause und lächeln. |
 
 Links zu den Fotos: <https://unsplash.com/photos/kcCMWn0G9Zo>,
 <https://unsplash.com/photos/IOk4hghiTIE>, <https://unsplash.com/photos/4L2wt5H82gE>,
-<https://unsplash.com/photos/ohkIw4iyoWs>.
+<https://unsplash.com/photos/ohkIw4iyoWs>, <https://unsplash.com/photos/WoLeTwKGzms>.
 
 ## Schriften
 

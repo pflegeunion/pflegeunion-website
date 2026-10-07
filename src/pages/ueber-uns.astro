@@ -1,0 +1,664 @@
+---
+/**
+ * Über uns /ueber-uns/ in der Gestaltung aus Claude Design, Seite «Über
+ * uns» (Gesamtansicht UU_Desktop_1–3 und UU_Mobil_1–3 mit den Boards
+ * UU_D01–UU_D09 und UU_M01–UU_M09; Vorstand und Treuhand in Variante A mit
+ * Porträtfeldern, Entscheid Michel Gurnari 07.10.2026). Alle Texte wörtlich
+ * aus den Boards; Meta-Titel und Meta-Beschreibung aus dem Auftrag Phase 6.3.
+ *
+ * Reihenfolge wie im Canvas: Hero · Warum es uns gibt · Team · Vorstand und
+ * Treuhand · Grundsätze · Nicht gewinnorientiert (Kernbotschaft, einziger
+ * Ocker-Kasten der Seite) · Qualität · Demnächst · Stellen (#stellen) ·
+ * Trust-Leiste · Anfrage. Die Kopfzeile zeigt «Lohn berechnen» →
+ * /#lohnrechner (Header.astro), «Über uns» ist aktiv; im Formular ist
+ * nichts vorgewählt.
+ *
+ * Teambild, Team, Vorstand und Treuhand kommen aus src/daten/personen.mjs,
+ * die offenen Stellen aus src/daten/stellen.mjs (kein JobPosting, solange
+ * keine Stelle ein festes Pensum und ein Eintrittsdatum hat).
+ * Bis die Fotos vorliegen, stehen ruhige Flächen mit «[Teambild folgt]»
+ * bzw. «[Foto folgt]»; diese und die übrigen Platzhalter bleiben sichtbar
+ * (Go-live-Sperre, scripts/platzhalter.mjs).
+ *
+ * Unter 768 px klappen die Grundsätze (Grundsatz sichtbar, Erklärung
+ * ausklappbar) und «Demnächst» wie auf der Startseite aus; alles andere
+ * bleibt offen. Bewegung beim Scrollen wie auf den anderen Seiten
+ * (global.css «Bewegung»).
+ */
+import Basis from '../layouts/Basis.astro';
+import Hero from '../components/Hero.astro';
+import Abschnitt from '../components/Abschnitt.astro';
+import Portraet from '../components/Portraet.astro';
+import Kernbotschaft from '../components/Kernbotschaft.astro';
+import Demnaechst from '../components/Demnaechst.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
+import Anfrage from '../components/Anfrage.astro';
+import Icon from '../components/Icon.astro';
+import { TEAMBILD, TEAM, VORSTAND, TREUHAND } from '../daten/personen.mjs';
+import { STELLEN } from '../daten/stellen.mjs';
+
+if (TEAMBILD.foto && !TEAMBILD.alt) {
+  throw new Error('src/daten/personen.mjs: Das Teambild braucht einen Alt-Text (TEAMBILD.alt).');
+}
+
+const grundsaetze = [
+  {
+    titel: 'Der Mensch entscheidet.',
+    text: 'Klienten und ihre Familien bestimmen mit – über Ziele, Abläufe und Grenzen.',
+  },
+  {
+    titel: 'Fachlichkeit ohne Abstriche.',
+    text: 'Wir pflegen nach aktuellen Standards, bilden uns laufend weiter und lassen unsere Qualität überprüfen.',
+  },
+  {
+    titel: 'Ehrliche Transparenz.',
+    text: 'Kosten, Löhne, Grenzen: Wir kommunizieren offen – auch, wenn die Antwort unbequem ist.',
+  },
+  {
+    titel: 'Weniger Bürokratie, mehr Zeit.',
+    text: 'Digitale Werkzeuge nehmen uns die Administration ab. Die gewonnene Zeit gehört den Menschen.',
+  },
+  {
+    titel: 'Fairness im Team.',
+    text: 'Faire Löhne, verlässliche Planung, Wertschätzung – für Pflegefachpersonen genauso wie für angestellte Angehörige.',
+  },
+];
+
+const qualitaet = [
+  'Betriebsbewilligung des Kantons Zug – behördlich beaufsichtigt',
+  'Abrechnung über die Krankenversicherung',
+  'Bedarfsabklärung mit interRAI, dem anerkannten Schweizer Standard',
+  'Instruktion, wöchentliche Begleitung in den ersten vier Wochen, danach monatliche Hausbesuche – schriftlich geregelt',
+  // Wortlaut gemäss Entscheid GL 07.10.2026 (im Canvas noch die alte Fassung).
+  'Angeschlossen an das nationale Fehlermeldesystem CIRRNET',
+  'Digitale, lückenlose Pflegedokumentation – für Behörden prüfbar, für Sie transparent',
+];
+---
+
+<Basis
+  bewegung
+  titel="Über uns – der Verein Pflegeunion Schweiz, Spitex in Rotkreuz"
+  beschreibung="Die Pflegeunion ist ein nicht gewinnorientierter Verein aus Rotkreuz: Wir stellen pflegende Angehörige an, begleiten sie fachlich und nehmen der Pflege die Bürokratie ab. Team, Grundsätze, Qualität, Stellen."
+  kanonisch="/ueber-uns/"
+  organisation={{ nonprofitStatus: 'https://schema.org/NonprofitType' }}
+>
+  <!-- Hero (Teambild folgt) -->
+  <Hero
+    etikette="ÜBER DIE PFLEGEUNION"
+    titel="Wir glauben, dass Pflege besser geht."
+    text="Besser für die Menschen, die Pflege brauchen: weil sie zu Hause bleiben können. Besser für die, die pflegen: weil sie Lohn, Wissen und Rückhalt bekommen. Und besser fürs System: weil ein nicht gewinnorientierter Verein jeden Franken dorthin lenkt, wo er wirkt. Dafür haben wir die Pflegeunion gegründet."
+    bild={TEAMBILD.foto || undefined}
+    bildHoehe={1321}
+    bildAlt={TEAMBILD.alt}
+    bildIdee="[Teambild folgt]"
+    unterseite
+    bewegung
+  />
+
+  <!-- Warum es uns gibt -->
+  <Abschnitt
+    flaeche="warmgrau"
+    label="Warum es uns gibt"
+    etikette="WARUM ES UNS GIBT"
+    titel="Entstanden aus Erfahrung – und aus Überzeugung."
+    abstand="eng"
+    seitlich
+    inhaltSpalte={6}
+    bewegung
+  >
+    <p class="textspalte" data-bewegung="text">
+      Wer lange genug in der Spitex arbeitet, sieht zwei Dinge: viel Herz und viel Papier.
+      Pflegefachpersonen, die Formulare statt Menschen betreuen. Familien, die längst pflegen, aber weder
+      Anleitung noch Anerkennung erhalten. Aus dieser Erfahrung ist die Pflegeunion entstanden: eine
+      Spitex-Organisation, die pflegende Angehörige anstellt und begleitet, die konsequent digitalisiert, was
+      Maschinen können, und konsequent menschlich bleibt, wo es Menschen braucht. Gegründet 2026 als Verein mit
+      Sitz in Rotkreuz, vom Kanton Zug bewilligt, tätig in allen elf Gemeinden.
+    </p>
+  </Abschnitt>
+
+  <!-- Team -->
+  <Abschnitt label="Team" etikette="DIE MENSCHEN DAHINTER" titel="Pflege hat bei uns ein Gesicht." bewegung>
+    <ul class="team liste-blank">
+      {
+        TEAM.map((p) => (
+          <li class="person" data-bewegung="kachel">
+            <div class="person-kopf">
+              <Portraet
+                foto={p.foto}
+                name={p.name}
+                sizes="(min-width: 1248px) 384px, (min-width: 768px) calc((100vw - 96px) / 3), 96px"
+                class="person-bild"
+              />
+              <div class="person-angaben">
+                <p class="text-h3-verdichtet person-name">{p.name}</p>
+                <p class="text-body-verdichtet person-funktion">{p.funktion}</p>
+              </div>
+            </div>
+            <blockquote class="person-zitat">
+              <p>{p.zitat}</p>
+            </blockquote>
+          </li>
+        ))
+      }
+    </ul>
+  </Abschnitt>
+
+  <!-- Vorstand und Treuhand (Variante A mit Porträtfeldern) -->
+  <Abschnitt flaeche="warmgrau" label="Vorstand und Treuhand">
+    <div class="traeger">
+      <div class="traeger-text">
+        <p class="text-label etikette" data-bewegung="text">WER DEN VEREIN TRÄGT</p>
+        <h2 class="text-h2" data-bewegung="text">Ein Vorstand, der hinschaut. Zahlen, die jemand prüft.</h2>
+        <p data-bewegung="text">
+          Der Vorstand führt den Verein strategisch und beaufsichtigt die Geschäftsleitung. Drei seiner fünf
+          Mitglieder gehören nicht zur Geschäftsleitung. Die Mitgliederversammlung genehmigt Budget und
+          Jahresrechnung. Unsere Buchhaltung führt eine externe Treuhänderin.
+        </p>
+      </div>
+      <div class="traeger-listen">
+        <h3 class="text-h3" data-bewegung="text">Vorstand</h3>
+        <ul class="mitglieder liste-blank">
+          {
+            VORSTAND.map((p) => (
+              <li class="mitglied" data-bewegung="kachel">
+                <Portraet foto={p.foto} name={p.name} art="vorstand" sizes="96px" class="mitglied-bild" />
+                <div class="mitglied-angaben">
+                  <p class="mitglied-name">{p.name}</p>
+                  <p class="text-zeile mitglied-funktion">{p.funktion}</p>
+                  <p class="text-zeile mitglied-zusatz">{p.hintergrund}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+        <h3 class="text-h3 treuhand-titel" data-bewegung="text">Treuhand</h3>
+        <ul class="mitglieder liste-blank">
+          {
+            TREUHAND.map((t) => (
+              <li class="mitglied" data-bewegung="kachel">
+                <div class="mitglied-angaben">
+                  <p class="mitglied-name">{t.name}</p>
+                  <p class="text-zeile mitglied-funktion">{t.firma}</p>
+                  <p class="text-zeile mitglied-zusatz">{t.aufgabe}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </Abschnitt>
+
+  <!-- Grundsätze -->
+  <Abschnitt
+    label="Grundsätze"
+    etikette="WOFÜR WIR STEHEN"
+    titel="Fünf Grundsätze, an denen Sie uns messen dürfen."
+    seitlich
+    inhaltSpalte={6}
+    bewegung
+  >
+    <ul class="grundsaetze liste-blank">
+      {
+        grundsaetze.map((g) => (
+          <li class="grundsatz" data-bewegung="kachel">
+            <details class="klappe">
+              <summary>
+                <h3 class="text-faq grundsatz-zeile">{g.titel}</h3>
+                <span class="klappe-icon">
+                  <Icon name="plus" class="klappe-plus" />
+                  <Icon name="minus" class="klappe-minus" />
+                </span>
+              </summary>
+              <p class="grundsatz-text">
+                <strong class="offen">{g.titel}</strong> {g.text}
+              </p>
+            </details>
+          </li>
+        ))
+      }
+    </ul>
+  </Abschnitt>
+
+  <!-- Nicht gewinnorientiert (Kernbotschaft, Ocker hell) -->
+  <Abschnitt label="Nicht gewinnorientiert">
+    <Kernbotschaft etikette="UNSER VERSPRECHEN" titel="Jeder Franken bleibt in der Pflege." ebene={2} seitlich bewegung>
+      <p data-bewegung="text">
+        Die Pflegeunion ist ein nicht gewinnorientierter Verein. Das heisst konkret: Es gibt keine Aktionäre und
+        keine Gewinnausschüttung. Erwirtschaften wir Überschüsse, bleiben sie im Verein – für bessere Pflege, für
+        die Aus- und Weiterbildung unserer Mitarbeitenden und für faire Anstellungsbedingungen. Das steht so in
+        unseren Statuten.
+      </p>
+    </Kernbotschaft>
+  </Abschnitt>
+
+  <!-- Qualität -->
+  <Abschnitt
+    flaeche="warmgrau"
+    label="Qualität"
+    etikette="QUALITÄT, DIE MAN PRÜFEN KANN"
+    titel="Nicht behauptet. Belegt."
+    seitlich
+    inhaltSpalte={6}
+    bewegung
+  >
+    <ul class="haken textspalte liste-blank" data-bewegung="text">
+      {
+        qualitaet.map((q) => (
+          <li>
+            <span class="haken-icon">
+              <Icon name="check" />
+            </span>
+            <span>{q}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </Abschnitt>
+
+  <!-- Demnächst -->
+  <Abschnitt
+    label="Demnächst"
+    etikette="WIR BAUEN AUS"
+    titel="Schritt für Schritt zur Spitex für alle Situationen."
+    abstand="eng"
+    bewegung
+  >
+    <p class="demnaechst-einleitung" data-bewegung="text">
+      Wir haben uns entschieden, mit dem zu starten, was uns von allen anderen unterscheidet: der Anstellung und
+      Begleitung pflegender Angehöriger, ergänzt durch Betreuung und Hauswirtschaft. Lieber ein Angebot, das vom
+      ersten Tag an verlässlich funktioniert, als zehn, die es halb tun. Die nächsten Schritte sind in
+      Vorbereitung; unsere Konzepte dafür liegen dem Kanton vor.
+    </p>
+    <div class="demnaechst-modul" data-bewegung="text">
+      <Demnaechst />
+    </div>
+    <p class="demnaechst-nachsatz" data-bewegung="text">
+      Sie möchten informiert werden, sobald eine Leistung startet? Schreiben Sie uns über das Formular mit dem
+      Stichwort «Ausbau» – wir melden uns, ohne Newsletter und ohne Werbung.
+    </p>
+  </Abschnitt>
+
+  <!-- Stellen -->
+  <Abschnitt
+    flaeche="warmgrau"
+    anker="stellen"
+    label="Stellen"
+    etikette="ARBEITEN BEI DER PFLEGEUNION"
+    titel="Pflegen statt Formulare ausfüllen."
+    abstand="eng"
+    seitlich
+    inhaltSpalte={6}
+    bewegung
+  >
+    <div class="textspalte">
+      <p data-bewegung="text">
+        Wir suchen diplomierte Pflegefachpersonen HF/FH, die Zeit für Menschen haben wollen – und die Freude
+        daran haben, pflegende Angehörige anzuleiten und zu begleiten. Bei uns: eine begrenzte Zahl von Familien
+        pro Pflegefachperson, digitale Dokumentation ohne Doppelspurigkeiten, kurze Wege zur Leitung, faire Löhne
+        nach Branchenempfehlung und eine Organisation, die nicht auf Rendite ausgerichtet ist.
+      </p>
+      <ul class="stellen liste-blank" data-bewegung="text">
+        {
+          STELLEN.map((s) => (
+            <li class="stelle">
+              <p class="stelle-titel">{s.titel}</p>
+              <p class="stelle-angaben">{s.angaben.join(' · ')}</p>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="knopfzeile">
+        <a class="button" href="mailto:info@pflegeunion.ch">Bewerbung senden</a>
+      </p>
+      <p class="stellen-adresse">
+        <a class="tippflaeche-zeile" href="mailto:info@pflegeunion.ch">info@pflegeunion.ch</a>
+      </p>
+      <p class="stellen-fragen">
+        Fragen zur Stelle beantwortet Christoph Willi, Pflegedienstleitung:{' '}
+        <a class="tippflaeche-zeile" href="tel:+41417842655">041 784 26 55</a>
+      </p>
+    </div>
+  </Abschnitt>
+
+  <!-- Trust-Leiste und Anfrage -->
+  <TrustLeiste bewegung />
+  <Anfrage titel="Reden wir über Ihre Situation." bewegung />
+</Basis>
+
+<style>
+  /* Team: mobil eine Liste mit Haarlinien, Porträt 96 × 128 px neben Name
+     und Funktion, Zitat darunter (UU_M03_Team); ab 768 px drei Spalten,
+     Porträt über dem Namen (UU_D03_Team, bei 1440 px 384 × 512 px). */
+  .team {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .person {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .person-kopf {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+
+  .person-kopf :global(.person-bild) {
+    flex: none;
+    width: var(--breite-portraet);
+  }
+
+  .person-angaben {
+    min-width: 0;
+  }
+
+  .person p {
+    margin: 0;
+  }
+
+  .person-funktion {
+    color: var(--color-text-gedaempft);
+  }
+
+  .person-zitat {
+    margin: var(--space-2) 0 0;
+  }
+
+  /* Vorstand und Treuhand (Variante A): ruhiger als das Team, Name 18 px
+     Bold, Zeilen 16 px, ohne Zitate; Porträt 84 × 112 px, ab 768 px
+     96 × 128 px; ab 768 px zwei Spalten mit Haarlinien. */
+  .traeger-text h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  .traeger-text p:last-child {
+    margin: 0;
+  }
+
+  .traeger-listen {
+    margin-top: var(--space-4);
+  }
+
+  .traeger-listen h3 {
+    margin: 0 0 var(--space-2);
+  }
+
+  .traeger-listen .treuhand-titel {
+    margin-top: var(--space-4);
+  }
+
+  .mitglieder {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .mitglied {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .mitglied :global(.mitglied-bild) {
+    flex: none;
+    width: var(--breite-portraet-klein);
+  }
+
+  .mitglied-angaben {
+    min-width: 0;
+  }
+
+  .mitglied p {
+    margin: 0;
+  }
+
+  .mitglied-name {
+    font-weight: 700;
+  }
+
+  .mitglied-funktion {
+    color: var(--color-text-gedaempft);
+  }
+
+  .mitglied-zusatz {
+    margin-top: calc(var(--space-1) / 2);
+  }
+
+  /* Grundsätze: mobil Grundsatz sichtbar, Erklärung ausklappbar
+     (UU_M05_Grundsaetze); ab 768 px offen, Grundsatz fett vor dem Text,
+     Haarlinien, max. 680 px (UU_D05_Grundsaetze). */
+  .grundsaetze {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .grundsatz {
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .grundsatz-zeile {
+    margin: 0;
+  }
+
+  .grundsatz-text {
+    margin: 0;
+    padding-bottom: var(--space-2);
+  }
+
+  .offen {
+    display: none;
+  }
+
+  @supports selector(::details-content) {
+    @media (min-width: 768px) {
+      .offen {
+        display: inline;
+      }
+
+      .grundsaetze {
+        max-width: var(--breite-text);
+      }
+
+      .grundsatz {
+        padding-block: calc(var(--space-2) + var(--space-1) / 2);
+      }
+
+      .grundsatz-text {
+        padding-bottom: 0;
+      }
+    }
+  }
+
+  /* Qualität: Liste mit Haken, Icon Ocker (nur als Strich), 16 px Abstand. */
+  .haken {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .haken li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  /* Icon mittig zur ersten Zeile (28 px Zeilenhöhe, 24 px Icon). */
+  .haken-icon {
+    flex: none;
+    display: inline-flex;
+    margin-top: calc(var(--space-1) / 4);
+  }
+
+  /* Ocker nur als Strich des Icons, nie als Schriftfarbe (color). Das Icon
+     stammt aus Icon.astro und liegt ausserhalb des Scopes. */
+  .haken-icon :global(.icon) {
+    stroke: var(--color-ocker);
+  }
+
+  /* Demnächst wie auf der Startseite (Abschnitt 10). */
+  .demnaechst-einleitung {
+    max-width: calc(var(--breite-text) - var(--space-4) - var(--space-1));
+    margin: 0;
+  }
+
+  .demnaechst-modul {
+    margin-top: var(--space-4);
+  }
+
+  .demnaechst-nachsatz {
+    max-width: var(--breite-text);
+    margin: var(--space-4) 0 0;
+  }
+
+  /* Stellen: ruhige Liste auf Weiss, eine Stelle pro Eintrag, Haarlinie
+     zwischen den Einträgen; Titel fett, Angaben darunter normal. Button
+     mobil in voller Breite. */
+  .stellen {
+    margin-top: var(--space-3);
+    background-color: var(--color-weiss);
+  }
+
+  .stelle {
+    padding: var(--space-3);
+  }
+
+  .stelle + .stelle {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .stelle p {
+    margin: 0;
+  }
+
+  .stelle-titel {
+    font-weight: 700;
+  }
+
+  .stelle .stelle-angaben {
+    margin-top: calc(var(--space-1) / 2);
+  }
+
+  .knopfzeile {
+    margin: var(--space-3) 0 0;
+  }
+
+  .knopfzeile .button {
+    display: block;
+    width: 100%;
+  }
+
+  /* Bewerbungsadresse unter dem Button, auch ohne Mailprogramm lesbar
+     (Entscheid GL 07.10.2026); Tippfläche 44 px. */
+  .stellen-adresse {
+    margin: var(--space-1) 0 0;
+  }
+
+  .stellen-adresse a {
+    white-space: nowrap;
+  }
+
+  .stellen-fragen {
+    margin: var(--space-3) 0 0;
+  }
+
+  .stellen-fragen a {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 480px) {
+    .knopfzeile .button {
+      display: inline-block;
+      width: auto;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .team {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-3);
+      border-top: 0;
+    }
+
+    .person {
+      padding: 0;
+      border-bottom: 0;
+    }
+
+    .person-kopf {
+      display: block;
+    }
+
+    .person-kopf :global(.person-bild) {
+      width: 100%;
+    }
+
+    .person-name {
+      margin-top: var(--space-3);
+    }
+
+    .person-funktion {
+      margin-top: calc(var(--space-1) / 2);
+    }
+
+    .mitglieder {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      border-top: 0;
+      border-bottom: 1px solid var(--color-linie);
+    }
+
+    .mitglied {
+      padding-block: var(--space-3);
+      border-top: 1px solid var(--color-linie);
+      border-bottom: 0;
+    }
+
+    .mitglied :global(.mitglied-bild) {
+      width: var(--breite-portraet);
+    }
+
+    .traeger-listen .treuhand-titel {
+      margin-top: calc(var(--space-4) + var(--space-1));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    /* Vorstand und Treuhand: Text links (4 Spalten), Listen ab Spalte 6. */
+    .traeger {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+      align-items: start;
+    }
+
+    .traeger-text {
+      grid-column: 1 / span 4;
+    }
+
+    .traeger-text h2 {
+      margin-bottom: var(--space-3);
+    }
+
+    .traeger-listen {
+      grid-column: 6 / -1;
+      margin-top: 0;
+    }
+
+    .demnaechst-modul {
+      margin-top: var(--space-6);
+    }
+
+    .demnaechst-nachsatz {
+      margin-top: calc(var(--space-4) + var(--space-1));
+    }
+
+    .stellen,
+    .knopfzeile {
+      margin-top: var(--space-4);
+    }
+  }
+</style>
