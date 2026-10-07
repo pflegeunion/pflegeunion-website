@@ -13,7 +13,9 @@
  * /#lohnrechner (Header.astro), «Über uns» ist aktiv; im Formular ist
  * nichts vorgewählt.
  *
- * Teambild, Team, Vorstand und Treuhand kommen aus src/daten/personen.mjs.
+ * Teambild, Team, Vorstand und Treuhand kommen aus src/daten/personen.mjs,
+ * die offenen Stellen aus src/daten/stellen.mjs (kein JobPosting, solange
+ * keine Stelle ein festes Pensum und ein Eintrittsdatum hat).
  * Bis die Fotos vorliegen, stehen ruhige Flächen mit «[Teambild folgt]»
  * bzw. «[Foto folgt]»; diese und die übrigen Platzhalter bleiben sichtbar
  * (Go-live-Sperre, scripts/platzhalter.mjs).
@@ -33,6 +35,7 @@ import TrustLeiste from '../components/TrustLeiste.astro';
 import Anfrage from '../components/Anfrage.astro';
 import Icon from '../components/Icon.astro';
 import { TEAMBILD, TEAM, VORSTAND, TREUHAND } from '../daten/personen.mjs';
+import { STELLEN } from '../daten/stellen.mjs';
 
 if (TEAMBILD.foto && !TEAMBILD.alt) {
   throw new Error('src/daten/personen.mjs: Das Teambild braucht einen Alt-Text (TEAMBILD.alt).');
@@ -70,10 +73,6 @@ const qualitaet = [
   'Angeschlossen an das nationale Fehlermeldesystem CIRRNET',
   'Digitale, lückenlose Pflegedokumentation – für Behörden prüfbar, für Sie transparent',
 ];
-
-// Offene Stellen (Konzept Teil F, Punkt 10): Platzhalter bis zur ersten
-// Stelle mit Pensum und Eintrittsdatum; erst dann auch JobPosting.
-const stellen = ['[Liste – aktuell: dipl. Pflegefachperson HF/FH, Pensum nach Absprache]'];
 ---
 
 <Basis
@@ -300,7 +299,14 @@ const stellen = ['[Liste – aktuell: dipl. Pflegefachperson HF/FH, Pensum nach 
         nach Branchenempfehlung und eine Organisation, die nicht auf Rendite ausgerichtet ist.
       </p>
       <ul class="stellen liste-blank" data-bewegung="text">
-        {stellen.map((s) => <li class="stelle">{s}</li>)}
+        {
+          STELLEN.map((s) => (
+            <li class="stelle">
+              <p class="stelle-titel">{s.titel}</p>
+              <p class="stelle-angaben">{s.angaben.join(' · ')}</p>
+            </li>
+          ))
+        }
       </ul>
       <p class="knopfzeile">
         <a class="button" href="mailto:info@pflegeunion.ch">Bewerbung senden</a>
@@ -502,15 +508,32 @@ const stellen = ['[Liste – aktuell: dipl. Pflegefachperson HF/FH, Pensum nach 
     margin: var(--space-4) 0 0;
   }
 
-  /* Stellen: Liste auf Weiss, Button mobil in voller Breite. */
+  /* Stellen: ruhige Liste auf Weiss, eine Stelle pro Eintrag, Haarlinie
+     zwischen den Einträgen; Titel fett, Angaben darunter normal. Button
+     mobil in voller Breite. */
   .stellen {
     margin-top: var(--space-3);
+    background-color: var(--color-weiss);
   }
 
   .stelle {
-    background-color: var(--color-weiss);
     padding: var(--space-3);
+  }
+
+  .stelle + .stelle {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .stelle p {
+    margin: 0;
+  }
+
+  .stelle-titel {
     font-weight: 700;
+  }
+
+  .stelle .stelle-angaben {
+    margin-top: calc(var(--space-1) / 2);
   }
 
   .knopfzeile {

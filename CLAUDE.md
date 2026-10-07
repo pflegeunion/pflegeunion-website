@@ -39,9 +39,8 @@ solange sie nicht ausdrücklich geändert werden.
   CHF 36.– liegt (Regieanweisung C3). Auf `/ueber-uns/` offen (Teil F,
   Punkte 10, 13, 14; Daten von Michel Gurnari): «[Teambild folgt]», je
   «[Foto folgt]» für Team und Vorstand, «[Hintergrund in einer Zeile]»,
-  Treuhand «[Name]», «[Firma, Ort]», «[Aufgabe in einer Zeile]» und die
-  Stellenliste; Fotos und Personen stehen an einer Stelle in
-  `src/daten/personen.mjs`. Die CIRRNET-Zeile unter «Qualität» lautet
+  Treuhand «[Name]», «[Firma, Ort]», «[Aufgabe in einer Zeile]»; Fotos und
+  Personen stehen an einer Stelle in `src/daten/personen.mjs`. Die CIRRNET-Zeile unter «Qualität» lautet
   «Angeschlossen an das nationale Fehlermeldesystem CIRRNET» (Entscheid GL
   07.10.2026; im Canvas noch die alte Fassung).
 - Das verbindliche Erscheinungsbild steht in `design/brand-book.md`, die
@@ -544,9 +543,11 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   Zwischentitel als H3) · Grundsätze (mobil Grundsatz sichtbar, Erklärung
   ausklappbar) · Nicht gewinnorientiert (Kernbotschaft, einziger
   Ocker-Kasten) · Qualität · Demnächst (sechs Kacheln wie Startseite) ·
-  Stellen (`#stellen`, Stellenliste als Platzhalter, «Bewerbung senden» →
-  `mailto:info@pflegeunion.ch`; kein JobPosting, solange keine Stelle mit
-  Pensum und Eintrittsdatum feststeht) · Trust-Leiste · Anfrage («Reden wir
+  Stellen (`#stellen`; ruhige Liste auf Weiss, eine Stelle pro Eintrag,
+  Titel fett, Angaben darunter normal mit « · »; Daten an einer Stelle in
+  `src/daten/stellen.mjs`, eine weitere Stelle mit einer Zeile; «Bewerbung
+  senden» → `mailto:info@pflegeunion.ch`; kein JobPosting, solange keine
+  Stelle mit Pensum und Eintrittsdatum feststeht) · Trust-Leiste · Anfrage («Reden wir
   über Ihre Situation.», nichts vorgewählt). Kopfzeile «Lohn berechnen» →
   `/#lohnrechner`, «Über uns» aktiv. Meta-Titel und -Beschreibung aus dem
   Auftrag Phase 6.3, canonical, Sitemap, Organization mit
@@ -649,7 +650,8 @@ src/pages/           Seiten, eine Datei pro Seite (index.astro,
 src/daten/           betreuung.mjs: Tarif und Bedingungen der Betreuung
                      (an einer Stelle, Platzhalter bis zum GL-Entscheid);
                      personen.mjs: Teambild, Team, Vorstand und Treuhand
-                     der Seite Über uns (Fotos leer = Platzhalter)
+                     der Seite Über uns (Fotos leer = Platzhalter);
+                     stellen.mjs: offene Stellen (Über uns, #stellen)
 src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
                      (Sätze, Stufen), unter 10 KB;
                      bewegung.js: Bewegung beim Scrollen (Startseite,

@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { TEAMBILD, TEAM, VORSTAND, TREUHAND } from '../src/daten/personen.mjs';
+import { STELLEN } from '../src/daten/stellen.mjs';
 
 const lies = (pfad) => readFileSync(new URL(`../${pfad}`, import.meta.url), 'utf8');
 const flach = (t) => t.replace(/\s+/g, ' ');
@@ -94,7 +95,6 @@ test('Texte wörtlich aus den Boards (Claude Design, Seite «Über uns»)', () =
     'ARBEITEN BEI DER PFLEGEUNION',
     'Pflegen statt Formulare ausfüllen.',
     'Wir suchen diplomierte Pflegefachpersonen HF/FH, die Zeit für Menschen haben wollen – und die Freude daran haben, pflegende Angehörige anzuleiten und zu begleiten. Bei uns: eine begrenzte Zahl von Familien pro Pflegefachperson, digitale Dokumentation ohne Doppelspurigkeiten, kurze Wege zur Leitung, faire Löhne nach Branchenempfehlung und eine Organisation, die nicht auf Rendite ausgerichtet ist.',
-    '[Liste – aktuell: dipl. Pflegefachperson HF/FH, Pensum nach Absprache]',
     'Bewerbung senden',
     "Fragen zur Stelle beantwortet Christoph Willi, Pflegedienstleitung:{' '} <a class=\"tippflaeche-zeile\" href=\"tel:+41417842655\">041 784 26 55</a>",
   ];
@@ -171,9 +171,21 @@ test('Porträts 3:4: Foto mit Alt-Text = Name, sonst «[Foto folgt]» als Text',
   assert.match(quelle, /<Portraet foto=\{p\.foto\} name=\{p\.name\} art="vorstand"/);
 });
 
-test('Stellen: Anker #stellen, Bewerbung per E-Mail, kein JobPosting', () => {
+test('Stellen: Anker #stellen, Liste aus src/daten/stellen.mjs, Bewerbung per E-Mail, kein JobPosting', () => {
   const stellen = quelle.slice(quelle.indexOf('anker="stellen"'), quelle.indexOf('<TrustLeiste'));
   assert.match(stellen, /anker="stellen"/);
+  // Echter Eintrag statt Platzhalter (Entscheid GL 07.10.2026); weitere Stellen mit einer Zeile in STELLEN.
+  assert.deepEqual(STELLEN, [
+    {
+      titel: 'Dipl. Pflegefachperson HF/FH',
+      angaben: ['Pensum nach Absprache', 'Eintritt nach Vereinbarung', 'Einsätze im ganzen Kanton Zug'],
+    },
+  ]);
+  assert.equal(STELLEN[0].angaben.join(' · '), 'Pensum nach Absprache · Eintritt nach Vereinbarung · Einsätze im ganzen Kanton Zug');
+  for (const s of STELLEN) assert.doesNotMatch(s.titel + s.angaben.join(), /[[\]]/, s.titel);
+  assert.match(quelle, /import \{ STELLEN \} from '\.\.\/daten\/stellen\.mjs';/);
+  assert.ok(stellen.includes('<p class="stelle-titel">{s.titel}</p> <p class="stelle-angaben">{s.angaben.join(\' · \')}</p>'));
+  assert.doesNotMatch(lies('src/daten/stellen.mjs'), /['"]JobPosting['"]/);
   assert.match(stellen, /<a class="button" href="mailto:info@pflegeunion\.ch">Bewerbung senden<\/a>/);
   // Erst mit einer konkreten Stelle (Pensum, Eintrittsdatum) als JobPosting auszeichnen.
   assert.doesNotMatch(lies('src/pages/ueber-uns.astro'), /['"]JobPosting['"]/);
