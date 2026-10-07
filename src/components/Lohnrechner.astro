@@ -16,15 +16,13 @@
  * Zeile 2 nennt die Pensionskasse nur ab der BVG-Schwelle. Bei «mehr als 3
  * Stunden» steht «über» statt «rund» und der Zusatzhinweis erscheint.
  *
- * Unter 768 px ist das Ergebnis immer sichtbar (Board «Test Rechner mobil»,
- * Kombination B+A, Entscheid GL 06.10.2026): kompaktere Abstände (A), und ab
- * 480 px Fensterhöhe klebt der Streifen mit Etikette, «Ihr Lohn …», Zahl und
- * «brutto pro Monat» unten am Bildschirm, solange die Rechnerfläche im Bild
- * ist, bis er an seinem Platz unter dem Kästchen einrastet (B, position:
- * sticky). Er klebt erst, nachdem im Rechner zum ersten Mal etwas angetippt
- * wurde (data-aktiv aus lohnrechner.js); «Nach dem Kurs …» klebt nicht mit.
- * Fokussierte Felder hält der Browser über dem Streifen frei
- * (scroll-padding-bottom). Ab 768 px unverändert.
+ * Unter 768 px eine ruhige, vollständige Ansicht (Entscheid GL 07.10.2026):
+ * kompaktere Abstände (Board «Test Rechner mobil», Variante A), «Erstgespräch
+ * vereinbaren» direkt unter «brutto pro Monat», darunter Jahresbetrag, «Nach
+ * dem Kurs …» und die übrigen Angaben; der Zusatzhinweis steht nach dem
+ * Ergebnis. Nur die Anzeige ist umgestellt (order), das HTML bleibt. Der
+ * Sprung zum Rechner beginnt mobil mit der Frage. Nichts klebt. Ab 768 px
+ * unverändert.
  *
  * Unter den Auswahlfeldern das Kästchen «Ich habe den Pflegehelferkurs noch
  * nicht abgeschlossen.» (standardmässig leer, ganze Zeile antippbar, .kaestchen
@@ -53,7 +51,9 @@
  * an das Formular (siehe Anfrage.astro).
  *
  * Parameter:
- *   anker         id des Abschnitts (Standard 'lohnrechner')
+ *   anker         id des Sprungziels (Standard 'lohnrechner'): ab 768 px der
+ *                 Anfang des Abschnitts, darunter die Frage (ohne JavaScript
+ *                 die Tabelle)
  *   vollstaendig  Fassung für die Lohnrechner-Seite (Standard false):
  *                 zusätzlich die Frage nach der Postleitzahl mit den
  *                 Meldungen aus D1 und der Sekundär-Button «Ergebnis per
@@ -133,7 +133,7 @@ const fussnote =
   'Der definitive Lohn steht in Ihrem Arbeitsvertrag.';
 ---
 
-<section id={anker} class="rechner-abschnitt" aria-label="Lohnrechner">
+<section class="rechner-abschnitt" aria-label="Lohnrechner">
   <div class="rechner-inhalt">
     <p class="text-label etikette" data-bewegung={bw}>IHR LOHN · IN 60 SEKUNDEN</p>
     <h2 class="text-h2" data-bewegung={bw}>Was würde ich verdienen?</h2>
@@ -143,6 +143,10 @@ const fussnote =
     </p>
 
     <div class="rechner" data-rechner data-stunden={nameStunden}>
+      <!-- Sprungziel: ab 768 px der Anfang des Abschnitts, darunter die Frage
+           (mit JavaScript) bzw. die Tabelle (ohne JavaScript). -->
+      <span id={anker} class="rechner-anker"></span>
+
       <!-- Ohne JavaScript: dieselben Werte als Tabelle. -->
       <div class="fallback" data-rechner-fallback>
         <table>
@@ -238,18 +242,16 @@ const fussnote =
 
         <div class="ergebnis" aria-live="polite">
           <div class="ergebnis-zahl">
-            <div class="ergebnis-streifen">
-              <p class="text-label etikette">IHRE SCHÄTZUNG</p>
-              <p class="ergebnis-titel" data-titel-mit>Ihr Lohn mit Pflegehelferkurs</p>
-              <p class="ergebnis-titel" data-titel-ohne hidden>Ihr Lohn bis zum Pflegehelferkurs</p>
-              <p class="text-result zahl" aria-hidden="true">
-                <span class="text-result-einheit" data-praefix>rund</span>{' '}
-                <span class="text-result-einheit">CHF</span>{' '}
-                <span data-monat>{ziffern(start.monat)}</span><span class="text-result-einheit">.–</span>
-              </p>
-              <p class="visually-hidden" data-vorlesen>{chf(start.monat, start.mehr)} brutto pro Monat</p>
-              <p class="brutto" aria-hidden="true">brutto pro Monat</p>
-            </div>
+            <p class="text-label etikette">IHRE SCHÄTZUNG</p>
+            <p class="ergebnis-titel" data-titel-mit>Ihr Lohn mit Pflegehelferkurs</p>
+            <p class="ergebnis-titel" data-titel-ohne hidden>Ihr Lohn bis zum Pflegehelferkurs</p>
+            <p class="text-result zahl" aria-hidden="true">
+              <span class="text-result-einheit" data-praefix>rund</span>{' '}
+              <span class="text-result-einheit">CHF</span>{' '}
+              <span data-monat>{ziffern(start.monat)}</span><span class="text-result-einheit">.–</span>
+            </p>
+            <p class="visually-hidden" data-vorlesen>{chf(start.monat, start.mehr)} brutto pro Monat</p>
+            <p class="brutto" aria-hidden="true">brutto pro Monat</p>
             <p class="nach-kurs" data-nach-kurs hidden>
               Nach dem Kurs, den wir bezahlen: <strong data-monat-kurs>{chf(start.monatMitKurs, start.mehr)}</strong> pro Monat.
             </p>
@@ -325,6 +327,19 @@ const fussnote =
   .rechner {
     margin: var(--space-3) calc(-1 * var(--seitenrand)) 0;
     background-color: var(--color-weiss);
+  }
+
+  /* Sprungziel (#lohnrechner bzw. #rechner aus Kopfzeile, Hero und von
+     anderen Seiten): ab 768 px wie bisher der Anfang des Abschnitts. Unter
+     768 px beginnt der Bildschirm mit der Frage «Wie viele Stunden pro Tag …»
+     (ohne JavaScript mit der Tabelle), 24 px unter der Oberkante der weissen
+     Fläche (Entscheid GL 07.10.2026). Ab dem Einleitungssatz passten Frage
+     bis Button auf keinem Handy (729 px bei 390 px Breite). Die Höhe der
+     Kopfzeile zieht wie überall scroll-padding-top ab (global.css); kein
+     weiches Scrollen. */
+  .rechner-anker {
+    position: absolute;
+    top: 0;
   }
 
   /* Fallback-Tabelle ohne JavaScript */
@@ -561,15 +576,53 @@ const fussnote =
     color: var(--color-text-gedaempft);
   }
 
-  /* Unter 768 px: Ergebnis immer sichtbar (Board «Test Rechner mobil»,
-     Kombination B+A, Entscheid GL 06.10.2026). Ab 768 px wie bisher.
+  @media (min-width: 480px) {
+    .knoepfe {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+  }
 
-     A, kompakter (Board A): Auswahlfelder 56 statt 62 px hoch (zweizeilige
+  /* Unter 768 px: ruhige, vollständige Rechner-Ansicht (Board «Test Rechner
+     mobil», Variante A; Entscheid GL 07.10.2026). Ab 768 px wie bisher.
+
+     Kompakter (Board A): Auswahlfelder 56 statt 62 px hoch (zweizeilige
      Beschriftung 2 × 22 + 2 × 4 + Rahmen = 54 px, also die Mindesthöhe),
      Kästchen-Zeile ohne Innenabstand (weiterhin mindestens 44 px hoch),
-     weisse Fläche unten 16 statt 24 px, Ergebnis oben 24 statt 32 px,
-     «Ihr Lohn …» 8 statt 16 px unter der Etikette. */
+     weisse Fläche unter dem Kästchen 16 statt 24 px, Ergebnis oben 24 statt
+     32 px, «Ihr Lohn …» 8 statt 16 px unter der Etikette.
+
+     Reihenfolge: «Erstgespräch vereinbaren» direkt unter «brutto pro Monat»,
+     darunter Jahresbetrag, «Nach dem Kurs …» und die übrigen Angaben. Der
+     Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit
+     sich über dem Button beim Antippen nichts verschiebt. Umgestellt wird nur
+     die Anzeige (order); im HTML bleibt alles, wie der Desktop es braucht.
+     Dafür geben Eingabe, die beiden Teile des Ergebnisses und die Buttons
+     ihre Box ab (display: contents); .ergebnis selbst bleibt die Live-Region
+     mit eigener Box. Die beiden Buttons behalten ihre Reihenfolge, die
+     Tab-Reihenfolge stimmt also mit der Anzeige überein. */
   @media (max-width: 767px) {
+    .ui {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .eingabe,
+    .ergebnis-zahl,
+    .ergebnis-rest,
+    .ergebnis .knoepfe {
+      display: contents;
+    }
+
+    .eingabe > * {
+      margin-inline: var(--seitenrand);
+    }
+
+    .eingabe > :first-child {
+      margin-top: var(--space-3);
+    }
+
     .rechner-feld {
       padding-block: calc(var(--space-1) / 2);
     }
@@ -578,103 +631,71 @@ const fussnote =
       padding: 0;
     }
 
-    .eingabe {
-      padding-bottom: var(--space-2);
+    .mehr-hinweis {
+      order: 1;
+      margin-block: var(--space-3);
     }
 
     .ergebnis {
+      display: flex;
+      flex-direction: column;
+      margin-top: var(--space-2);
       padding-top: var(--space-3);
     }
 
     .ergebnis-zahl .etikette {
       margin-bottom: var(--space-1);
     }
-  }
 
-  /* B, klebt (Board B): Etikette, «Ihr Lohn …», Zahl und «brutto pro Monat»
-     bleiben unten am Bildschirm stehen, solange die weisse Rechnerfläche im
-     Bild ist, und rasten an ihrem Platz unter dem Kästchen ein. Erst nachdem
-     im Rechner zum ersten Mal etwas angetippt wurde (data-aktiv, setzt
-     lohnrechner.js; Rückmeldung GL nach dem Handy-Test); vorher und ohne
-     JavaScript steht der Streifen an seinem Platz. «Nach dem Kurs …» klebt
-     nicht mit, so bleibt der Streifen in beiden Zuständen gleich hoch
-     (161 px). Erst ab 480 px Fensterhöhe: Auf dem Handy quer bliebe sonst
-     neben Kopfzeile und Streifen kaum Platz für die Eingabe; dort gilt nur A.
-     Nur am Bildschirm, beim Drucken klebt nichts. */
-  @media screen and (max-width: 767px) and (min-height: 480px) {
-    /* .ergebnis bleibt die Live-Region und .ergebnis-zahl ihr erster Teil;
-       beide geben ihre Box ab. So ist die ganze Rechnerfläche (.ui) der
-       Rahmen, in dem der Streifen klebt. Fläche und Abstände tragen Streifen,
-       «Nach dem Kurs …» und der Rest selbst; das Aussehen ändert sich beim
-       ersten Antippen nicht, nur das Kleben kommt dazu. */
-    .ergebnis,
-    .ergebnis-zahl {
-      display: contents;
+    .ergebnis [data-erstgespraech] {
+      order: 1;
+      margin-top: var(--space-1);
     }
 
-    /* Streifen wie im Board B: deckend Ocker hell, oben eine Haarlinie,
-       keine Schatten; Innenabstand 12 px, Zahl ohne Abstand zum Titel. */
-    .ergebnis-streifen {
-      padding: calc(var(--space-1) * 1.5) var(--seitenrand);
+    /* Ocker-Linie zwischen Button und Jahresbetrag (Grafik, keine Schrift);
+       Zeile 2 reserviert weiterhin Platz für vier Zeilen. */
+    .zeile-2 {
+      order: 2;
+      min-height: calc(4 * 1.55em + var(--space-3) + 1px);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
       border-top: 1px solid var(--color-ocker);
-      background-color: var(--color-ocker-hell);
     }
 
-    .rechner[data-aktiv] .ergebnis-streifen {
-      position: sticky;
-      bottom: 0;
-      z-index: 1;
-    }
-
-    .zahl {
-      margin-top: 0;
-    }
-
-    /* Angekreuzt: «Nach dem Kurs …» unter dem Streifen, auf derselben Fläche
-       wie Jahreslohn und Buttons; 16 px unter «brutto pro Monat», 12 px über
-       der Ocker-Linie wie im Board B. */
     .nach-kurs {
-      margin: 0;
-      padding: calc(var(--space-1) / 2) var(--seitenrand) calc(var(--space-1) * 1.5);
-      background-color: var(--color-ocker-hell);
+      order: 3;
     }
 
-    /* Jahreslohn und Buttons: eigene Fläche, Ocker-Linie davor wie bisher.
-       Liegt über dem Streifen, damit dieser die Linie beim Einrasten nicht
-       verdeckt (er rückt nur nach oben, sonst überlappen sich die beiden nie). */
-    .ergebnis-rest {
-      position: relative;
-      z-index: 1;
-      margin-top: 0;
-      padding: var(--space-3) var(--seitenrand) var(--space-4);
-      background-color: var(--color-ocker-hell);
+    .plz-meldung {
+      order: 4;
     }
 
-    /* Fokus nie hinter dem Streifen: Sobald im Rechner etwas angetippt wurde
-       oder ein Feld den Fokus hat, hält der Browser beim Fokussieren
-       (Tastatur, Screenreader) unten so viel frei, wie der Streifen höchstens
-       hoch ist (161 px, Reserve für Umbrüche bei vergrösserter Schrift). Der
-       Fokus zählt mit, damit ein Feld schon vor dem ersten Tastendruck frei
-       steht, der den Streifen kleben lässt. Buttons und Links stehen nach dem
-       Streifen und liegen nie dahinter. Der unsichtbare Radio-Button deckt
-       das ganze Auswahlfeld ab, damit der Browser das ganze Feld in den
-       freien Bereich scrollt (nicht nur seine Mitte). */
-    .rechner-feld input {
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    :global(html:has([data-rechner]:is([data-aktiv], :focus-within) > [data-rechner-ui]:not([hidden]))) {
-      scroll-padding-bottom: calc(var(--space-8) * 3);
+    .ergebnis .knoepfe > :not([data-erstgespraech]) {
+      order: 5;
+      margin-top: var(--space-3);
     }
   }
 
-  @media (min-width: 480px) {
-    .knoepfe {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
+  @media (max-width: 767px) {
+    .rechner {
+      position: relative;
+    }
+
+    .rechner-anker {
+      top: var(--space-3);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .rechner-abschnitt {
+      position: relative;
+    }
+  }
+
+  /* 480–767 px: Buttons nicht über die ganze Breite (wie bisher ab 480 px). */
+  @media (min-width: 480px) and (max-width: 767px) {
+    .ergebnis .knoepfe > * {
+      align-self: flex-start;
     }
   }
 

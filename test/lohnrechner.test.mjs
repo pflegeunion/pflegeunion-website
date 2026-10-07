@@ -7,8 +7,8 @@
  * abgeschlossen.» (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs,
  * darunter der Lohn nach dem Kurs), Pensionskasse ab BVG-Schwelle mit dem
  * gezeigten Satz, Übergabe an das Formular, Rundung, Anzeigeformat,
- * Skriptgrösse und Postleitzahl-Liste. Zuletzt die Regeln für den
- * Ergebnisstreifen, der unter 768 px unten am Bildschirm klebt.
+ * Skriptgrösse und Postleitzahl-Liste. Zuletzt die mobile Ansicht: nichts
+ * klebt, Reihenfolge nur unter 768 px per CSS, Sprungziel an der Frage.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -207,31 +207,27 @@ function bloecke(text, kopf) {
   return inhalte.join('\n');
 }
 
-test('Ergebnisstreifen klebt nur unter 768 px ab 480 px Höhe und erst nach dem ersten Antippen', () => {
+test('Mobil: nichts klebt, Button unter «brutto pro Monat», Sprung zur Frage', () => {
   const komponente = readFileSync(new URL('../src/components/Lohnrechner.astro', import.meta.url), 'utf8');
   const skript = readFileSync(new URL('../src/scripts/lohnrechner.js', import.meta.url), 'utf8');
   const [markup, stil] = komponente.split('<style>');
-  const klebt = bloecke(stil, '@media screen and (max-width: 767px) and (min-height: 480px)');
-  // Genau ein klebendes Element: der Streifen, unten, erst mit data-aktiv.
-  assert.equal(stil.match(/position: sticky/g).length, 1);
-  assert.match(klebt, /\.rechner\[data-aktiv\] \.ergebnis-streifen \{\s*position: sticky;\s*bottom: 0;/);
-  assert.match(klebt, /\.ergebnis-streifen \{[^}]*background-color: var\(--color-ocker-hell\);/);
-  assert.doesNotMatch(stil, /shadow|gradient/);
-  // Das Skript setzt data-aktiv beim ersten Antippen (auch der vorgewählten Stundenzahl).
-  assert.match(skript, /wurzel\.addEventListener\('click', function \(\) \{ wurzel\.dataset\.aktiv = ''; \}\);/);
-  // Der Streifen enthält Etikette bis «brutto pro Monat»; «Nach dem Kurs …» steht danach.
-  const streifen = markup.split('<div class="ergebnis-streifen">')[1].split('</div>')[0];
-  assert.match(streifen, /IHRE SCHÄTZUNG[\s\S]*data-monat[\s\S]*brutto pro Monat/);
-  assert.doesNotMatch(streifen, /data-nach-kurs/);
-  assert.match(markup, /<\/div>\s*<p class="nach-kurs" data-nach-kurs hidden>/);
-  // Die Live-Region bleibt dasselbe Element und gibt ihre Box nur dort ab.
-  assert.equal(stil.match(/display: contents/g).length, 1);
-  assert.match(klebt, /\.ergebnis,\s*\.ergebnis-zahl \{\s*display: contents;/);
-  assert.equal(markup.match(/aria-live=/g).length, 1);
-  assert.match(markup, /<div class="ergebnis" aria-live="polite">\s*<div class="ergebnis-zahl">/);
-  // Fokus nie hinter dem Streifen: unten frei halten, sobald der Rechner benutzt wird.
-  assert.match(
-    klebt,
-    /:global\(html:has\(\[data-rechner\]:is\(\[data-aktiv\], :focus-within\) > \[data-rechner-ui\]:not\(\[hidden\]\)\)\) \{\s*scroll-padding-bottom:/,
-  );
+  const mobil = bloecke(stil, '@media (max-width: 767px)');
+  // Kein klebendes Element, kein Freihalten unten, keine Logik dafür im Skript.
+  assert.doesNotMatch(stil, /sticky|scroll-padding-bottom|data-aktiv/);
+  assert.doesNotMatch(skript, /sticky|aktiv/);
+  // Reihenfolge nur unter 768 px umgestellt: Button, Jahresbetrag, «Nach dem Kurs …»;
+  // der Zusatzhinweis folgt nach dem Ergebnis.
+  assert.match(mobil, /\.ergebnis \[data-erstgespraech\] \{\s*order: 1;/);
+  assert.match(mobil, /\.zeile-2 \{\s*order: 2;/);
+  assert.match(mobil, /\.nach-kurs \{\s*order: 3;/);
+  assert.match(mobil, /\.mehr-hinweis \{\s*order: 1;/);
+  assert.equal((stil.match(/\sorder: \d/g) || []).length, (mobil.match(/\sorder: \d/g) || []).length);
+  // Die Live-Region behält ihre Box; nur die Hüllen darin geben sie ab.
+  assert.match(mobil, /\.eingabe,\s*\.ergebnis-zahl,\s*\.ergebnis-rest,\s*\.ergebnis \.knoepfe \{\s*display: contents;/);
+  assert.equal((stil.match(/display: contents;/g) || []).length, 1);
+  assert.match(markup, /<div class="ergebnis" aria-live="polite">/);
+  // Sprungziel: eigenes Element in der Rechnerfläche, ausserhalb von Tabelle und Rechner-Oberfläche.
+  assert.match(markup, /<section class="rechner-abschnitt" aria-label="Lohnrechner">/);
+  assert.match(markup, /data-stunden=\{nameStunden\}>[\s\S]*?<span id=\{anker\} class="rechner-anker"><\/span>\s*(<!--[^>]*-->\s*)?<div class="fallback"/);
+  assert.match(mobil, /\.rechner-anker \{\s*top: var\(--space-3\);/);
 });

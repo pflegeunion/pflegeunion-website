@@ -94,7 +94,9 @@ solange sie nicht ausdrücklich geändert werden.
   Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer);
   angekreuzt zeigt der Rechner Monat und Jahr mit `SATZ_EINSTIEG` und direkt
   unter der Zahl «Nach dem Kurs, den wir bezahlen: …» mit `SATZ_KURS`
-  (Auftrag GL 23.09.2026, Boards D02/M02_Lohnrechner_Kurs_Test). Die
+  (Auftrag GL 23.09.2026, Boards D02/M02_Lohnrechner_Kurs_Test); unter
+  768 px steht die Zeile nach dem Button «Erstgespräch vereinbaren» und dem
+  Jahresbetrag (Entscheid GL 07.10.2026). Die
   Pensionskasse steht nur ab der BVG-Schwelle, gemessen am Jahreslohn mit
   dem gezeigten Satz (leer ab 2 Stunden, angekreuzt ab 2½ Stunden). Die Zahlen 30,4 und 365 sowie
   CHF 2'310.–, 27'700.–, 2'060.–, 1'150.–, 3'460.– und 39.90 sind überholt
@@ -308,9 +310,7 @@ Werden die SVG-Dateien ersetzt, werden diese beiden Icons neu erzeugt.
   Slider, keine Parallax-Effekte, kein Hover-Anheben, kein Festhalten von
   Abschnitten, kein Eingriff ins Scrollen. Erlaubt gemäss Konzept B5: das
   weiche Öffnen der FAQ-Akkordeons und das Aufzählen der Rechner-Zahl,
-  beides mit `prefers-reduced-motion`. Einzige Ausnahme vom Festhalten: der
-  Ergebnisstreifen des Lohnrechners unter 768 px (siehe Komponenten;
-  Entscheid GL 06.10.2026).
+  beides mit `prefers-reduced-motion`.
 - **Sanftes Einblenden beim Scrollen** ist auf der Startseite erlaubt
   (Auftrag «Startseite: sanfte Bewegung beim Scrollen», Vorlage Variante B
   aus Claude Design): einmal pro Element, sobald es zu etwa 15 % sichtbar
@@ -399,10 +399,7 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   CSS-Variablen in Media Queries nicht wirken, tragen die Komponenten die
   Zahl ein, und zwar nur diese Werte in der Schreibweise `(min-width: Xpx)`
   bzw. `(max-width: X−1 px)`. `npm test` prüft alle Media Queries in `src/`.
-  Neue Breakpoints nur dort ergänzen. Fensterhöhen stehen in derselben Liste
-  («Höhe X px») und gelten nur zusammen mit einer Breite, Schreibweise
-  `(min-height: Xpx)`; bisher nur **Höhe 480 px** (klebender
-  Ergebnisstreifen des Lohnrechners).
+  Neue Breakpoints nur dort ergänzen.
 - `--radius-full` auf der Webseite **nicht verwenden**; Porträts sind eckig.
 - Das Dunkel-Thema aus `design/tokens.json` wird auf der Webseite nicht
   verwendet; `tokens.css` enthält nur das Hell-Thema.
@@ -430,7 +427,7 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 | `Hinweiskasten.astro` | Baustein C: Kasten tiefblau-hell «Gut zu wissen» | Definitionen und ehrliche Grenzen, mehrfach pro Seite erlaubt |
 | `Kernbotschaft.astro` | Baustein D: Kasten ocker-hell | Höchstens einer pro Seite; Startseite: Lohn-Abschnitt |
 | `FAQ.astro` | Baustein E: Akkordeon mit details/summary auf allen Breiten, erste Frage offen, schema.org FAQPage | Vier bis sechs Fragen pro Seite |
-| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px Ergebnis immer sichtbar (Board «Test Rechner mobil», Kombination B+A, Entscheid GL 06.10.2026): Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis (A), und ab 480 px Fensterhöhe klebt der Streifen (`.ergebnis-streifen`: Etikette, «Ihr Lohn …», Zahl und «brutto pro Monat»; «Nach dem Kurs …» klebt nicht mit und steht darunter bei Jahreslohn und Buttons) mit `position: sticky; bottom: 0` unten am Bildschirm, solange die Rechnerfläche im Bild ist, und rastet an seinem Platz unter dem Kästchen ein (B; 161 px in beiden Zuständen; Ocker hell mit Ocker-Haarlinie oben; `.ergebnis` bleibt die Live-Region mit `display: contents`). Er klebt erst, nachdem im Rechner zum ersten Mal etwas angetippt wurde (auch die vorgewählte Stundenzahl): `lohnrechner.js` setzt dann `data-aktiv` am Rechner; vorher und ohne JavaScript steht er an seinem Platz (Rückmeldung GL nach dem Handy-Test). `scroll-padding-bottom` hält fokussierte Felder über dem Streifen, sobald der Rechner `data-aktiv` hat oder ein Feld darin den Fokus; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
+| `Lohnrechner.astro` | Baustein F (C1 Abschnitt 2, D1): Warmgrau, Übertitel, H2, Einleitung; Rechner auf weisser Fläche mit einer Frage (Stunden pro Tag) als Radio-Gruppe mit sechs Auswahlfeldern (fieldset/legend, Pfeiltasten, Vorbelegung 2 Stunden; Desktop in einer Reihe, mobil drei mal zwei), direkt darunter das Kästchen «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.» (standardmässig leer, nur mit JavaScript), darunter der Zusatzhinweis bei «mehr als 3 Stunden»; darunter das Ergebnis als Streifen Ocker hell und `aria-live`-Region mit Zahl in `.text-result` (leer: Lohn mit Kurs; angekreuzt: Lohn bis zum Kurs mit der Zeile «Ihr Lohn bis zum Pflegehelferkurs», darunter «Nach dem Kurs, den wir bezahlen: …» mit dem Lohn mit Kurs), Fussnote und Buttons; unter 768 px eine ruhige, vollständige Ansicht ohne klebende Elemente (Entscheid GL 07.10.2026): Abstände aus Board «Test Rechner mobil», Variante A (Auswahlfelder 56 px, Kästchen-Zeile ohne Innenabstand, weniger Luft über dem Ergebnis), und nur per CSS (`order`, die Hüllen `.eingabe`, `.ergebnis-zahl`, `.ergebnis-rest` und `.knoepfe` mit `display: contents`, die Live-Region `.ergebnis` behält ihre Box) die Reihenfolge «brutto pro Monat» · «Erstgespräch vereinbaren» · Ocker-Linie · Jahresbetrag · «Nach dem Kurs …» · zweiter Button; der Zusatzhinweis bei «mehr als 3 Stunden» steht nach dem Ergebnis, damit sich über dem Button beim Antippen nichts verschiebt; Sprungziel ist das Element `.rechner-anker` mit der id aus `anker` am Anfang der Rechnerfläche, ab 768 px am Anfang des Abschnitts (wie bisher), darunter an der Frage «Wie viele Stunden pro Tag …» (ohne JavaScript an der Tabelle), die Höhe der Kopfzeile zieht `scroll-padding-top` ab; Übergabe an das Formular (`#kontakt`, Anliegen vorbelegt, angekreuzt Feld 2 «Nein, noch nicht», versteckte Felder stunden/ergebnis, Zeile «Ihre Schätzung aus dem Rechner» mit Schaltfläche «Entfernen» in `Anfrage.astro`; angekreuzt mit «bis zum Pflegehelferkurs»). Ohne JavaScript bleibt die Fallback-Tabelle (`[data-rechner-fallback]`) sichtbar: Tabelle 2 der Korrektur vom 22.09.2026 mit fünf Spalten (Auswahl · Monat, mit Kurs · Jahr, mit Kurs · Monat, Einstieg · Jahr, Einstieg), unter 640 px als Block je Auswahl ohne Querscrollen; mit JavaScript blendet das Skript sie aus und `[data-rechner-ui]` ein. Parameter: `anker` (id des Sprungziels, Standard `lohnrechner`), `vollstaendig` (Lohnrechner-Seite: zusätzlich Frage 3 Postleitzahl mit den Meldungen aus D1 und Sekundär-Button «Ergebnis per E-Mail erhalten», vorerst ohne Funktion; «Alle Details zum Lohn» entfällt). **Stundensätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen werden nur im Konfigurationsblock `KONFIG` von `src/scripts/lohnrechner.js` geändert**; die Komponente erzeugt Rechner und Fallback-Tabelle aus derselben Rechenlogik, prüft die Kontrollwerte aus D1 beim Build, und `npm test` prüft alle Ergebniswerte der Tabelle D1, beide Zustände des Kästchens sowie die Skriptgrösse. Messung: Ereignisse aus D1 als Aufrufe von `window.pflegeunionTrack(name, daten)`, falls vorhanden; kein Tracking-Skript | Startseite Abschnitt 2 (kompakt, ohne Postleitzahl), Lohnrechner-Seite (`anker="rechner"`, `vollstaendig`); Musterseite `/bausteine/` zeigt die vollständige Fassung |
 | `Demnaechst.astro` | Baustein G: ab 768 px sechs Kacheln im Haarlinien-Raster mit Etikette «DEMNÄCHST» auf jeder Kachel; mobil hinter «6 Leistungen in Vorbereitung», Etikette einmal über der Liste | Startseite Abschnitt 10 (kompakt), Über uns (mit Text) |
 | `Icon.astro` | Linien-Icons (Lucide, ISC-Lizenz in `src/components/LICENSE-lucide.txt`) als Inline-SVG, 2 px Strich | In allen Bausteinen; neue Icons werden in `Icon.astro` ergänzt |
 
@@ -496,7 +493,8 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
 - Lohn: **CHF 37.95 mit Kurs immer zuerst**, CHF 33.95 danach, **nie «ab»**.
   Einzige Ausnahme: Im Lohnrechner ist nach aktivem Ankreuzen von «Ich habe
   den Pflegehelferkurs noch nicht abgeschlossen.» der Lohn mit CHF 33.95 die
-  Hauptzahl; der Lohn nach dem Kurs (CHF 37.95) steht direkt darunter.
+  Hauptzahl; der Lohn nach dem Kurs (CHF 37.95) steht direkt darunter, unter
+  768 px nach dem Button und dem Jahresbetrag (Entscheid GL 07.10.2026).
 - **Kein Lohndatum** auf der Webseite (kein Auszahlungstag).
 - **Krankentaggeldversicherung** überall nennen, wo Versicherungen stehen;
   **Pensionskasse nur mit Bedingung** (ab BVG-Schwelle).
@@ -530,10 +528,9 @@ src/scripts/         lohnrechner.js: Rechner-Skript mit Konfigurationsblock
                      unter 1 KB, inline im Kopf
 test/                npm test (node:test ohne Zusatzpakete):
                      lohnrechner.test.mjs prüft die Ergebniswerte aus D1,
-                     beide Zustände des Kurs-Kästchens und die Regeln
-                     des klebenden Ergebnisstreifens,
-                     breakpoints.test.mjs die Media Queries (Breiten
-                     und Fensterhöhen),
+                     beide Zustände des Kurs-Kästchens und die mobile
+                     Ansicht (nichts klebt, Reihenfolge, Sprungziel),
+                     breakpoints.test.mjs die Media Queries,
                      menue.test.mjs Grösse des Menü-Skripts, die
                      Zeile der Zeitprüfung und die Kopfzeile ohne
                      JavaScript unter 1024 px (nicht sticky),

@@ -186,9 +186,6 @@ function starte(wurzel) {
     if (werte.mehr) melde('rechner_mehr_als_3');
   });
 
-  // Ab dem ersten Antippen klebt das Ergebnis mobil (CSS).
-  wurzel.addEventListener('click', function () { wurzel.dataset.aktiv = ''; });
-
   // Postleitzahl prüfen (nur vollständige Fassung).
   var plz = q('[data-plz]');
   if (plz) {
