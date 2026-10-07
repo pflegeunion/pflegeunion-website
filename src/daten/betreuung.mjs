@@ -7,7 +7,7 @@
  * von hier. Liegt ein Entscheid vor, wird die betreffende Zeile ersetzt.
  *
  * Bis dahin stehen die Platzhalter aus C3 wörtlich und sichtbar in eckigen
- * Klammern. Go-live-Sperre (CLAUDE.md): Der Production-Build bricht ab,
+ * Klammern. Go-live-Sperre (CLAUDE.md): Mit GO_LIVE=ja bricht der Build ab,
  * solange eine Seite «[XX» oder «[X]» enthält (scripts/platzhalter.mjs).
  */
 export const TARIF = {

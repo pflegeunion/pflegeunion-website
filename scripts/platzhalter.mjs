@@ -7,23 +7,18 @@
  *     «[ohne Zuschläge für Abende und Wochenenden]» (CSS und Skripte zählen
  *     nicht, dort sind eckige Klammern Code).
  *
- * Die Sperre greift mit der Domain pflegeunion.ch (Go-live-Bedingung E4
- * Punkt 8; Entscheid 07.10.2026): Nur wenn Netlify die Seite für die echte
- * Domain baut, bricht der Build mit Exit-Code 1 ab und Netlify
- * veröffentlicht ihn nicht. Das ist der Fall, wenn die Netlify-Variable URL
- * (Hauptadresse der Website) https://pflegeunion.ch oder
- * https://www.pflegeunion.ch ist und CONTEXT=production. URL ist bei Netlify
- * in allen Kontexten dieselbe; ohne CONTEXT=production würden nach dem
- * Wechsel auf die Domain auch Deploy Previews abbrechen. In allen anderen
- * Fällen nur Warnung: Testseite pflegeunion-test.netlify.app (heute der
- * Production-Kontext), Deploy Previews, Branch deploys und lokal.
+ * Die Sperre greift erst mit der Netlify-Umgebungsvariable GO_LIVE=ja
+ * (Go-live-Bedingung E4 Punkt 8; Entscheid GL 07.10.2026): Dann bricht der
+ * Build mit Exit-Code 1 ab und Netlify veröffentlicht ihn nicht. Ohne diese
+ * Variable nur Warnung: Testseite, pflegeunion.ch mit Passwortschutz,
+ * Deploy Previews, Branch deploys und lokal. Die Adresse (URL) zählt nicht.
+ * Vor dem Go-live in Netlify GO_LIVE=ja setzen und das Passwort entfernen.
+ *
+ * Aufruf: node scripts/platzhalter.mjs [ordner] (Standard: dist).
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-/** Hauptadressen, unter denen die Sperre greift. */
-export const DOMAINS = ['https://pflegeunion.ch', 'https://www.pflegeunion.ch'];
 
 /** «[XX» bis zur schliessenden Klammer (z. B. «[XX.–]») und «[X]». */
 const KURZ = /\[XX[^\]<"]{0,20}\]?|\[X\]/g;
@@ -67,35 +62,34 @@ export function pruefeOrdner(ordner) {
   return ergebnis;
 }
 
-/** Baut Netlify die Seite für die echte Domain (Production unter pflegeunion.ch)? */
-export function echteDomain({ URL: adresse, CONTEXT: kontext } = {}) {
-  const hauptadresse = String(adresse ?? '').trim().toLowerCase().replace(/\/+$/, '');
-  return kontext === 'production' && DOMAINS.includes(hauptadresse);
+/** Ist die Sperre eingeschaltet (Netlify-Variable GO_LIVE=ja)? */
+export function goLive({ GO_LIVE: wert } = {}) {
+  return String(wert ?? '').trim().toLowerCase() === 'ja';
 }
 
 /**
- * Bewertet die Funde für die Build-Umgebung (Netlify-Variablen URL und
- * CONTEXT). Gibt { code, zeilen } zurück: code 1 (Abbruch) nur für die
- * echte Domain mit Funden, sonst 0.
+ * Bewertet die Funde für die Build-Umgebung (Variable GO_LIVE). Gibt
+ * { code, zeilen } zurück: code 1 (Abbruch) nur mit GO_LIVE=ja und Funden,
+ * sonst 0.
  */
 export function bewerte(funde, umgebung = {}) {
   const seiten = Object.entries(funde);
   if (!seiten.length) return { code: 0, zeilen: ['Platzhalter: keine eckigen Klammern im HTML.'] };
-  const sperre = echteDomain(umgebung);
-  const wo = umgebung.URL ? `${umgebung.URL}, Kontext ${umgebung.CONTEXT || 'ohne'}` : 'lokal';
+  const sperre = goLive(umgebung);
+  const wert = umgebung.GO_LIVE ? `GO_LIVE=${umgebung.GO_LIVE}` : 'ohne GO_LIVE';
   const zeilen = [
     sperre
-      ? `Platzhalter: Build für ${umgebung.URL} abgebrochen (Go-live-Sperre, CLAUDE.md; Go-live-Bedingung E4 Punkt 8). Noch offen:`
-      : `Platzhalter: Warnung (${wo}); unter der Domain pflegeunion.ch bricht der Build hier ab. Noch offen:`,
+      ? 'Platzhalter: Build abgebrochen, GO_LIVE=ja (Go-live-Sperre, CLAUDE.md; Go-live-Bedingung E4 Punkt 8). Noch offen:'
+      : `Platzhalter: Warnung (${wert}); mit GO_LIVE=ja bricht der Build hier ab. Noch offen:`,
     ...seiten.map(([seite, liste]) => `  ${seite}: ${liste.join(' · ')}`),
   ];
   return { code: sperre ? 1 : 0, zeilen };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const dist = fileURLToPath(new URL('../dist', import.meta.url));
-  const funde = pruefeOrdner(dist);
-  const { code, zeilen } = bewerte(funde, { URL: process.env.URL, CONTEXT: process.env.CONTEXT });
+  const ordner = process.argv[2] ?? fileURLToPath(new URL('../dist', import.meta.url));
+  const funde = pruefeOrdner(ordner);
+  const { code, zeilen } = bewerte(funde, { GO_LIVE: process.env.GO_LIVE });
   const ausgabe = code ? console.error : Object.keys(funde).length ? console.warn : console.log;
   ausgabe(zeilen.join('\n'));
   process.exitCode = code;
