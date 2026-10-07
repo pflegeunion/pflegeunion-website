@@ -42,38 +42,57 @@
  * src/scripts/lohnrechner.js blendet `[data-rechner-fallback]` aus und
  * `[data-rechner-ui]` ein.
  *
- * Sätze, Tage, BVG-Schwelle, Stundenstufen und Postleitzahlen stehen
- * ausschliesslich im Konfigurationsblock des Skripts (KONFIG); Rechner und
- * Fallback-Tabelle nutzen dieselbe Rechenlogik, die Tabelle wird beim Build
- * gegen die Kontrollwerte aus D1 geprüft.
+ * Sätze, Tage, BVG-Schwelle und Stundenstufen stehen ausschliesslich im
+ * Konfigurationsblock des Skripts (KONFIG); Rechner und Fallback-Tabelle
+ * nutzen dieselbe Rechenlogik, die Tabelle wird beim Build gegen die
+ * Kontrollwerte aus D1 geprüft. Die Postleitzahl-Frage ist gestrichen
+ * (Entscheid GL 06.10.2026, Konzept V3.19); die Postleitzahl steht im
+ * Formular, Feld 6.
  *
  * «Kostenloses Erstgespräch vereinbaren» springt zu #kontakt und übergibt die
  * Schätzung an das Formular (siehe Anfrage.astro).
+ *
+ * Ergebnis per E-Mail (nur vollständige Fassung; Konzept D1, Claude Design
+ * LR_D02/LR_M02_Mail_offen, _gesendet, _Fehler; Entscheid GL 06.10.2026:
+ * ohne neues JavaScript, lohnrechner.js unverändert): «Ergebnis per E-Mail
+ * erhalten» ist die Zeile zum Antippen eines <details>, das Formular steht
+ * gleich danach und erscheint per CSS, sobald das <details> offen ist. Die
+ * Stundenfelder und das Kästchen gehören über das Attribut form zu diesem
+ * Formular und gehen beim Absenden mit (Feld «stunden», Kästchen
+ * «ohne_kurs»); im HTML bleiben sie, wo sie sind, für das Rechner-Skript
+ * ändert sich nichts. Versand an /api/anfrage mit art=ergebnis; der Server
+ * rechnet die Beträge selbst (netlify/functions/anfrage/), Honeypot und
+ * Zeitprüfung wie im Anfrageformular. Rückmeldung per 303 und :target beim
+ * Rechner: #ergebnis-gesendet oder #ergebnis-fehler (dann bleibt das
+ * E-Mail-Feld sichtbar).
  *
  * Parameter:
  *   anker         id des Sprungziels (Standard 'lohnrechner'): ab 768 px der
  *                 Anfang des Abschnitts, darunter die Frage (ohne JavaScript
  *                 die Tabelle)
- *   vollstaendig  Fassung für die Lohnrechner-Seite (Standard false):
- *                 zusätzlich die Frage nach der Postleitzahl mit den
- *                 Meldungen aus D1 und der Sekundär-Button «Ergebnis per
- *                 E-Mail erhalten» (vorerst ohne Funktion, folgt mit dem
- *                 Formularversand) statt «Alle Details zum Lohn».
+ *   vollstaendig  Fassung für die Lohnrechner-Seite (Standard false): statt
+ *                 «Alle Details zum Lohn» der Sekundär-Button «Ergebnis per
+ *                 E-Mail erhalten» mit dem E-Mail-Formular (siehe oben)
+ *   kopf          Übertitel, H2 und Einleitung zeigen (Standard true); ohne
+ *                 Kopf (Lohnrechner-Seite) steht nur die H2 «Lohnrechner»,
+ *                 unsichtbar für Vorleseprogramme
  *   bewegung      Übertitel, H2, Einleitung und Fussnote blenden beim
- *                 Scrollen ein (nur Startseite, global.css «Bewegung»;
- *                 Standard false). Rechner, Kästchen, Ergebnis und Buttons
- *                 bewegen sich nie.
+ *                 Scrollen ein (Startseite und Lohnrechner-Seite, global.css
+ *                 «Bewegung»; Standard false). Rechner, Kästchen, Ergebnis,
+ *                 Buttons und E-Mail-Formular bewegen sich nie.
  */
 import { KONFIG, ergebnis, chf, ziffern, stufeFuer } from '../scripts/lohnrechner.js';
+import { LAENGE, MUSTER } from '../../netlify/functions/anfrage/felder.mjs';
 import Icon from './Icon.astro';
 
 interface Props {
   anker?: string;
   vollstaendig?: boolean;
+  kopf?: boolean;
   bewegung?: boolean;
 }
 
-const { anker = 'lohnrechner', vollstaendig = false, bewegung = false } = Astro.props;
+const { anker = 'lohnrechner', vollstaendig = false, kopf = true, bewegung = false } = Astro.props;
 const bw = bewegung ? 'text' : undefined;
 
 // Vorbelegung gemäss D1: 2 Stunden, Kästchen leer (Lohn mit Kurs).
@@ -117,9 +136,17 @@ zeilen.forEach((z, i) => {
   }
 });
 
-// Eindeutige Namen und ids je Einsatz der Komponente.
+// Eindeutige Namen und ids je Einsatz der Komponente. In der vollständigen
+// Fassung heissen die Stundenfelder «stunden» (Feld des E-Mail-Formulars).
 const id = anker;
-const nameStunden = `${id}-stunden`;
+const nameStunden = vollstaendig ? 'stunden' : `${id}-stunden`;
+
+// E-Mail-Formular (nur vollständige Fassung): Stundenfelder und Kästchen
+// gehören über das Attribut form dazu. Die Anker der Rückmeldungen nennt die
+// Netlify Function (ERGEBNIS_GESENDET, ERGEBNIS_FEHLER in anfrage.mjs).
+const mailFormular = vollstaendig ? `${id}-mail-formular` : undefined;
+const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
+const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
 
 const satzKurs = KONFIG.SATZ_KURS.toFixed(2);
 const satzEinstieg = KONFIG.SATZ_EINSTIEG.toFixed(2);
@@ -135,14 +162,22 @@ const fussnote =
 
 <section class="rechner-abschnitt" aria-label="Lohnrechner">
   <div class="rechner-inhalt">
-    <p class="text-label etikette" data-bewegung={bw}>IHR LOHN · IN 60 SEKUNDEN</p>
-    <h2 class="text-h2" data-bewegung={bw}>Was würde ich verdienen?</h2>
-    <p class="einleitung" data-bewegung={bw}>
-      Eine Angabe genügt. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
-      kostenlosen Abklärung bei Ihnen zu Hause.
-    </p>
+    {
+      kopf ? (
+        <>
+          <p class="text-label etikette" data-bewegung={bw}>IHR LOHN · IN 60 SEKUNDEN</p>
+          <h2 class="text-h2" data-bewegung={bw}>Was würde ich verdienen?</h2>
+          <p class="einleitung" data-bewegung={bw}>
+            Eine Angabe genügt. Das Ergebnis ist eine Schätzung – verbindlich wird Ihre Zahl nach der
+            kostenlosen Abklärung bei Ihnen zu Hause.
+          </p>
+        </>
+      ) : (
+        <h2 class="visually-hidden">Lohnrechner</h2>
+      )
+    }
 
-    <div class="rechner" data-rechner data-stunden={nameStunden}>
+    <div class:list={['rechner', { 'rechner--ohne-kopf': !kopf }]} data-rechner data-stunden={nameStunden}>
       <!-- Sprungziel: ab 768 px der Anfang des Abschnitts, darunter die Frage
            (mit JavaScript) bzw. die Tabelle (ohne JavaScript). -->
       <span id={anker} class="rechner-anker"></span>
@@ -190,13 +225,19 @@ const fussnote =
             </legend>
             <p class="hilfe text-small" id={`${id}-hilfe`}>
               Zählen Sie nur die Zeit, in der Sie direkt am Menschen helfen. Haushalt, Einkaufen und
-              Gesellschaft zählen hier nicht – dazu weiter unten mehr.
+              Gesellschaft zählen hier {vollstaendig ? 'nicht.' : 'nicht – dazu weiter unten mehr.'}
             </p>
             <div class="felder">
               {
                 zeilen.map((z) => (
                   <label class="rechner-feld text-button">
-                    <input type="radio" name={nameStunden} value={z.wert} checked={z.wert === vorbelegung} />
+                    <input
+                      type="radio"
+                      name={nameStunden}
+                      value={z.wert}
+                      checked={z.wert === vorbelegung}
+                      form={mailFormular}
+                    />
                     <span>{z.text}</span>
                   </label>
                 ))
@@ -206,7 +247,13 @@ const fussnote =
 
           <label class="kurs-zeile">
             <span class="kaestchen">
-              <input type="checkbox" data-ohne-kurs />
+              <input
+                type="checkbox"
+                data-ohne-kurs
+                name={vollstaendig ? 'ohne_kurs' : undefined}
+                value={vollstaendig ? 'ja' : undefined}
+                form={mailFormular}
+              />
               <Icon name="check" />
             </span>
             <span>Ich habe den Pflegehelferkurs noch nicht abgeschlossen.</span>
@@ -218,26 +265,6 @@ const fussnote =
             zeigen wir Ihnen, was zusätzlich möglich ist: Betreuung, Entlastung,
             Hilflosenentschädigung, Ergänzungsleistungen.
           </p>
-
-          {
-            vollstaendig && (
-              <div class="frage frage--plz">
-                <label for={`${id}-plz`}>
-                  Postleitzahl der gepflegten Person (freiwillig – wir prüfen, ob wir bei Ihnen im
-                  Einsatz sind)
-                </label>
-                <input
-                  type="text"
-                  id={`${id}-plz`}
-                  inputmode="numeric"
-                  autocomplete="postal-code"
-                  pattern="[0-9]{4}"
-                  maxlength="4"
-                  data-plz
-                />
-              </div>
-            )
-          }
         </div>
 
         <div class="ergebnis" aria-live="polite">
@@ -263,35 +290,78 @@ const fussnote =
               AHV, Unfall- und Krankentaggeldversicherung<span data-bvg hidden={!start.pensionskasse}>{' und Pensionskasse'}</span>.
             </p>
 
-            {
-              vollstaendig && (
-                <>
-                  <p class="plz-meldung" data-plz-innerhalb hidden>
-                    Wir sind bei Ihnen im Einsatz.
-                  </p>
-                  <p class="plz-meldung" data-plz-ausserhalb hidden>
-                    Ehrlich gesagt: An diesem Ort sind wir noch nicht im Einsatz. Lassen Sie uns Ihre
-                    Kontaktdaten da – wir melden uns, sobald wir Ihre Region erschliessen, und nennen
-                    Ihnen auf Wunsch eine Anlaufstelle in Ihrer Nähe.
-                  </p>
-                </>
-              )
-            }
-
             <div class="knoepfe">
               <a class="button" href="#kontakt" data-erstgespraech>Kostenloses Erstgespräch vereinbaren</a>
               {
-                vollstaendig ? (
-                  <button type="button" class="button button--sekundaer" data-email>
-                    Ergebnis per E-Mail erhalten
-                  </button>
-                ) : (
+                !vollstaendig && (
                   <a class="button button--sekundaer" href="/lohnrechner/">
                     Alle Details zum Lohn
                   </a>
                 )
               }
             </div>
+
+            {
+              vollstaendig && (
+                <>
+                  <!-- Ergebnis per E-Mail: Zeile zum Antippen, darunter Rückmeldungen und
+                       Formular; sichtbar per CSS ([open], :target), ohne JavaScript. -->
+                  <details class="mail">
+                    <summary class="button button--sekundaer" data-email aria-controls={mailFormular}>
+                      Ergebnis per E-Mail erhalten
+                    </summary>
+                  </details>
+                  <div class="mail-bereich">
+                    <div class="mail-rueckmeldung mail-rueckmeldung--fehler flaeche-tiefblau" id="ergebnis-fehler" tabindex="-1">
+                      <p>
+                        Die E-Mail konnte gerade nicht gesendet werden. Bitte rufen Sie uns an:{' '}
+                        <a class="tippflaeche-zeile" href={telefon.href}>{telefon.text}</a>, schreiben Sie uns{' '}
+                        <a class="tippflaeche-zeile mail-whatsapp" href={whatsapp}><Icon name="message-circle" groesse={20} />auf WhatsApp</a>{' '}
+                        oder versuchen Sie es in ein paar Minuten nochmals.
+                      </p>
+                    </div>
+                    <form
+                      class="mail-formular"
+                      id={mailFormular}
+                      method="post"
+                      action="/api/anfrage"
+                      aria-label="Ergebnis per E-Mail"
+                    >
+                      <label for={`${id}-mail`}>Ihre E-Mail-Adresse</label>
+                      <div class="mail-zeile">
+                        <input
+                          type="email"
+                          id={`${id}-mail`}
+                          name="email"
+                          autocomplete="email"
+                          maxlength={LAENGE.email}
+                          pattern={MUSTER.email}
+                          required
+                          aria-describedby={`${id}-mail-hinweis`}
+                        />
+                        <button type="submit" class="button">Ergebnis senden</button>
+                      </div>
+                      <p class="mail-hinweis text-small" id={`${id}-mail-hinweis`}>
+                        Wir senden Ihnen nur diese eine E-Mail und speichern Ihre Adresse nicht.
+                      </p>
+                      <!-- Art der Anfrage, Quellseite (Rücksprung) und Dauer seit dem Laden in ms
+                           (Zeitprüfung, füllt das Menü-Skript beim Absenden). -->
+                      <input type="hidden" name="art" value="ergebnis" />
+                      <input type="hidden" name="quellseite" value={Astro.url.pathname} />
+                      <input type="hidden" name="dauer" value="" />
+                      <!-- Honeypot wie im Anfrageformular. -->
+                      <div class="honeypot" aria-hidden="true">
+                        <label for={`${id}-mail-webseite`}>Bitte dieses Feld leer lassen</label>
+                        <input type="text" id={`${id}-mail-webseite`} name="webseite" tabindex="-1" autocomplete="off" />
+                      </div>
+                    </form>
+                    <p class="mail-rueckmeldung mail-rueckmeldung--gesendet" id="ergebnis-gesendet" tabindex="-1">
+                      Die E-Mail ist unterwegs. Falls sie nicht ankommt, schauen Sie bitte im Spam-Ordner nach.
+                    </p>
+                  </div>
+                </>
+              )
+            }
           </div>
         </div>
       </div>
@@ -327,6 +397,12 @@ const fussnote =
   .rechner {
     margin: var(--space-3) calc(-1 * var(--seitenrand)) 0;
     background-color: var(--color-weiss);
+  }
+
+  /* Ohne sichtbaren Kopf (Lohnrechner-Seite): die Rechnerfläche beginnt
+     direkt am Anfang des Abschnitts (Board LR_D02_Rechner, LR_M02_Rechner). */
+  .rechner.rechner--ohne-kopf {
+    margin-top: 0;
   }
 
   /* Sprungziel (#lohnrechner bzw. #rechner aus Kopfzeile, Hero und von
@@ -425,8 +501,7 @@ const fussnote =
     min-width: 0;
   }
 
-  .frage legend,
-  .frage--plz label {
+  .frage legend {
     display: block;
     max-width: var(--breite-text);
     padding: 0;
@@ -503,18 +578,6 @@ const fussnote =
     margin: var(--space-2) 0 0;
   }
 
-  .frage--plz {
-    margin-top: var(--space-4);
-  }
-
-  .frage--plz label {
-    margin-bottom: var(--space-1);
-  }
-
-  .frage--plz input {
-    max-width: calc(var(--space-8) * 2);
-  }
-
   /* Ergebnis: Streifen in Ocker hell, mobil untereinander. */
   .ergebnis {
     background-color: var(--color-ocker-hell);
@@ -558,16 +621,107 @@ const fussnote =
     min-height: calc(4 * 1.55em);
   }
 
-  .plz-meldung {
-    margin: var(--space-3) 0 0;
-    padding: var(--space-2) var(--space-3);
-    background-color: var(--color-tiefblau-hell);
-  }
-
   .knoepfe {
     display: grid;
     gap: calc(var(--space-1) * 1.5);
     margin-top: var(--space-4);
+  }
+
+  /* Ergebnis per E-Mail (vollständige Fassung; Claude Design
+     LR_D02/LR_M02_Mail_offen, _gesendet, _Fehler). Die Zeile zum Antippen
+     ist ein Sekundär-Button, 16 px unter «Kostenloses Erstgespräch
+     vereinbaren» (Desktop: in einer zweiten Zeile). */
+  .mail {
+    margin-top: var(--space-2);
+  }
+
+  .mail > summary {
+    list-style: none;
+  }
+
+  .mail > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* Das Formular erscheint, sobald das <details> offen ist, und nach einem
+     Fehler (#ergebnis-fehler): dann bleibt das E-Mail-Feld stehen. */
+  .mail-formular {
+    display: none;
+    margin-top: var(--space-4);
+  }
+
+  .mail[open] + .mail-bereich > .mail-formular,
+  .mail-rueckmeldung--fehler:target + .mail-formular {
+    display: block;
+  }
+
+  .mail-rueckmeldung--fehler:target + .mail-formular {
+    margin-top: var(--space-3);
+  }
+
+  .mail-formular label {
+    display: block;
+    font-weight: 700;
+  }
+
+  /* Mobil Feld und Button untereinander in voller Breite, ab 768 px
+     nebeneinander. */
+  .mail-zeile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+  }
+
+  .mail-hinweis {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-gedaempft);
+  }
+
+  /* Rückmeldungen nach dem Absenden, nur per :target (wie im
+     Anfrageformular): gesendet auf Tiefblau-hell, Fehler als Tiefblau-Fläche
+     mit weisser Schrift und weissen Links, kein Rot. Ist das <details>
+     wieder offen, tritt «gesendet» zurück. */
+  .mail-rueckmeldung {
+    margin: var(--space-4) 0 0;
+    padding: var(--space-2) var(--space-3);
+    background-color: var(--color-tiefblau-hell);
+    scroll-margin-top: var(--space-2);
+  }
+
+  .mail-rueckmeldung:not(:target),
+  .mail[open] + .mail-bereich > .mail-rueckmeldung--gesendet {
+    display: none;
+  }
+
+  .mail-rueckmeldung a {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mail-rueckmeldung--fehler {
+    background-color: var(--color-tiefblau);
+    color: var(--color-auf-tiefblau);
+  }
+
+  .mail-rueckmeldung--fehler a {
+    color: var(--color-auf-tiefblau);
+  }
+
+  /* WhatsApp im Satz: Sprechblasen-Icon vor «auf WhatsApp». */
+  .mail-whatsapp :global(.icon) {
+    vertical-align: text-bottom;
+    margin-inline-end: var(--space-1);
+  }
+
+  /* Honeypot: für Menschen unsichtbar, für Programme ein normales Feld. */
+  .honeypot {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
   }
 
   .fussnote {
@@ -666,13 +820,27 @@ const fussnote =
       order: 3;
     }
 
-    .plz-meldung {
-      order: 4;
-    }
-
     .ergebnis .knoepfe > :not([data-erstgespraech]) {
       order: 5;
       margin-top: var(--space-3);
+    }
+
+    /* Ergebnis per E-Mail (vollständige Fassung) an derselben Stelle wie der
+       zweite Button: am Schluss, darunter Formular und Rückmeldungen. */
+    .mail,
+    .mail-bereich {
+      order: 5;
+    }
+
+    .mail {
+      margin-top: var(--space-3);
+    }
+  }
+
+  /* Unter 480 px: Zeile zum Antippen in voller Breite wie die Buttons. */
+  @media (max-width: 479px) {
+    .mail > summary {
+      display: block;
     }
   }
 
@@ -704,6 +872,17 @@ const fussnote =
       margin-inline: 0;
     }
 
+    .mail-zeile {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .mail-zeile input {
+      flex: 1 1 calc(var(--space-6) * 5);
+      width: auto;
+    }
+
     .fallback,
     .eingabe {
       padding: var(--space-6);
@@ -721,6 +900,10 @@ const fussnote =
 
     .rechner {
       margin-top: var(--space-6);
+    }
+
+    .rechner.rechner--ohne-kopf {
+      margin-top: 0;
     }
 
     .felder {

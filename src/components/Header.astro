@@ -26,6 +26,9 @@
  * Hauswirtschaft «Beratung anfragen» → #kontakt, auf allen anderen Seiten
  * «Lohn berechnen» → /#lohnrechner, auch auf der Startseite.
  *
+ * Der Menüpunkt der aktuellen Seite (z. B. «Lohnrechner» auf /lohnrechner/)
+ * trägt aria-current="page" und ist 2 px unterstrichen.
+ *
  * Menü-Skript: neben dem Lohnrechner die einzige zweite Ausnahme vom
  * Verzicht auf JavaScript, inline, unter 1 KB, ohne Framework. Ohne
  * JavaScript bleibt die Navigation sichtbar (unter der Kopfzeile
@@ -74,6 +77,10 @@ const menue = [
   { text: 'Kontakt', ziel: '#kontakt' },
 ];
 
+// Menüpunkt der aktuellen Seite (aria-current="page", 2 px unterstrichen),
+// z. B. «Lohnrechner» auf /lohnrechner/.
+const aktuell = `${pfad}/`;
+
 const telefon = { text: '041 784 26 55', href: 'tel:+41417842655' };
 const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
 ---
@@ -101,7 +108,7 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
         {
           menue.map((punkt) => (
             <li>
-              <a class="menue-link text-menu" href={punkt.ziel}>
+              <a class="menue-link text-menu" href={punkt.ziel} aria-current={punkt.ziel === aktuell ? 'page' : undefined}>
                 {punkt.text}
               </a>
             </li>
@@ -248,6 +255,14 @@ const logoAlt = 'Pflegeunion Schweiz – zur Startseite';
 
   .menue-link:hover {
     text-decoration: underline;
+  }
+
+  /* Menüpunkt der aktuellen Seite: 2 px unterstrichen, 8 px unter der
+     Schrift (Board LR_D01_Hero), in allen Breiten. */
+  .menue-link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: var(--space-1);
   }
 
   .menue-telefon {

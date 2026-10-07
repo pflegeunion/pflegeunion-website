@@ -25,7 +25,11 @@
  *              und 1200 px breit, Hochformat 1200 × 1513 px); kein Lazy
  *              Loading, fetchpriority="high"
  *   bildAlt    Alternativtext zum Bild
- *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt
+ *   bildIdee   Text zur Bildidee für die Bildfläche, solange kein Foto vorliegt;
+ *              ohne bild und bildIdee steht kein Bild (Hero ohne Bild, z. B.
+ *              Lohnrechner-Seite C2: der Text steht allein, ohne Mindesthöhe)
+ *   unterseite H1 als Seitentitel einer Unterseite (.text-h1--sub, 40 px;
+ *              Standard false)
  *   bewegung   Bewegung beim Scrollen (nur Startseite, global.css «Bewegung»):
  *              das Foto zoomt beim Laden von 108 % auf 100 %, die Ebene
  *              darum (.hero-ebene) beim Scrollen bis 105 %; der Rahmen
@@ -50,6 +54,7 @@ interface Props {
   bild?: string;
   bildAlt?: string;
   bildIdee?: string;
+  unterseite?: boolean;
   bewegung?: boolean;
 }
 
@@ -64,8 +69,11 @@ const {
   bild,
   bildAlt = '',
   bildIdee = '',
+  unterseite = false,
   bewegung = false,
 } = Astro.props;
+
+const mitBild = Boolean(bild || bildIdee);
 
 const titelTeile = Array.isArray(titel) ? titel : [titel];
 const whatsappLink = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
@@ -75,11 +83,11 @@ const breiten = [480, 800, 1200];
 const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join(', ') : '';
 ---
 
-<section class="hero" aria-label="Einstieg">
+<section class:list={['hero', { 'hero--ohne-bild': !mitBild }]} aria-label="Einstieg">
   <div class="hero-inhalt">
     <div class="hero-text">
       <p class="text-label etikette">{etikette}</p>
-      <h1 class="text-h1">
+      <h1 class:list={['text-h1', { 'text-h1--sub': unterseite }]}>
         {titelTeile.map((teil, i) => (i === 0 ? teil : [<br />, teil]))}
       </h1>
       <p class="hero-absatz">{text}</p>
@@ -108,28 +116,30 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
     </div>
   </div>
 
-  <figure class="hero-bild">
-    {
-      bild ? (
-        <div class="hero-ebene">
-          <img
-            src={`/bilder/${bild}-800.webp`}
-            srcset={srcset}
-            sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
-            alt={bildAlt}
-            width="1200"
-            height="1513"
-            loading="eager"
-            fetchpriority="high"
-            decoding="sync"
-            data-bewegung={bewegung ? 'hero' : undefined}
-          />
-        </div>
-      ) : (
-        <figcaption class="bild-idee text-small">{bildIdee}</figcaption>
-      )
-    }
-  </figure>
+  {
+    mitBild && (
+      <figure class="hero-bild">
+        {bild ? (
+          <div class="hero-ebene">
+            <img
+              src={`/bilder/${bild}-800.webp`}
+              srcset={srcset}
+              sizes="(min-width: 1360px) calc(50vw - 114px), (min-width: 1024px) 600px, 100vw"
+              alt={bildAlt}
+              width="1200"
+              height="1513"
+              loading="eager"
+              fetchpriority="high"
+              decoding="sync"
+              data-bewegung={bewegung ? 'hero' : undefined}
+            />
+          </div>
+        ) : (
+          <figcaption class="bild-idee text-small">{bildIdee}</figcaption>
+        )}
+      </figure>
+    )
+  }
 </section>
 
 <style>
@@ -264,6 +274,11 @@ const srcset = bild ? breiten.map((w) => `/bilder/${bild}-${w}.webp ${w}w`).join
       min-height: calc(
         (50vw - (min(100vw - 2 * var(--seitenrand), var(--breite-inhalt)) + 7 * var(--space-3)) / 12) * 0.81
       );
+    }
+
+    /* Ohne Bild: keine Mindesthöhe, der Text bestimmt die Höhe. */
+    .hero--ohne-bild {
+      min-height: 0;
     }
 
     .hero-inhalt {

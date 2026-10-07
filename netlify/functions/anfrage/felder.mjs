@@ -5,7 +5,13 @@
  * Netlify Function (Prüfung, Bezeichnungen in der Mail). Bezeichnungen und
  * Werte wörtlich aus D2; sie ändern sich nur zusammen mit dem Konzept.
  * Reihenfolge und Nummern wie in D2: Pflicht sind Feld 1, 3, 4 und 6.
+ *
+ * Dazu das kleine Formular «Ergebnis per E-Mail» der Lohnrechner-Seite (D1,
+ * Lohnrechner.astro, Feld art=ergebnis): E-Mail (Pflicht, dieselben Regeln
+ * wie Feld 5), Stunden (einer der Werte aus KONFIG.stufen) und das Kästchen
+ * «ohne_kurs» (leer oder «ja»). Beträge nimmt der Server nie vom Browser.
  */
+import { KONFIG } from '../../../src/scripts/lohnrechner.js';
 
 export const ANLIEGEN = [
   'Anstellung als pflegender Angehöriger',
@@ -61,6 +67,12 @@ export const FELDER = [
 /** Versteckte Felder mit den Werten aus dem Lohnrechner. */
 const RECHNER = ['stunden', 'ergebnis'];
 
+/** Wert des versteckten Felds «art» beim Formular «Ergebnis per E-Mail». */
+export const ART_ERGEBNIS = 'ergebnis';
+
+/** Erlaubte Werte des Kästchens «Ich habe den Pflegehelferkurs noch nicht abgeschlossen.». */
+const OHNE_KURS = 'ja';
+
 /** Spam-Schutz (D2): Zeitprüfung ab dem Laden der Seite. */
 export const MINDESTDAUER_MS = 3000;
 
@@ -99,6 +111,24 @@ export function pruefe(formular) {
     werte[feld.name] = wert;
   }
   return { werte };
+}
+
+/**
+ * Prüft das Formular «Ergebnis per E-Mail». Gibt { werte: { email, stufe,
+ * ohneKurs } } zurück (stufe aus KONFIG.stufen) oder { fehler: name } mit
+ * dem Namen des ersten ungültigen Felds (nie den Wert). Das Kästchen wird
+ * nur geprüft: Die Mail ist laut D1 in beiden Zuständen gleich.
+ */
+export function pruefeErgebnis(formular) {
+  const email = saeubere(formular.get('email'));
+  if (!email || email.length > LAENGE.email || !EMAIL.test(email) || !REGEL.email.test(email)) {
+    return { fehler: 'email' };
+  }
+  const stufe = KONFIG.stufen.find((s) => s.wert === formular.get('stunden'));
+  if (!stufe) return { fehler: 'stunden' };
+  const kurs = formular.get('ohne_kurs');
+  if (kurs !== null && kurs !== OHNE_KURS) return { fehler: 'ohne_kurs' };
+  return { werte: { email, stufe, ohneKurs: kurs === OHNE_KURS } };
 }
 
 /**
