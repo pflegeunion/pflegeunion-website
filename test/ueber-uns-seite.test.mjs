@@ -142,7 +142,7 @@ test('Team, Vorstand und Treuhand an einer Stelle (src/daten/personen.mjs)', () 
       ['Cristian Fernandez', 'Vizepräsident', '[Hintergrund in einer Zeile]'],
       ['Rolf Günter', 'Mitglied', '[Hintergrund in einer Zeile]'],
       ['Fabian Blaser', 'Mitglied', '[Hintergrund in einer Zeile]'],
-      ['Oliver Ruppen', 'Mitglied', '[Hintergrund in einer Zeile]'],
+      ['Olivier Ruppen', 'Mitglied', '[Hintergrund in einer Zeile]'],
     ],
   );
   assert.deepEqual(TREUHAND, [{ name: '[Name]', firma: '[Firma, Ort]', aufgabe: '[Aufgabe in einer Zeile]' }]);
@@ -151,7 +151,7 @@ test('Team, Vorstand und Treuhand an einer Stelle (src/daten/personen.mjs)', () 
   // Die Seite bezieht alles von dort und schreibt keine Namen selbst.
   assert.match(quelle, /import \{ TEAMBILD, TEAM, VORSTAND, TREUHAND \} from '\.\.\/daten\/personen\.mjs';/);
   const markup = lies('src/pages/ueber-uns.astro').split(/^---$/m)[2];
-  for (const name of ['Michel Gurnari', 'Rolf Günter', 'Oliver Ruppen']) assert.ok(!markup.includes(name), name);
+  for (const name of ['Michel Gurnari', 'Rolf Günter', 'Olivier Ruppen']) assert.ok(!markup.includes(name), name);
 });
 
 test('Porträts 3:4: Foto mit Alt-Text = Name, sonst «[Foto folgt]» als Text', () => {

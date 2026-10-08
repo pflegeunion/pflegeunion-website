@@ -51,7 +51,7 @@ export const VORSTAND = [
   { name: 'Cristian Fernandez', funktion: 'Vizepräsident', hintergrund: '[Hintergrund in einer Zeile]', foto: '' },
   { name: 'Rolf Günter', funktion: 'Mitglied', hintergrund: '[Hintergrund in einer Zeile]', foto: '' },
   { name: 'Fabian Blaser', funktion: 'Mitglied', hintergrund: '[Hintergrund in einer Zeile]', foto: '' },
-  { name: 'Oliver Ruppen', funktion: 'Mitglied', hintergrund: '[Hintergrund in einer Zeile]', foto: '' },
+  { name: 'Olivier Ruppen', funktion: 'Mitglied', hintergrund: '[Hintergrund in einer Zeile]', foto: '' },
 ];
 
 /** Treuhand (UU_D04_Vorstand_A), ohne Foto. */
