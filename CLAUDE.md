@@ -701,10 +701,31 @@ netlify/functions/   anfrage/: Netlify Function für den Formularversand
 
 ## Arbeitsweise
 
+- **Drei Stufen** (Entscheid GL 08.10.2026): Vorschau, Vorproduktion,
+  Produktion.
+  1. **Vorschau:** Jeder Pull Request hat seine eigene Netlify-Vorschau
+     (Deploy Preview).
+  2. **Vorproduktion:** Nach dem Merge steht die Änderung auf
+     `vorproduktion--pflegeunion-test.netlify.app` (Branch deploy des
+     dauerhaften Branches `vorproduktion`).
+  3. **Produktion:** `main` → pflegeunion.ch.
 - Änderungen auf einem eigenen Branch entwickeln und als Pull Request
-  einreichen. **Claude eröffnet Pull Requests, Menschen mergen.** Nie direkt
-  auf main pushen.
-- **Nichts kommt auf main ohne gesehene Netlify-Vorschau.**
+  einreichen. **Alle Pull Requests gehen gegen `vorproduktion`, nicht gegen
+  `main`.** **Claude eröffnet Pull Requests, Menschen mergen.** Nie direkt
+  auf `main` oder `vorproduktion` pushen.
+- **Produktion nur über einen Release:** Ein Pull Request «Release
+  JJJJ-MM-TT» von `vorproduktion` nach `main`, mit der Liste der enthaltenen
+  Änderungen (die gemergten Pull Requests). Nie direkt auf `main` arbeiten.
+- Vor jedem neuen Branch `vorproduktion` aktuell holen
+  (`git fetch origin vorproduktion`, neuer Branch ab `origin/vorproduktion`).
+  Nach einem Release prüfen, dass `vorproduktion` und `main` gleich sind
+  (`git diff origin/main origin/vorproduktion` ohne Ausgabe); sonst
+  `vorproduktion` per Pull Request auf den Stand von `main` bringen.
+- **Nichts kommt auf `vorproduktion` ohne gesehene Netlify-Vorschau** des
+  Pull Requests und nichts auf `main` ohne gesehene Vorproduktion.
+- `GO_LIVE=ja` wird später nur für den Netlify-Kontext Production gesetzt
+  (siehe Go-live-Sperre); in der Vorproduktion, in Deploy Previews und in
+  Branch deploys bleibt es bei der Warnung.
 - **Freigabe** (Entscheid GL 07.10.2026): Michel Gurnari entscheidet und
   gibt frei, im Einverständnis mit Cristian Fernandez – auch bei Zahlen mit
   Aussenwirkung, Leistungsversprechen, Personen-Nennungen und Zitaten. Eine
