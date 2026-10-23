@@ -130,7 +130,7 @@ test('Team, Vorstand und Treuhand an einer Stelle (src/daten/personen.mjs)', () 
       ],
       [
         'Christoph Willi',
-        'Pflegedienstleitung, dipl. Pflegefachmann HF',
+        'Pflegedienstleitung',
         '«Gute Pflege beginnt mit Zuhören – bei den Klienten genauso wie bei den Angehörigen.»',
       ],
     ],
