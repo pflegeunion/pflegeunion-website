@@ -39,7 +39,7 @@ export const TEAM = [
   },
   {
     name: 'Christoph Willi',
-    funktion: 'Pflegedienstleitung, dipl. Pflegefachmann HF',
+    funktion: 'Pflegedienstleitung',
     zitat: '«Gute Pflege beginnt mit Zuhören – bei den Klienten genauso wie bei den Angehörigen.»',
     foto: '',
   },
