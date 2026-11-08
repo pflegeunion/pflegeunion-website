@@ -1,26 +1,19 @@
 /*
  * Betreuung & Hauswirtschaft: Tarif und Bedingungen (Konzept C3, Teil F
- * Punkt 1; Entscheide der Geschäftsleitung offen).
+ * Punkt 1). Tarif entschieden 08.11.2026 (Entscheid GL, Auftrag «Tarife
+ * und Einsatzgebiet»): CHF 56.– pro Stunde, ohne Zuschläge, Wegpauschale
+ * CHF 10.– bei Einsätzen unter 2 Stunden. Mindestdauer, Frist und die
+ * Vergleichszeile mit der öffentlichen Spitex entfallen.
  *
  * Einzige Stelle für diese Werte. Die Seite /betreuung-hauswirtschaft/
- * (Tarif-Kasten, FAQ) und die Startseite (Abschnitt 8, Tarif) beziehen sie
- * von hier. Liegt ein Entscheid vor, wird die betreffende Zeile ersetzt.
- *
- * Bis dahin stehen die Platzhalter aus C3 wörtlich und sichtbar in eckigen
- * Klammern. Go-live-Sperre (CLAUDE.md): Mit GO_LIVE=ja bricht der Build ab,
- * solange eine Seite «[XX» oder «[X]» enthält (scripts/platzhalter.mjs).
+ * (Tarif-Kasten), die Startseite (Abschnitt 8, Tarif) und /tarife/
+ * (Tabelle «Betreuung und Hauswirtschaft») beziehen sie von hier.
  */
 export const TARIF = {
-  // Stundentarif in Franken, im Text nach «CHF», z. B. '52.–'.
-  stunde: '[XX.–]',
-  // Satzteil nach dem Gedankenstrich im Tarif-Kasten, z. B.
-  // 'ohne Zuschläge für Abende und Wochenenden'.
-  zuschlaege: '[ohne Zuschläge für Abende und Wochenenden]',
-  // Mindestdauer eines Einsatzes, im Satz «Einsätze dauern mindestens …», z. B. '1 Stunde'.
-  mindestdauer: '[X] Stunden',
-  // Frist für Änderungen, im Satz «Änderungen melden Sie bis … am Vortag», z. B. '12 Uhr'.
-  frist: '[X] Uhr',
-  // Vergleichszeile im Tarif-Kasten; null blendet sie aus. Nur zeigen, wenn
-  // unser Tarif nicht über CHF 36.– liegt (Regieanweisung C3).
-  vergleich: 'Zum Vergleich: Die öffentliche Spitex im Kanton Zug verrechnet für Hauswirtschaft CHF 36.– pro Stunde.',
+  // Stundentarif in Franken, im Text nach «CHF».
+  stunde: '56.–',
+  // Satzteil nach dem Gedankenstrich im Tarif-Kasten.
+  zuschlaege: 'ohne Zuschläge für Abende und Wochenenden',
+  // Satz zur Wegpauschale im Tarif-Kasten.
+  wegpauschale: 'Bei Einsätzen unter 2 Stunden kommt eine Wegpauschale von CHF 10.– dazu, ab 2 Stunden keine.',
 };

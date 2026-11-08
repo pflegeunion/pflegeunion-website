@@ -11,7 +11,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -121,10 +121,36 @@ test('Build ruft die Prüfung nach dem Astro-Build auf', () => {
   assert.match(paket.scripts.build, /astro build && node scripts\/platzhalter\.mjs$/);
 });
 
-test('Tarif der Betreuung an einer Stelle, Seiten tragen die Werte nicht selbst ein', () => {
-  assert.deepEqual(Object.keys(TARIF), ['stunde', 'zuschlaege', 'mindestdauer', 'frist', 'vergleich']);
-  for (const datei of ['src/pages/betreuung-hauswirtschaft.astro', 'src/pages/index.astro']) {
+test('Tarif der Betreuung an einer Stelle (entschieden 08.11.2026), ohne Platzhalter', () => {
+  assert.deepEqual(Object.keys(TARIF), ['stunde', 'zuschlaege', 'wegpauschale']);
+  for (const wert of Object.values(TARIF)) assert.doesNotMatch(wert, /[[\]]/, wert);
+  for (const datei of ['src/pages/betreuung-hauswirtschaft.astro', 'src/pages/index.astro', 'src/pages/tarife.astro']) {
     const quelle = readFileSync(new URL(`../${datei}`, import.meta.url), 'utf8');
     assert.doesNotMatch(quelle, /\[XX|\[X\]|\[ohne Zuschläge|CHF 36\.–/, datei);
   }
+});
+
+test('Startseite, Betreuung und Tarife ohne Platzhalter; nur Über uns offen (Quelltext und Daten)', () => {
+  // Quelltext und Daten aller Seiten ausser Über uns: kein «[XX…]», kein «[X]».
+  const dateien = [
+    'src/pages/index.astro',
+    'src/pages/betreuung-hauswirtschaft.astro',
+    'src/pages/tarife.astro',
+    'src/pages/lohnrechner.astro',
+    'src/daten/betreuung.mjs',
+    'src/daten/tarife.mjs',
+    'src/daten/einsatzgebiet.mjs',
+    'src/components/Footer.astro',
+    'src/components/Header.astro',
+  ];
+  for (const datei of dateien) {
+    const quelle = readFileSync(new URL(`../${datei}`, import.meta.url), 'utf8');
+    assert.doesNotMatch(quelle, /\[XX|\[X\]/, datei);
+  }
+});
+
+test('Gebaute Seiten: nur Über uns hat noch Platzhalter (nach npm run build)', { skip: !existsSync(new URL('../dist/index.html', import.meta.url)) }, () => {
+  const funde = pruefeOrdner(fileURLToPath(new URL('../dist/', import.meta.url)));
+  assert.deepEqual(Object.keys(funde), ['ueber-uns/index.html']);
+  assert.ok(!funde['ueber-uns/index.html'].some((f) => f.startsWith('[XX') || f === '[X]'));
 });

@@ -4,8 +4,13 @@
  * Kopfzeile_Desktop, Kopfzeile_1280, Kopfzeile_1280_Scroll,
  * Kopfzeile_1440_Scroll, Kopfzeile_Mobil, Trust_320).
  *
- * Ab 1360 px eine Zeile, 72 px, sticky: Logo, fünf Menüpunkte, Telefon,
- * Primär-Button. Darüber die Utility-Zeile (Warmgrau), die wegscrollt.
+ * Ab 1360 px eine Zeile, 72 px, sticky: Logo, sechs Menüpunkte, Telefon,
+ * Primär-Button. Im Menü steht kurz «Tarife» (Seitentitel und Fusszeile
+ * «Tarife und Kosten»): Gemessen am 08.11.2026 passt die Kopfzeile damit ab
+ * 1360 px einzeilig (Button endet bei 1336 px, auch mit «Beratung
+ * anfragen») und 1024–1359 px in die Menüzeile; «Tarife und Kosten» liefe
+ * bei 1360–1377 px 18 px über den Rand. Darüber die Utility-Zeile
+ * (Warmgrau), die wegscrollt.
  *
  * 1024–1359 px zwei Zeilen: Hauptzeile 72 px (Logo, Telefon, Button),
  * darunter die Menüzeile 50 px. Beide bleiben beim Scrollen sichtbar
@@ -85,6 +90,7 @@ const menue = [
   { text: 'So funktioniert es', ziel: '/#ablauf' },
   { text: 'Lohnrechner', ziel: '/lohnrechner/' },
   { text: 'Betreuung & Hauswirtschaft', ziel: '/betreuung-hauswirtschaft/' },
+  { text: 'Tarife', ziel: '/tarife/' },
   { text: 'Über uns', ziel: '/ueber-uns/' },
   { text: 'Kontakt', ziel: '#kontakt' },
 ];

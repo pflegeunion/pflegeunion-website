@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, statSync } from 'node:fs';
 import { ANLIEGEN } from '../netlify/functions/anfrage/felder.mjs';
+import { TARIF } from '../src/daten/betreuung.mjs';
 
 const lies = (pfad) => readFileSync(new URL(`../${pfad}`, import.meta.url), 'utf8');
 const flach = (t) => t.replace(/\s+/g, ' ');
@@ -60,11 +61,11 @@ test('Texte wörtlich aus den Boards (Claude Design, Seite «Betreuung & Hauswir
     'Sie sind bei der Pflegeunion als pflegender Angehöriger angestellt oder werden es bald? Dann ergänzt Betreuung und Hauswirtschaft Ihre Pflege dort, wo die Krankenversicherung nicht zahlt: Haushalt, Begleitung, Gesellschaft – und Entlastung für Sie selbst. Ihre Pflegefachperson plant das mit Ihnen.',
     'Sie brauchen Unterstützung im Alltag',
     'Sie oder Ihre Eltern leben im Kanton Zug und brauchen regelmässig jemanden, der einkauft, kocht, begleitet oder Gesellschaft leistet – ohne dass Pflege nötig ist? Auch dann kommen wir. Sobald Pflege dazukommt, sagen wir Ihnen ehrlich, was wir heute leisten und was noch nicht.',
-    // Tarif (BH_D04_Tarif); Werte aus src/daten/betreuung.mjs
+    // Tarif (BH_D04_Tarif, Tarif entschieden 08.11.2026); Werte aus src/daten/betreuung.mjs
     'EIN TARIF, KEINE ÜBERRASCHUNGEN',
-    'titel={`CHF ${TARIF.stunde} pro Stunde. Das ist alles.`}',
-    'Betreuung und Hauswirtschaft sind private Leistungen; die Krankenversicherung übernimmt sie nicht. Bei uns gilt ein einziger Stundentarif von CHF {TARIF.stunde} – {TARIF.zuschlaege}. Einsätze dauern mindestens {TARIF.mindestdauer}. Sie erhalten vor dem ersten Einsatz eine schriftliche Offerte; was darin steht, gilt.',
-    '{TARIF.vergleich && <p data-bewegung="text">{TARIF.vergleich}</p>}',
+    'titel={`CHF ${TARIF.stunde} pro Stunde. Ohne Zuschläge.`}',
+    "Betreuung und Hauswirtschaft sind private Leistungen; die Krankenversicherung übernimmt sie nicht. Bei uns gilt ein einziger Stundentarif von CHF {TARIF.stunde} – {TARIF.zuschlaege}.{' '} {TARIF.wegpauschale} Sie erhalten vor dem ersten Einsatz eine schriftliche Offerte; was darin steht, gilt.",
+    '<a class="textlink" href="/tarife/">Tarife und Kosten</a>',
     // Finanzielle Hilfen (BH_D05_Hilfen)
     'Diese Unterstützungen stehen Ihnen möglicherweise zu.',
     'Ergänzungsleistungen (EL):',
@@ -88,13 +89,21 @@ test('Texte wörtlich aus den Boards (Claude Design, Seite «Betreuung & Hauswir
     'Kommt immer dieselbe Person?',
     'Wir planen mit festen Bezugspersonen und stellen Ihnen Ihr Team vor. Bei Ferien oder Krankheit informieren wir Sie vorher, wer kommt.',
     'Wie kurzfristig kann ich buchen oder absagen?',
-    'Regelmässige Einsätze planen wir mit Ihnen fest. Änderungen melden Sie bis ${TARIF.frist} am Vortag; die Details stehen in Ihrer Offerte.',
+    'Regelmässige Einsätze planen wir mit Ihnen fest. Absagen sind bis 24 Stunden vorher kostenlos, danach verrechnen wir die geplante Zeit, höchstens 1 Stunde – nie bei Spitaleintritt oder Todesfall. Die Details stehen in Ihrer Offerte.',
     'Meine Mutter braucht auch Hilfe beim Duschen. Übernehmen Sie das?',
     'Hilfe bei der Körperpflege ist Grundpflege und wird über die Krankenversicherung vergütet. Wenn ein Angehöriger sie leisten kann, stellen wir ihn dafür an. Pflege durch unser eigenes Fachpersonal bieten wir demnächst an – rufen Sie an, wir sagen Ihnen den Stand.',
     'Muss ich die Leistungen vorstrecken?',
     'Sie erhalten von uns monatlich eine Rechnung über die geleisteten Stunden. Beiträge von Ergänzungsleistungen oder Zusatzversicherungen beantragen wir mit Ihnen; die Rückerstattung läuft je nach Stelle direkt an Sie.',
   ];
   for (const text of texte) assert.ok(quelle.includes(text), text);
+  // Tarif-Entscheid 08.11.2026: Werte gesetzt; «Das ist alles.», Mindestdauer,
+  // Frist und die Vergleichszeile (CHF 36.–) entfallen.
+  assert.equal(TARIF.stunde, '56.–');
+  assert.equal(TARIF.zuschlaege, 'ohne Zuschläge für Abende und Wochenenden');
+  assert.equal(TARIF.wegpauschale, 'Bei Einsätzen unter 2 Stunden kommt eine Wegpauschale von CHF 10.– dazu, ab 2 Stunden keine.');
+  for (const alt of ['Das ist alles.', 'Einsätze dauern mindestens', 'Änderungen melden Sie', 'TARIF.mindestdauer', 'TARIF.frist', 'TARIF.vergleich', 'CHF 36.–', 'Zum Vergleich']) {
+    assert.ok(!quelle.includes(alt), alt);
+  }
   // Häufige Fragen ohne Übertitel.
   const faq = quelle.split('label="Häufige Fragen"')[1].split('>')[0];
   assert.doesNotMatch(faq, /etikette=/);

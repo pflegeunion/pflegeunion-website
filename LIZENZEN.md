@@ -39,6 +39,18 @@ Links zu den Fotos: <https://unsplash.com/photos/kcCMWn0G9Zo>,
 - Lucide (Linien-Icons in `src/components/Icon.astro`), ISC-Lizenz, siehe
   `src/components/LICENSE-lucide.txt`.
 
+## Karten
+
+- Karte Kanton Zug (`src/components/KarteZug.astro`): Gemeindegrenzen und Seen aus swiss-maps 4.7.0
+  (Interactive Things, BSD-Lizenz), Datenstand 2026; Quelle der Geodaten: BFS,
+  ThemaKart (generalisierte Gemeindegrenzen) und swisstopo. Vereinfacht und als
+  SVG gezeichnet am 08.11.2026.
+
+## Downloads
+
+- Tarifblatt (`public/downloads/tarifblatt-pflegeunion.pdf`, 2 Seiten A4,
+  Stand 08.11.2026), Eigentum des Vereins Pflegeunion Schweiz.
+
 ## Logo
 
 - Logo und Bildzeichen der Pflegeunion Schweiz (`public/logos/`), Eigentum des

@@ -439,6 +439,9 @@ input[type='radio']:checked {
   --tippflaeche: 44px;
   --tippflaeche-gross: 56px;
 
+  /* Karte des Kantons Zug (Startseite, Einsatzgebiet): höchstens 560 px. */
+  --breite-karte: 560px;
+
   /* Spalte der Schrittzahlen (Abschnitt «So funktioniert es», ab 768 px). */
   --schritt-zahl-spalte: calc(var(--space-8) + var(--space-2));
 
@@ -623,6 +626,35 @@ a {
   display: inline-block;
   padding-block: calc((var(--tippflaeche) - 1lh) / 2);
   margin-block: calc((1lh - var(--tippflaeche)) / 2);
+}
+
+/* Längere Links im Fliesstext, die umbrechen dürfen (z. B. «gesetzlichen
+   Eigenanteil von höchstens CHF 15.35 pro Tag»): bleiben inline; der
+   Innenabstand vergrössert nur die Tippfläche auf 44 px, die Zeilen
+   verschieben sich nicht. */
+.tippflaeche-inline {
+  padding-block: calc((var(--tippflaeche) - 1lh) / 2);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Textlink in eigener Zeile (z. B. «Tarife und Kosten»): Tiefblau, Bold,
+   unterstrichen, Tippfläche 44 px. */
+.textlink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tippflaeche);
+  color: var(--color-tiefblau);
+  font-weight: 700;
+}
+
+/* Waagrecht scrollbare Box um eine Tabelle (role="region", tabindex="0",
+   aria-label): Sicherheitsnetz für sehr schmale Bildschirme (z. B. 320 px).
+   Ist die Tabelle einmal breiter als die Spalte, scrollt nur die Box, nie
+   die Seite; nichts wird abgeschnitten. */
+.tabelle-box {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /*
