@@ -17,9 +17,10 @@
  *   etikette   Übertitel
  *   titel      H1; als Liste werden die Teile mit Zeilenumbruch gesetzt
  *   text       Fliesstext
- *   primaer    { text, ziel } Primär-Button (optional; ohne Button folgt die
- *              Telefonzeile direkt auf den Text: 24 px, ab 1024 px 32 px,
- *              Über uns)
+ *   primaer    { text, ziel, typ? } Primär-Button (optional; ohne Button folgt
+ *              die Telefonzeile direkt auf den Text: 24 px, ab 1024 px 32 px,
+ *              Über uns); typ setzt das Attribut type des Links, z. B.
+ *              'application/pdf' für das Tarifblatt auf /tarife/
  *   sekundaer  { text, ziel } Sekundär-Button (optional)
  *   telefon    Telefonzeile anzeigen (Standard true)
  *   whatsapp   WhatsApp-Zeile «Lieber schreiben? Auf WhatsApp» anzeigen (Standard true)
@@ -49,6 +50,7 @@ import Icon from './Icon.astro';
 interface Knopf {
   text: string;
   ziel: string;
+  typ?: string;
 }
 
 interface Props {
@@ -114,7 +116,7 @@ const bildStil =
       {
         primaer && (
           <div class="knoepfe">
-            <a class="button" href={primaer.ziel}>{primaer.text}</a>
+            <a class="button" href={primaer.ziel} type={primaer.typ}>{primaer.text}</a>
             {sekundaer && <a class="button button--sekundaer" href={sekundaer.ziel}>{sekundaer.text}</a>}
           </div>
         )
