@@ -129,8 +129,8 @@ test('Pflege: Tabelle mit Beiträgen und Ihrem Anteil', () => {
     '<th scope="col" class="text-label betrag">IHR ANTEIL</th>',
     '<th scope="row">',
     '<span class="text-label noch-nicht">NOCH NICHT IM ANGEBOT</span>',
-    '<td class="betrag">CHF {z.krankenkasse}</td>',
-    '<td class="betrag anteil">CHF {z.anteil}</td>',
+    '<td class="betrag" data-spalte="Krankenkasse">CHF {z.krankenkasse}</td>',
+    '<td class="betrag anteil" data-spalte="Ihr Anteil">CHF {z.anteil}</td>',
   ]) {
     assert.ok(quelle.includes(text), text);
   }
@@ -189,6 +189,25 @@ test('Tabellen: th für Kopf- und Zeilenbeschriftung, rechtsbündige Beträge, s
   assert.ok(css.includes('.tabelle-box { max-width: 100%; overflow-x: auto; }'));
   // Keine Schatten, keine Verläufe, keine Hex-Werte.
   assert.doesNotMatch(stil, /shadow|gradient|#[0-9a-f]{3,6}\b/i);
+});
+
+test('Tabellen auf dem Handy: keine Mindestbreite, Beträge ohne Umbruch, Pflege unter 480 px als Block', () => {
+  const stil = flach(roh.split('<style>')[1]);
+  // Keine Mindestbreite mehr (sie schob die Beträge bei 390 px aus der Box).
+  assert.doesNotMatch(stil, /min-width: var\(--breite-tabelle\)/);
+  assert.doesNotMatch(lies('src/styles/global.css'), /--breite-tabelle/);
+  // Nur Beträge brechen nie um; Bezeichnungen dürfen umbrechen.
+  assert.equal(stil.match(/white-space: nowrap/g).length, 3); // .betrag, .tabelle--pflege thead (versteckt), .notfall
+  assert.doesNotMatch(stil, /\.tabelle--beispiele th, \.tabelle--beispiele td \{[^}]*nowrap/);
+  // Pflege unter 480 px: je Leistung ein Block, Bezeichnungen aus data-spalte.
+  const mobil = stil.split('@media (max-width: 479px) {')[1];
+  assert.ok(mobil.includes('.tabelle--pflege, .tabelle--pflege tbody, .tabelle--pflege tr, .tabelle--pflege th, .tabelle--pflege td { display: block; }'));
+  assert.ok(mobil.includes('.tabelle--pflege td::before { content: attr(data-spalte);'));
+  // Im HTML bleibt es eine echte Tabelle mit Kopf.
+  assert.ok(quelle.includes('<table class="tabelle tabelle--pflege">'));
+  assert.ok(quelle.includes('<thead>'));
+  // Beispiele und Betreuung: Betrag rutscht bei Platzmangel unter die Bezeichnung.
+  assert.ok(stil.includes('.tabelle--beispiele tr, .tabelle--betreuung tr { display: flex; flex-wrap: wrap;'));
 });
 
 test('Gut zu wissen: sechs Einträge wörtlich, Titel als H3', () => {

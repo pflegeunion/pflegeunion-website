@@ -18,9 +18,16 @@
  *
  * Tabellen: <table> mit <th> für Kopf- und Zeilenbeschriftung, Kopfzeile und
  * Beträge rechtsbündig mit gleich breiten Ziffern, Haarlinien zwischen den
- * Zeilen wie im Tarifblatt. Jede Tabelle steht in einer waagrecht
- * scrollbaren Box (.tabelle-box, role="region", tabindex="0"); unter 768 px
- * scrollt nur die Box, nie die Seite.
+ * Zeilen wie im Tarifblatt. Beträge brechen nie um; Namen, Beschreibungen,
+ * Bezeichnungen und die Etikette «NOCH NICHT IM ANGEBOT» dürfen umbrechen.
+ * Auf dem Handy (390 und 360 px) sind alle Beträge ohne seitliches Wischen
+ * sichtbar: Die Pflege-Tabelle steht unter 480 px je Leistung als Block
+ * (Name, Beschreibung, darunter «Krankenkasse CHF …» und «Ihr Anteil
+ * CHF …» mit sichtbaren Bezeichnungen aus data-spalte, wie die Beispiele
+ * auf /lohnrechner/), im HTML bleibt sie eine Tabelle. Jede Tabelle steht
+ * zusätzlich in einer waagrecht scrollbaren Box (.tabelle-box,
+ * role="region", tabindex="0") als Sicherheitsnetz für sehr schmale
+ * Bildschirme; scrollen kann dann nur die Box, nie die Seite.
  *
  * Daten: Stand, Tarifblatt, Pflege, Eigenanteil und Beispiele aus
  * src/daten/tarife.mjs, der Tarif der Betreuung aus src/daten/betreuung.mjs,
@@ -111,8 +118,8 @@ const gutZuWissen = [
                   </span>
                   <span class="leistung-beschreibung text-small">{z.beschreibung}</span>
                 </th>
-                <td class="betrag">CHF {z.krankenkasse}</td>
-                <td class="betrag anteil">CHF {z.anteil}</td>
+                <td class="betrag" data-spalte="Krankenkasse">CHF {z.krankenkasse}</td>
+                <td class="betrag anteil" data-spalte="Ihr Anteil">CHF {z.anteil}</td>
               </tr>
             ))
           }
@@ -292,11 +299,6 @@ const gutZuWissen = [
   }
 
   /* Pflege */
-  .tabelle--pflege,
-  .tabelle--betreuung {
-    min-width: var(--breite-tabelle);
-  }
-
   .leistung {
     display: flex;
     flex-direction: column;
@@ -346,7 +348,6 @@ const gutZuWissen = [
   .tabelle--beispiele th,
   .tabelle--beispiele td {
     padding-block: var(--space-1);
-    white-space: nowrap;
   }
 
   .tabelle--beispiele td {
@@ -432,6 +433,117 @@ const gutZuWissen = [
   .knopfzeile .button {
     display: block;
     width: 100%;
+  }
+
+  /* Pflege unter 480 px: je Leistung ein Block (Board-Muster der Beispiele
+     auf /lohnrechner/ unter 768 px). Name und Beschreibung oben, darunter
+     je eine Zeile «Krankenkasse CHF …» und «Ihr Anteil CHF …»; die
+     Bezeichnungen kommen aus data-spalte. Der Tabellenkopf bleibt für
+     Vorleseprogramme. */
+  @media (max-width: 479px) {
+    .tabelle--pflege,
+    .tabelle--pflege tbody,
+    .tabelle--pflege tr,
+    .tabelle--pflege th,
+    .tabelle--pflege td {
+      display: block;
+    }
+
+    .tabelle--pflege thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .tabelle--pflege tbody tr {
+      padding-block: var(--space-2);
+      border-bottom: 1px solid var(--color-linie);
+    }
+
+    .tabelle--pflege tbody tr:first-child {
+      border-top: 1px solid var(--color-linie);
+    }
+
+    .tabelle--pflege th,
+    .tabelle--pflege td {
+      padding: 0;
+      border: 0;
+    }
+
+    .tabelle--pflege td {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-2);
+      margin-top: var(--space-1);
+    }
+
+    .tabelle--pflege th + td {
+      margin-top: var(--space-2);
+    }
+
+    .tabelle--pflege td::before {
+      content: attr(data-spalte);
+      color: var(--color-schwarz);
+      font-weight: 400;
+    }
+
+    .tabelle--pflege .zeile--gedaempft td::before {
+      color: var(--color-text-gedaempft);
+    }
+  }
+
+  /* Beispiele und Betreuung unter 480 px: Bezeichnung und Betrag stehen
+     nebeneinander, solange beide auf eine Zeile passen; sonst rutscht der
+     Betrag (nie umgebrochen) rechtsbündig unter die Bezeichnung. So bleibt
+     jeder Betrag bei 390 und 360 px ohne seitliches Wischen sichtbar. */
+  @media (max-width: 479px) {
+    .tabelle--beispiele,
+    .tabelle--beispiele tbody,
+    .tabelle--betreuung,
+    .tabelle--betreuung tbody {
+      display: block;
+    }
+
+    .tabelle--beispiele tr,
+    .tabelle--betreuung tr {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: var(--space-2);
+      row-gap: calc(var(--space-1) / 2);
+      padding-block: var(--space-1);
+      border-bottom: 1px solid var(--color-linie);
+    }
+
+    .tabelle--betreuung tr {
+      padding-block: var(--space-2);
+    }
+
+    .tabelle--betreuung tr:last-child {
+      border-bottom: 0;
+    }
+
+    .tabelle--beispiele th,
+    .tabelle--beispiele td,
+    .tabelle--betreuung th,
+    .tabelle--betreuung td {
+      padding: 0;
+      border: 0;
+    }
+
+    .tabelle--beispiele th,
+    .tabelle--betreuung th {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .tabelle--beispiele td,
+    .tabelle--betreuung td {
+      flex: none;
+      margin-left: auto;
+    }
   }
 
   @media (min-width: 480px) {

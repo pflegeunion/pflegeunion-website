@@ -439,10 +439,6 @@ input[type='radio']:checked {
   --tippflaeche: 44px;
   --tippflaeche-gross: 56px;
 
-  /* Mindestbreite der Tabellen «Pflege» und «Betreuung und Hauswirtschaft»
-     auf /tarife/: schmaler scrollt die Box (.tabelle-box) waagrecht. */
-  --breite-tabelle: 560px;
-
   /* Karte des Kantons Zug (Startseite, Einsatzgebiet): höchstens 560 px. */
   --breite-karte: 560px;
 
@@ -653,8 +649,9 @@ a {
 }
 
 /* Waagrecht scrollbare Box um eine Tabelle (role="region", tabindex="0",
-   aria-label): Ist die Tabelle breiter als die Spalte (unter 768 px),
-   scrollt nur die Box, nie die Seite; nichts wird abgeschnitten. */
+   aria-label): Sicherheitsnetz für sehr schmale Bildschirme (z. B. 320 px).
+   Ist die Tabelle einmal breiter als die Spalte, scrollt nur die Box, nie
+   die Seite; nichts wird abgeschnitten. */
 .tabelle-box {
   max-width: 100%;
   overflow-x: auto;

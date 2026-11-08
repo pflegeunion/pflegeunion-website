@@ -458,8 +458,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   «Tarife und Kosten»), `.tippflaeche-inline` (längerer Link im Fliesstext,
   der umbrechen darf; Tippfläche 44 px ohne Zeilenverschiebung) und
   `.tabelle-box` (waagrecht scrollbare Box um eine Tabelle, mit
-  `role="region"`, `aria-label` und `tabindex="0"`; unter 768 px scrollt
-  nur die Box, nie die Seite).
+  `role="region"`, `aria-label` und `tabindex="0"`; nur Sicherheitsnetz für
+  sehr schmale Bildschirme: scrollt, dann nur die Box, nie die Seite).
 - Layoutgrössen der Webseite sind keine Design-Tokens und stehen nur in
   `global.css`: `--breite-inhalt` (1200 px), `--breite-kopfzeile` (1440 px),
   `--breite-text` (680 px), `--breite-hero-text` (560 px),
@@ -471,10 +471,8 @@ und Radien. Daraus erzeugt `scripts/build-tokens.mjs` die Datei
   ab 768 px 24 px), `--hoehe-sticky` (Höhe der sticky Kopfzeile für
   Sprungziele; 0, wenn sie ohne JavaScript unter 1024 px wegscrollt),
   `--schritt-zahl-spalte` (Spalte der Schrittzahlen), `--breite-portraet`
-  (96 px) und `--breite-portraet-klein` (84 px) für die Porträts auf Über uns,
-  `--breite-tabelle` (560 px, Mindestbreite der Tabellen «Pflege» und
-  «Betreuung und Hauswirtschaft» auf `/tarife/`) und `--breite-karte`
-  (560 px, Karte des Kantons Zug auf der Startseite).
+  (96 px) und `--breite-portraet-klein` (84 px) für die Porträts auf Über uns
+  sowie `--breite-karte` (560 px, Karte des Kantons Zug auf der Startseite).
 - Die Werte der Bewegung beim Scrollen sind ebenfalls keine Design-Tokens
   und stehen nur im Abschnitt «Bewegung» von `global.css`, je eine Zeile:
   `--bewegung-weg` (40 px), `--bewegung-dauer` (700 ms), `--bewegung-kurve`,
@@ -555,7 +553,14 @@ Farben, Abstände und Schriftgrössen werden nie direkt eingetragen.
   vorgewählt). Ohne Bewegung beim Scrollen. Kopfzeile «Lohn berechnen» →
   `/#lohnrechner`, «Tarife» aktiv. Tabellen mit `<th>` für Kopf- und
   Zeilenbeschriftung, Beträge rechtsbündig (`tabular-nums`), jede in einer
-  `.tabelle-box`. Stand, Tarifblatt, Pflege, Eigenanteil und Beispiele an
+  `.tabelle-box`. Auf dem Handy (390 und 360 px) sind alle Beträge ohne
+  seitliches Wischen sichtbar (Korrektur 08.11.2026, keine Mindestbreite):
+  Beträge brechen nie um, Bezeichnungen dürfen umbrechen; die
+  Pflege-Tabelle steht unter 480 px je Leistung als Block mit «Krankenkasse
+  CHF …» und «Ihr Anteil CHF …» (Bezeichnungen aus `data-spalte`, im HTML
+  eine Tabelle); bei Beispielen und Betreuung rutscht der Betrag unter
+  480 px rechtsbündig unter die Bezeichnung, wenn beide nicht auf eine
+  Zeile passen. Desktop unverändert. Stand, Tarifblatt, Pflege, Eigenanteil und Beispiele an
   einer Stelle in `src/daten/tarife.mjs` (bei Abklärung «Ihr Anteil»
   bewusst CHF 15.35, nie 15.38; Entscheid Michel Gurnari 08.11.2026), der
   Tarif der Betreuung aus `src/daten/betreuung.mjs`. Das Tarifblatt liegt
@@ -736,6 +741,11 @@ test/                npm test (node:test ohne Zusatzpakete):
                      tarife-seite.test.mjs die Seite /tarife/
                      (Reihenfolge, Texte, Tabellenwerte, PDF, Kopfzeile,
                      SEO; nach dem Build auch das HTML),
+                     tarife-mobil.test.mjs die Tabellen von /tarife/
+                     im Browser bei 390 und 360 px (jede Box ohne
+                     Querscrollen, kein Betrag umgebrochen; nach dem
+                     Build, mit vorinstalliertem Playwright, sonst
+                     übersprungen),
                      einsatzgebiet.test.mjs Gemeinden, Startseite
                      «Einsatzgebiet» mit Karte, Links auf /tarife/,
                      Fusszeile und JSON-LD auf jeder Seite,
