@@ -1,0 +1,477 @@
+---
+/**
+ * Tarife und Kosten /tarife/ (Webseitenkonzept V3.22 vom 08.11.2026,
+ * Auftrag «Tarife und Einsatzgebiet»). Das Amt für Gesundheit Zug verlangt
+ * nach Art. 51 KVV, dass wir örtlichen, zeitlichen, sachlichen und
+ * personellen Tätigkeitsbereich und die Kosten für die gepflegte Person
+ * öffentlich machen. Alle Texte wörtlich aus dem Auftrag.
+ *
+ * Reihenfolge und Flächen: Hero (weiss) · Pflege (weiss) · Betreuung und
+ * Hauswirtschaft (warmgrau) · Gut zu wissen (weiss) · Wo, wann und wie wir
+ * pflegen (warmgrau) · Trust-Leiste · Anfrage (tiefblau). Die Kopfzeile
+ * zeigt «Lohn berechnen» → /#lohnrechner (Header.astro), «Tarife» ist
+ * aktiv; im Formular ist nichts vorgewählt.
+ *
+ * Ohne Bewegung beim Scrollen (sachliche Seite; Tabellen und Beträge
+ * stehen sofort still da). Kernbotschaft «IHR EIGENANTEIL PRO TAG» ist der
+ * einzige Ocker-Kasten der Seite.
+ *
+ * Tabellen: <table> mit <th> für Kopf- und Zeilenbeschriftung, Kopfzeile und
+ * Beträge rechtsbündig mit gleich breiten Ziffern, Haarlinien zwischen den
+ * Zeilen wie im Tarifblatt. Jede Tabelle steht in einer waagrecht
+ * scrollbaren Box (.tabelle-box, role="region", tabindex="0"); unter 768 px
+ * scrollt nur die Box, nie die Seite.
+ *
+ * Daten: Stand, Tarifblatt, Pflege, Eigenanteil und Beispiele aus
+ * src/daten/tarife.mjs, der Tarif der Betreuung aus src/daten/betreuung.mjs,
+ * die Gemeinden aus src/daten/einsatzgebiet.mjs. Das Tarifblatt liegt unter
+ * public/downloads/tarifblatt-pflegeunion.pdf.
+ */
+import Basis from '../layouts/Basis.astro';
+import Hero from '../components/Hero.astro';
+import Abschnitt from '../components/Abschnitt.astro';
+import Kernbotschaft from '../components/Kernbotschaft.astro';
+import Gemeinden from '../components/Gemeinden.astro';
+import TrustLeiste from '../components/TrustLeiste.astro';
+import Anfrage from '../components/Anfrage.astro';
+import { STAND, TARIFBLATT, PFLEGE, EIGENANTEIL, BEISPIELE } from '../daten/tarife.mjs';
+import { TARIF } from '../daten/betreuung.mjs';
+
+const betreuung = [
+  { text: 'Betreuung und Hauswirtschaft', betrag: `CHF ${TARIF.stunde} pro Std.`, haupt: true },
+  { text: 'Wegpauschale bei Einsätzen unter 2 Stunden', betrag: 'CHF 10.– pro Einsatz' },
+  { text: 'Wegpauschale bei Einsätzen ab 2 Stunden', betrag: 'keine' },
+  { text: 'Zuschläge für Abende, Wochenenden und Feiertage', betrag: 'keine' },
+];
+
+const gutZuWissen = [
+  {
+    titel: 'Erstgespräch und Offerte',
+    text: 'Kostenlos und unverbindlich. Die pflegerische Bedarfsabklärung bei Ihnen zu Hause ist eine Pflegeleistung und wird wie oben abgerechnet.',
+  },
+  {
+    titel: 'Rechnung',
+    text: 'Sie erhalten monatlich eine Rechnung für Ihren Eigenanteil und allfällige private Leistungen, zahlbar innert 30 Tagen.',
+  },
+  {
+    titel: 'Absagen',
+    text: 'Pflege: keine Absagekosten. Betreuung und Hauswirtschaft: bis 24 Std. vorher kostenlos, danach die geplante Zeit, höchstens 1 Std. Nie bei Spitaleintritt oder Todesfall.',
+  },
+  {
+    titel: 'Pflegematerial',
+    text: 'Wir verkaufen kein Material. Was wir bei der Pflege verwenden, rechnen wir nach den gesetzlichen Vorgaben mit der Krankenversicherung ab.',
+  },
+  {
+    titel: 'Finanzielle Hilfen',
+    text: 'Ergänzungsleistungen, Hilflosenentschädigung und manche Zusatzversicherungen helfen mit. Wir prüfen Ihre Ansprüche im kostenlosen Erstgespräch.',
+  },
+  {
+    titel: 'Mehrwertsteuer',
+    text: 'Auf unseren Leistungen erheben wir keine Mehrwertsteuer. Gesetzliche Beiträge können sich ändern; es gilt das aktuelle Tarifblatt.',
+  },
+];
+---
+
+<Basis
+  titel="Tarife und Kosten | Pflegeunion Schweiz"
+  beschreibung="Was Pflege zu Hause im Kanton Zug kostet: Eigenanteil höchstens CHF 15.35 pro Tag, Betreuung und Hauswirtschaft CHF 56.– pro Stunde. Mit Tarifblatt zum Herunterladen."
+  kanonisch="/tarife/"
+>
+  <!-- Hero (ohne Bild) -->
+  <Hero
+    etikette={`TARIFE UND KOSTEN · STAND ${STAND.toUpperCase()}`}
+    titel="Was Sie bei uns bezahlen."
+    text="Pflege bezahlen zum grössten Teil Ihre Krankenversicherung und Ihre Wohngemeinde. Ihr Eigenanteil ist gesetzlich begrenzt. Betreuung und Hauswirtschaft sind private Leistungen."
+    primaer={{ text: TARIFBLATT.text, ziel: TARIFBLATT.pfad, typ: 'application/pdf' }}
+    unterseite
+  />
+
+  <!-- Pflege -->
+  <!-- H2 mit weichem Trennstrich (U+00AD): «Krankenversicherung» ist bei
+       320 px und 32 px Schrift breiter als die Spalte. -->
+  <Abschnitt label="Pflege" titel={'Pflege: zahlen Kranken\u00ADversicherung und Gemeinde'}>
+    <div class="tabelle-box" role="region" aria-label="Pflege: Beiträge pro Stunde" tabindex="0">
+      <table class="tabelle tabelle--pflege">
+        <caption class="visually-hidden">Pflege: Beitrag der Krankenkasse und Ihr Anteil, Beträge pro Stunde</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="text-label">LEISTUNG · BETRÄGE PRO STUNDE</th>
+            <th scope="col" class="text-label betrag">KRANKENKASSE</th>
+            <th scope="col" class="text-label betrag">IHR ANTEIL</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            PFLEGE.map((z) => (
+              <tr class:list={{ 'zeile--gedaempft': !z.angebot }}>
+                <th scope="row">
+                  <span class="leistung">
+                    <span class="leistung-name">{z.leistung}</span>
+                    {!z.angebot && <span class="text-label noch-nicht">NOCH NICHT IM ANGEBOT</span>}
+                  </span>
+                  <span class="leistung-beschreibung text-small">{z.beschreibung}</span>
+                </th>
+                <td class="betrag">CHF {z.krankenkasse}</td>
+                <td class="betrag anteil">CHF {z.anteil}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="eigenanteil">
+      <Kernbotschaft etikette="IHR EIGENANTEIL PRO TAG" titel={`höchstens CHF ${EIGENANTEIL.hoechstens}`} seitlich>
+        <p slot="kopf">{EIGENANTEIL.text}</p>
+        <div class="tabelle-box" role="region" aria-label="Beispiele für Ihren Eigenanteil" tabindex="0">
+          <table class="tabelle tabelle--beispiele">
+            <caption class="visually-hidden">Beispiele für Ihren Eigenanteil</caption>
+            <tbody>
+              {
+                BEISPIELE.map((b) => (
+                  <tr>
+                    <th scope="row">{b.fall}</th>
+                    <td class="betrag">{b.betrag}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      </Kernbotschaft>
+    </div>
+
+    <p class="absatz">
+      Die übrigen Pflegekosten trägt Ihre Wohngemeinde; wir rechnen direkt mit Krankenversicherung und
+      Gemeinde ab. Kinder und Jugendliche bis 18 Jahre bezahlen keinen Eigenanteil. Franchise und
+      Selbstbehalt (10 %) erhebt Ihre Krankenversicherung wie bei jeder ärztlichen Leistung. Wir verrechnen
+      die effektive Pflegezeit in 5-Minuten-Einheiten.
+    </p>
+  </Abschnitt>
+
+  <!-- Betreuung und Hauswirtschaft -->
+  <Abschnitt
+    flaeche="warmgrau"
+    label="Betreuung und Hauswirtschaft"
+    titel="Betreuung und Hauswirtschaft: bezahlen Sie privat"
+    abstand="eng"
+  >
+    <p class="einleitung">
+      Einkaufen, Kochen, Reinigung, Wäsche, Begleitung zum Arzt, Gesellschaft und Entlastung für Angehörige.
+      Die Krankenversicherung bezahlt diese Leistungen nicht.
+    </p>
+    <div class="tabelle-box tabelle-box--weiss" role="region" aria-label="Betreuung und Hauswirtschaft: Tarif" tabindex="0">
+      <table class="tabelle tabelle--betreuung">
+        <caption class="visually-hidden">Betreuung und Hauswirtschaft: Tarif</caption>
+        <tbody>
+          {
+            betreuung.map((z) => (
+              <tr class:list={{ 'zeile--haupt': z.haupt }}>
+                <th scope="row">{z.text}</th>
+                <td class:list={['betrag', { anteil: z.haupt }]}>{z.betrag}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="absatz">
+      Wir verrechnen die effektive Zeit im 15-Minuten-Takt. Vor dem ersten Einsatz erhalten Sie eine
+      schriftliche Offerte.
+    </p>
+  </Abschnitt>
+
+  <!-- Gut zu wissen -->
+  <Abschnitt label="Gut zu wissen" titel="Gut zu wissen">
+    <ul class="wissen liste-blank">
+      {
+        gutZuWissen.map((w) => (
+          <li class="wissen-eintrag">
+            <h3 class="text-h3">{w.titel}</h3>
+            <p>{w.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </Abschnitt>
+
+  <!-- Wo, wann und wie wir pflegen -->
+  <Abschnitt flaeche="warmgrau" label="Wo, wann und wie wir pflegen" titel="Wo, wann und wie wir pflegen">
+    <dl class="bereich">
+      <div class="bereich-zeile">
+        <dt class="text-label">EINSATZGEBIET</dt>
+        <dd>
+          <p class="bereich-titel">Ganzer Kanton Zug, alle elf Gemeinden</p>
+          <Gemeinden />
+        </dd>
+      </div>
+      <div class="bereich-zeile">
+        <dt class="text-label">EINSATZZEITEN</dt>
+        <dd>
+          <p>
+            Täglich 06.00–22.00 Uhr, auch an Wochenenden und Feiertagen. Geschäftsstelle Mo bis Fr,
+            08.00–17.00 Uhr. Kein 24-Stunden-Pikett; im Notfall: Sanität{' '}
+            <a class="tippflaeche-zeile" href="tel:144">144</a>, Ärztlicher Notfalldienst{' '}
+            <a class="tippflaeche-zeile notfall" href="tel:+41900008008">0900 008 008</a>.
+          </p>
+        </dd>
+      </div>
+      <div class="bereich-zeile">
+        <dt class="text-label">LEISTUNGEN</dt>
+        <dd>
+          <p>
+            Abklärung und Beratung, Grundpflege, Betreuung und Hauswirtschaft. Behandlungspflege noch nicht;
+            wir klären mit Ihnen, wer sie übernimmt.
+          </p>
+        </dd>
+      </div>
+      <div class="bereich-zeile">
+        <dt class="text-label">PERSONAL</dt>
+        <dd>
+          <p>
+            Diplomierte Pflegefachpersonen mit Berufsausübungsbewilligung des Kantons Zug klären ab, planen und
+            leiten an. Angestellte pflegende Angehörige leisten die Grundpflege, Betreuungspersonen Betreuung und
+            Hauswirtschaft.
+          </p>
+        </dd>
+      </div>
+    </dl>
+    <p class="knopfzeile">
+      <a class="button" href={TARIFBLATT.pfad} type="application/pdf">{TARIFBLATT.text}</a>
+    </p>
+  </Abschnitt>
+
+  <!-- Trust-Leiste und Anfrage -->
+  <TrustLeiste />
+  <Anfrage etikette="FRAGEN ZU KOSTEN? KOSTENLOSES ERSTGESPRÄCH" />
+</Basis>
+
+<style>
+  /* Tabellen: Haarlinien zwischen den Zeilen (wie im Tarifblatt), keine
+     senkrechten Linien, Kopfzeile ohne Fläche als Etikette in Tiefblau.
+     Kopfzeile und Beträge rechtsbündig, Ziffern gleich breit. */
+  .tabelle {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tabelle th,
+  .tabelle td {
+    border: 0;
+    border-bottom: 1px solid var(--color-linie);
+    background-color: transparent;
+    color: var(--color-schwarz);
+    font-weight: 400;
+    padding: var(--space-2);
+  }
+
+  .tabelle th:first-child,
+  .tabelle td:first-child {
+    padding-left: 0;
+  }
+
+  .tabelle th:last-child,
+  .tabelle td:last-child {
+    padding-right: 0;
+  }
+
+  .tabelle thead th {
+    color: var(--color-tiefblau);
+    font-weight: 700;
+    vertical-align: bottom;
+    padding-top: 0;
+  }
+
+  .tabelle .betrag {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .tabelle .anteil {
+    color: var(--color-tiefblau);
+    font-weight: 700;
+  }
+
+  /* Pflege */
+  .tabelle--pflege,
+  .tabelle--betreuung {
+    min-width: var(--breite-tabelle);
+  }
+
+  .leistung {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .leistung-name {
+    font-weight: 700;
+  }
+
+  .leistung-beschreibung {
+    display: block;
+    margin-top: calc(var(--space-1) / 2);
+    color: var(--color-text-gedaempft);
+  }
+
+  /* Etikette «NOCH NICHT IM ANGEBOT»: Tiefblau, Rahmen 1 px, eckig; mobil
+     unter dem Namen, ab 768 px daneben. */
+  .noch-nicht {
+    padding: calc(var(--space-1) / 4) calc(var(--space-1) - 1px);
+    border: 1px solid var(--color-tiefblau);
+    color: var(--color-tiefblau);
+  }
+
+  /* Behandlungspflege (noch nicht im Angebot): ganze Zeile gedämpft, «Ihr
+     Anteil» dort normal. */
+  .zeile--gedaempft th,
+  .zeile--gedaempft td,
+  .zeile--gedaempft .anteil {
+    color: var(--color-text-gedaempft);
+  }
+
+  .zeile--gedaempft .anteil {
+    font-weight: 400;
+  }
+
+  /* Eigenanteil (Kernbotschaft) und Beispiele */
+  .eigenanteil {
+    margin-top: var(--space-6);
+  }
+
+  .tabelle--beispiele {
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .tabelle--beispiele th,
+  .tabelle--beispiele td {
+    padding-block: var(--space-1);
+    white-space: nowrap;
+  }
+
+  .tabelle--beispiele td {
+    font-weight: 700;
+  }
+
+  .absatz {
+    max-width: var(--breite-text);
+    margin: var(--space-4) 0 0;
+  }
+
+  /* Betreuung und Hauswirtschaft: Tabelle auf weisser Fläche. */
+  .einleitung {
+    max-width: var(--breite-text);
+    margin: 0 0 var(--space-4);
+  }
+
+  .tabelle-box--weiss {
+    background-color: var(--color-weiss);
+    padding: 0 var(--space-3);
+  }
+
+  .tabelle--betreuung tr:last-child th,
+  .tabelle--betreuung tr:last-child td {
+    border-bottom: 0;
+  }
+
+  .zeile--haupt th {
+    font-weight: 700;
+  }
+
+  /* Gut zu wissen: mobil eine Spalte, ab 768 px zwei; jeder Eintrag mit
+     Haarlinie oben (wie Seite 2 des Tarifblatts). */
+  .wissen {
+    display: grid;
+    gap: var(--space-4) var(--space-6);
+  }
+
+  .wissen-eintrag {
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .wissen-eintrag h3 {
+    margin-bottom: var(--space-1);
+    color: var(--color-tiefblau);
+  }
+
+  /* Wo, wann und wie wir pflegen: Definitionsliste mit Haarlinien. */
+  .bereich {
+    margin: 0;
+    border-bottom: 1px solid var(--color-linie);
+  }
+
+  .bereich-zeile {
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-linie);
+  }
+
+  .bereich dt {
+    margin-bottom: var(--space-1);
+    color: var(--color-tiefblau);
+  }
+
+  .bereich dd {
+    margin: 0;
+    max-width: var(--breite-text);
+  }
+
+  .bereich-titel {
+    margin-bottom: var(--space-2);
+    font-weight: 700;
+  }
+
+  .notfall {
+    white-space: nowrap;
+  }
+
+  .knopfzeile {
+    margin: var(--space-4) 0 0;
+  }
+
+  .knopfzeile .button {
+    display: block;
+    width: 100%;
+  }
+
+  @media (min-width: 480px) {
+    .knopfzeile .button {
+      display: inline-block;
+      width: auto;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .leistung {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: var(--space-2);
+    }
+
+    .tabelle-box--weiss {
+      padding-inline: var(--space-4);
+    }
+
+    .wissen {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Bezeichnung links (3 von 12 Spalten), Inhalt rechts. */
+    .bereich-zeile {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--space-3);
+    }
+
+    .bereich dt {
+      grid-column: 1 / span 3;
+      margin-bottom: 0;
+      padding-top: calc(var(--space-1) / 2);
+    }
+
+    .bereich dd {
+      grid-column: 4 / -1;
+    }
+  }
+</style>

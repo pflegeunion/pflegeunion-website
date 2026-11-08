@@ -11,9 +11,10 @@
  * Kopfzeile zeigt hier «Beratung anfragen» → #kontakt (Header.astro), im
  * Formular ist «Betreuung und Hauswirtschaft» vorgewählt.
  *
- * Tarif, Zuschläge, Mindestdauer, Frist und Vergleichszeile kommen aus
- * src/daten/betreuung.mjs (Platzhalter aus C3, bis die Geschäftsleitung
- * entscheidet).
+ * Tarif, Zuschläge und Wegpauschale kommen aus src/daten/betreuung.mjs
+ * (Tarif entschieden 08.11.2026; Mindestdauer, Frist und die Vergleichszeile
+ * mit der öffentlichen Spitex entfallen). Unter dem Tarif-Kasten der
+ * Textlink «Tarife und Kosten» → /tarife/.
  *
  * Bewegung beim Scrollen wie auf der Startseite (global.css «Bewegung»).
  */
@@ -101,7 +102,8 @@ const fragen = [
   },
   {
     frage: 'Wie kurzfristig kann ich buchen oder absagen?',
-    antwort: `Regelmässige Einsätze planen wir mit Ihnen fest. Änderungen melden Sie bis ${TARIF.frist} am Vortag; die Details stehen in Ihrer Offerte.`,
+    antwort:
+      'Regelmässige Einsätze planen wir mit Ihnen fest. Absagen sind bis 24 Stunden vorher kostenlos, danach verrechnen wir die geplante Zeit, höchstens 1 Stunde – nie bei Spitaleintritt oder Todesfall. Die Details stehen in Ihrer Offerte.',
   },
   {
     frage: 'Meine Mutter braucht auch Hilfe beim Duschen. Übernehmen Sie das?',
@@ -150,7 +152,7 @@ const fragen = [
   <Abschnitt label="Tarif">
     <Kernbotschaft
       etikette="EIN TARIF, KEINE ÜBERRASCHUNGEN"
-      titel={`CHF ${TARIF.stunde} pro Stunde. Das ist alles.`}
+      titel={`CHF ${TARIF.stunde} pro Stunde. Ohne Zuschläge.`}
       ebene={2}
       seitlich
       bewegung
@@ -158,11 +160,13 @@ const fragen = [
       <div class="absaetze">
         <p data-bewegung="text">
           Betreuung und Hauswirtschaft sind private Leistungen; die Krankenversicherung übernimmt sie
-          nicht. Bei uns gilt ein einziger Stundentarif von CHF {TARIF.stunde} – {TARIF.zuschlaege}.
-          Einsätze dauern mindestens {TARIF.mindestdauer}. Sie erhalten vor dem ersten Einsatz eine
-          schriftliche Offerte; was darin steht, gilt.
+          nicht. Bei uns gilt ein einziger Stundentarif von CHF {TARIF.stunde} – {TARIF.zuschlaege}.{' '}
+          {TARIF.wegpauschale} Sie erhalten vor dem ersten Einsatz eine schriftliche Offerte; was darin
+          steht, gilt.
         </p>
-        {TARIF.vergleich && <p data-bewegung="text">{TARIF.vergleich}</p>}
+        <p class="tarife-link">
+          <a class="textlink" href="/tarife/">Tarife und Kosten</a>
+        </p>
       </div>
     </Kernbotschaft>
   </Abschnitt>
@@ -227,6 +231,11 @@ const fragen = [
 
   .absaetze p {
     margin: 0;
+  }
+
+  /* Textlink «Tarife und Kosten»: Tippfläche 44 px, 16 px unter dem Text. */
+  .absaetze .tarife-link {
+    margin-top: calc(-1 * var(--space-1));
   }
 
   /* Finanzielle Hilfen: Kasten so breit wie die Textspalte plus Innenabstand

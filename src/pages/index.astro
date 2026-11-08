@@ -1,6 +1,7 @@
 ---
 /**
- * Startseite: zwölf Abschnitte gemäss Konzept C1 in der Gestaltung aus
+ * Startseite: dreizehn Abschnitte gemäss Konzept C1 (Webseitenkonzept V3.22:
+ * neu «Einsatzgebiet» mit Karte vor «Häufige Fragen») in der Gestaltung aus
  * Claude Design, Fassung A (Boards Main und Desktop_A_2 mit D01–D13,
  * Mobil_A_1 bis Mobil_A_3 mit M01–M13). Alle Texte wörtlich aus den
  * Boards, von der Geschäftsleitung freigegeben.
@@ -22,6 +23,8 @@ import Hinweiskasten from '../components/Hinweiskasten.astro';
 import Demnaechst from '../components/Demnaechst.astro';
 import FAQ from '../components/FAQ.astro';
 import Anfrage from '../components/Anfrage.astro';
+import KarteZug from '../components/KarteZug.astro';
+import Gemeinden from '../components/Gemeinden.astro';
 import { TARIF } from '../daten/betreuung.mjs';
 
 const whatsapp = 'https://wa.me/41417842655?text=Guten%20Tag%2C%20ich%20habe%20eine%20Frage%3A';
@@ -242,10 +245,12 @@ const fragen = [
           bieten wir zurzeit noch nicht an. Braucht die gepflegte Person solche Leistungen, klären wir im
           kostenlosen Erstgespräch mit Ihnen, wer sie übernimmt.
         </p>
-        <p data-bewegung="text">
-          <strong>Für die gepflegte Person</strong> ändert sich finanziell wenig: Sie bezahlt den
-          gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag – gleich viel wie bei jeder anderen
-          Spitex-Organisation. Ansprüche wie die Hilflosenentschädigung bleiben bestehen.
+        <!-- Enthält einen Link: steht still (global.css «Bewegung»). -->
+        <p>
+          <strong>Für die gepflegte Person</strong> ändert sich finanziell wenig: Sie bezahlt den{' '}
+          <a class="tippflaeche-inline" href="/tarife/">gesetzlichen Eigenanteil von höchstens CHF 15.35 pro Tag</a>{' '}
+          – gleich viel wie bei jeder anderen Spitex-Organisation. Ansprüche wie die
+          Hilflosenentschädigung bleiben bestehen.
         </p>
       </div>
       <hr class="ehrlich-linie" />
@@ -285,7 +290,10 @@ const fragen = [
           Ergänzungsleistungen und Zusatzversicherungen können sich beteiligen – wir prüfen das mit
           Ihnen.
         </p>
-        <p class="knopfzeile">
+        <p class="tarife-link">
+          <a class="textlink" href="/tarife/">Tarife und Kosten</a>
+        </p>
+        <p class="knopfzeile knopfzeile--nach-link">
           <a class="button button--sekundaer" href="/betreuung-hauswirtschaft/">Betreuung & Hauswirtschaft ansehen</a>
         </p>
       </div>
@@ -346,9 +354,28 @@ const fragen = [
     </p>
   </Abschnitt>
 
-  <!-- 11 Häufige Fragen -->
+  <!-- 11 Einsatzgebiet (Art. 51 KVV): Text, Gemeinden und Link links, Karte rechts -->
+  <Abschnitt flaeche="warmgrau" anker="einsatzgebiet" label="Einsatzgebiet">
+    <div class="einsatzgebiet">
+      <div class="einsatz-kopf">
+        <p class="text-label etikette" data-bewegung="text">EINSATZGEBIET</p>
+        <h2 class="text-h2" data-bewegung="text">Im ganzen Kanton Zug.</h2>
+        <p class="einsatz-text" data-bewegung="text">
+          Wir pflegen und betreuen in allen elf Zuger Gemeinden, täglich von 06.00 bis 22.00 Uhr.
+        </p>
+      </div>
+      <div class="einsatz-karte">
+        <KarteZug bewegung />
+      </div>
+      <Gemeinden class="einsatz-gemeinden" bewegung />
+      <p class="einsatz-link">
+        <a class="textlink" href="/tarife/">Tarife und Kosten</a>
+      </p>
+    </div>
+  </Abschnitt>
+
+  <!-- 12 Häufige Fragen -->
   <Abschnitt
-    flaeche="warmgrau"
     anker="fragen"
     label="Häufige Fragen"
     etikette="HÄUFIGE FRAGEN"
@@ -360,7 +387,7 @@ const fragen = [
     <FAQ fragen={fragen} bewegung />
   </Abschnitt>
 
-  <!-- 12 Anfrage -->
+  <!-- 13 Anfrage -->
   <Anfrage titel="Reden wir über Ihre Situation." bewegung />
 </Basis>
 
@@ -466,6 +493,57 @@ const fragen = [
 
   .tarif {
     margin: var(--space-3) 0 0;
+  }
+
+  /* Betreuung: Textlink «Tarife und Kosten» in eigener Zeile vor dem Button. */
+  .tarife-link {
+    margin: var(--space-2) 0 0;
+  }
+
+  .knopfzeile--nach-link {
+    margin-top: var(--space-3);
+  }
+
+  /* Einsatzgebiet (CSS Grid mit Bereichen, ohne JavaScript): unter 1024 px
+     Übertitel, H2, Text · Karte (volle Breite, höchstens 560 px) ·
+     Etiketten · Link; ab 1024 px links (Spalten 1–5) Text, Etiketten und
+     Link, rechts (Spalten 7–12) die Karte, vertikal mittig. */
+  .einsatzgebiet {
+    display: grid;
+    grid-template-areas:
+      'kopf'
+      'karte'
+      'gemeinden'
+      'link';
+  }
+
+  .einsatz-kopf {
+    grid-area: kopf;
+  }
+
+  .einsatz-kopf h2 {
+    margin-bottom: var(--space-2);
+  }
+
+  .einsatz-text {
+    margin: 0;
+  }
+
+  .einsatz-karte {
+    grid-area: karte;
+    width: 100%;
+    max-width: var(--breite-karte);
+    margin-top: var(--space-4);
+  }
+
+  .einsatzgebiet :global(.einsatz-gemeinden) {
+    grid-area: gemeinden;
+    margin-top: var(--space-4);
+  }
+
+  .einsatz-link {
+    grid-area: link;
+    margin: var(--space-2) 0 0;
   }
 
   /* Ehrlich gesagt: Absätze im Abstand von 24 px, Linie in Tiefblau. */
@@ -603,6 +681,28 @@ const fragen = [
 
     .demnaechst-modul {
       margin-top: var(--space-6);
+    }
+
+    .einsatzgebiet {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: 1fr auto auto auto 1fr;
+      column-gap: var(--space-3);
+      grid-template-areas:
+        '.         .         .         .         .         . karte karte karte karte karte karte'
+        'kopf      kopf      kopf      kopf      kopf      . karte karte karte karte karte karte'
+        'gemeinden gemeinden gemeinden gemeinden gemeinden . karte karte karte karte karte karte'
+        'link      link      link      link      link      . karte karte karte karte karte karte'
+        '.         .         .         .         .         . karte karte karte karte karte karte';
+    }
+
+    .einsatz-karte {
+      align-self: center;
+      justify-self: end;
+      margin-top: 0;
+    }
+
+    .einsatz-kopf h2 {
+      margin-bottom: var(--space-3);
     }
 
     .demnaechst-nachsatz {

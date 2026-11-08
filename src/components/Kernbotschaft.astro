@@ -12,6 +12,10 @@
  * Spalten), der Inhalt rechts (8 Spalten, max. 680 px). Immer offen, auch
  * mobil.
  *
+ * Slot «kopf» (freiwillig): Text direkt unter dem Titel, ab 1024 px links
+ * mit Etikette und Titel, mobil vor dem Inhalt (/tarife/: «20 % des
+ * Krankenkassenbeitrags …» links, die Beispiele als Tabelle rechts).
+ *
  * Parameter:
  *   etikette  Übertitel
  *   titel     Titel des Kastens
@@ -32,12 +36,20 @@ interface Props {
 
 const { etikette, titel, ebene = 3, seitlich = false, bewegung = false } = Astro.props;
 const bw = bewegung ? 'text' : undefined;
+const mitKopftext = Astro.slots.has('kopf');
 ---
 
 <div class:list={['kasten', { 'kasten--seitlich': seitlich }]}>
   <div class="kasten-kopf">
     <p class="text-label etikette" data-bewegung={bw}>{etikette}</p>
     {ebene === 2 ? <h2 class="text-h2" data-bewegung={bw}>{titel}</h2> : <h3 class="text-h3" data-bewegung={bw}>{titel}</h3>}
+    {
+      mitKopftext && (
+        <div class="kasten-kopftext" data-bewegung={bw}>
+          <slot name="kopf" />
+        </div>
+      )
+    }
   </div>
   <div class="kasten-inhalt">
     <slot />
@@ -67,6 +79,15 @@ const bw = bewegung ? 'text' : undefined;
     margin-bottom: var(--space-3);
   }
 
+  /* Text unter dem Titel (Slot «kopf»): mobil 24 px Abstand zum Inhalt. */
+  .kasten-kopf h3:has(+ .kasten-kopftext) {
+    margin-bottom: var(--space-1);
+  }
+
+  .kasten-kopftext {
+    margin-bottom: var(--space-3);
+  }
+
   @media (min-width: 768px) {
     .kasten {
       padding: var(--space-4);
@@ -87,6 +108,10 @@ const bw = bewegung ? 'text' : undefined;
     }
 
     .kasten--seitlich .kasten-kopf h2 {
+      margin-bottom: 0;
+    }
+
+    .kasten--seitlich .kasten-kopftext {
       margin-bottom: 0;
     }
 

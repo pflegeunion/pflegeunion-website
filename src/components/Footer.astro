@@ -6,15 +6,20 @@
  * Tiefblau-Fläche (.flaeche-tiefblau: Fokusrahmen in --color-auf-tiefblau,
  * global.css), weisse Schrift 15 px, oben eine weisse Haarlinie, darunter
  * das Negativ-Logo. Drei Spalten (Kontakt, Angebot, Pflegeunion), darunter
- * Vertrauenszeile und Copyright. Mobil steht «Kontakt» über der ganzen
- * Breite, «Angebot» und «Pflegeunion» nebeneinander.
+ * das Einsatzgebiet (ganzer Kanton Zug mit den elf Gemeinden aus
+ * src/daten/einsatzgebiet.mjs; Art. 51 KVV), Vertrauenszeile und
+ * Copyright. Mobil steht «Kontakt» über der ganzen Breite, «Angebot» und
+ * «Pflegeunion» nebeneinander.
  *
  * WhatsApp als Textlink mit Sprechblasen-Icon (Lucide «message-circle»),
  * weiss auf Tiefblau, normal gesetzt wie Telefon und E-Mail (gewollte
  * Abweichung vom Board, das «WhatsApp» fett zeigt). Alle Links mit
  * Tippfläche 44 px.
  *
- * Adresse, Telefon und Logo zusätzlich als schema.org Organization (JSON-LD).
+ * Adresse, Telefon und Logo zusätzlich als schema.org Organization (JSON-LD),
+ * mit areaServed: die elf Gemeinden als City im Kanton Zug. Kein
+ * priceRange: Die Eigenschaft gilt bei schema.org nur für LocalBusiness
+ * (Entscheid 08.11.2026).
  *
  * Parameter:
  *   organisation  zusätzliche Angaben zur Organization (JSON-LD), z. B. der
@@ -22,6 +27,7 @@
  *                 (Standard: keine)
  */
 import Icon from './Icon.astro';
+import { GEMEINDEN } from '../daten/einsatzgebiet.mjs';
 
 interface Props {
   organisation?: Record<string, unknown>;
@@ -37,6 +43,7 @@ const angebot = [
   { text: 'Angehörige anstellen', ziel: '/#ablauf' },
   { text: 'Lohnrechner', ziel: '/lohnrechner/' },
   { text: 'Betreuung & Hauswirtschaft', ziel: '/betreuung-hauswirtschaft/' },
+  { text: 'Tarife und Kosten', ziel: '/tarife/' },
   { text: 'Kostenloses Erstgespräch', ziel: '#kontakt' },
 ];
 
@@ -67,7 +74,11 @@ const organisation = {
     addressRegion: 'ZG',
     addressCountry: 'CH',
   },
-  areaServed: 'Kanton Zug',
+  areaServed: GEMEINDEN.map((name) => ({
+    '@type': 'City',
+    name,
+    containedInPlace: { '@type': 'AdministrativeArea', name: 'Kanton Zug' },
+  })),
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
@@ -128,6 +139,7 @@ const organisation = {
     </div>
 
     <div class="basis">
+      <p class="basis-einsatzgebiet">Einsatzgebiet: ganzer Kanton Zug – {GEMEINDEN.join(', ')}</p>
       <p>Kantonal bewilligte Spitex-Organisation · Nicht gewinnorientierter Verein · Tätig im ganzen Kanton Zug</p>
       <p>© 2026 Verein Pflegeunion Schweiz</p>
     </div>
@@ -255,10 +267,16 @@ const organisation = {
 
     .basis {
       flex-direction: row;
+      flex-wrap: wrap;
       justify-content: space-between;
-      gap: var(--space-3);
+      gap: var(--space-1) var(--space-3);
       margin-top: var(--space-6);
       padding-top: var(--space-3);
+    }
+
+    /* Einsatzgebiet als eigene erste Zeile über der ganzen Breite. */
+    .basis-einsatzgebiet {
+      flex-basis: 100%;
     }
   }
 </style>

@@ -1,0 +1,45 @@
+---
+/**
+ * Die elf Gemeinden des Kantons Zug als Etiketten (Auftrag «Tarife und
+ * Einsatzgebiet», 08.11.2026): Startseite (Abschnitt «Einsatzgebiet») und
+ * /tarife/ («Wo, wann und wie wir pflegen»), gleiche Gestaltung.
+ *
+ * Liste (<ul>), keine Links. Fläche tiefblau-hell, Text Tiefblau, Lato Bold
+ * 15 px, normal geschrieben (keine Versalien), eckig, Innenabstand aus den
+ * Tokens; die Etiketten brechen zwischeneinander um. Die Gemeinden kommen
+ * nur aus src/daten/einsatzgebiet.mjs.
+ *
+ * Parameter:
+ *   bewegung  die Liste blendet beim Scrollen als Ganzes ein (Startseite,
+ *             global.css «Bewegung»; Standard false)
+ *   class     zusätzliche Klassen
+ */
+import { GEMEINDEN } from '../daten/einsatzgebiet.mjs';
+
+interface Props {
+  bewegung?: boolean;
+  class?: string;
+}
+
+const { bewegung = false, class: klasse } = Astro.props;
+---
+
+<ul class:list={['gemeinden liste-blank', klasse]} data-bewegung={bewegung ? 'text' : undefined}>
+  {GEMEINDEN.map((g) => <li class="gemeinde text-small">{g}</li>)}
+</ul>
+
+<style>
+  .gemeinden {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .gemeinde {
+    padding: calc(var(--space-1) / 2) var(--space-1);
+    background-color: var(--color-tiefblau-hell);
+    color: var(--color-tiefblau);
+    font-weight: 700;
+    border-radius: var(--radius-none);
+  }
+</style>
